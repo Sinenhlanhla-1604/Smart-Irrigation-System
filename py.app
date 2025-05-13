@@ -3,6 +3,7 @@ import struct
 from datetime import datetime
 import json
 import os
+from db import get_data_from_db, save_to_db, save_useful_data  # Import save_to_db function from db.py
 
 app = Flask(__name__)
 
@@ -16,6 +17,7 @@ POWER_TEMP_DEVICES = {"1fc5622", "1fc57ca"}  # lowercase
 PULSE_METER_DEVICES = {"1fc74ab"}
 WATER_DETECT_DEVICES = {"c6e542"}
 MAGNETIC_DEVICES = {"1f7f022"}
+
 
 # ----------------------------
 # DECODE FUNCTIONS
@@ -58,6 +60,7 @@ def decode_PowerTemp(payload_hex):
 
     except Exception as e:
         return {'error': f"PowerTemp decode failed: {str(e)}"}
+
 
 def decode_pulsemeter(payload_hex):
     try:
@@ -126,6 +129,7 @@ def decode_water_sensor(payload_hex):
         return {'error': f"WaterSensor decode failed: {str(e)}"}
 
 
+
 def decode_magnetic_sensor(payload_hex):
     try:
         data = bytes.fromhex(payload_hex)
@@ -148,6 +152,7 @@ def decode_magnetic_sensor(payload_hex):
     except Exception as e:
         return {'error': f"Magnetic sensor decode failed: {str(e)}"}
 
+
 # ----------------------------
 # DEVICE TO DECODER MAP
 # ----------------------------
@@ -165,27 +170,6 @@ def get_decoder_by_device(device_id):
     else:
         return None
 
-# ----------------------------
-# UTILITIES
-# ----------------------------
-
-def initialize_data_file():
-    if not os.path.exists(DATA_FILE):
-        with open(DATA_FILE, 'w') as f:
-            json.dump([], f)
-
-def save_to_json(new_entry):
-    initialize_data_file()
-    with open(DATA_FILE, 'r+') as f:
-        try:
-            data = json.load(f)
-        except json.JSONDecodeError:
-            data = []
-
-        data.append(new_entry)
-        f.seek(0)
-        json.dump(data, f, indent=2)
-        f.truncate()
 
 # ----------------------------
 # ROUTES
@@ -220,7 +204,9 @@ def sigfox_callback():
             "received_at": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         }
 
-        save_to_json(entry)
+        # Save to database instead of JSON
+        save_to_db(entry)
+        save_useful_data(entry)
 
         print(f"📦 Saved entry: {json.dumps(entry, indent=2)}")
         return jsonify({"status": "success", "message": "Data saved"}), 200
@@ -231,13 +217,16 @@ def sigfox_callback():
             "message": f"Processing error: {str(e)}",
             "received_data": data if 'data' in locals() else None
         }), 500
+    
+    
+    
+    
 
 @app.route('/data', methods=['GET'])
 def get_data():
     try:
-        initialize_data_file()
-        with open(DATA_FILE, 'r') as f:
-            return jsonify(json.load(f)), 200
+        data = get_data_from_db()
+        return jsonify(data), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -246,5 +235,4 @@ def get_data():
 # ----------------------------
 
 if __name__ == '__main__':
-    initialize_data_file()
     app.run(host='0.0.0.0', port=5000, debug=True)
