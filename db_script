@@ -1,0 +1,224 @@
+import psycopg2
+import json
+import time
+
+# Database credentials
+DB_USER = "postgres"
+DB_PASSWORD = "123"
+DB_NAME = "smartgrow"
+DB_HOST = "localhost"
+DB_PORT = "5432"
+
+TARGET_CONN_STR = f"dbname='{DB_NAME}' user='{DB_USER}' password='{DB_PASSWORD}' host='{DB_HOST}' port='{DB_PORT}'"
+
+def wait_for_database_availability(dbname, retries=5, delay=2):
+    for i in range(retries):
+        try:
+            conn = psycopg2.connect(
+                dbname=dbname, user=DB_USER, password=DB_PASSWORD, host=DB_HOST, port=DB_PORT
+            )
+            conn.close()
+            print(f"Connected to '{dbname}' successfully.")
+            return True
+        except psycopg2.OperationalError:
+            print(f"Attempt {i + 1}: Waiting for '{dbname}' to become available...")
+            time.sleep(delay)
+    print(f"Failed to connect to database '{dbname}' after {retries} attempts.")
+    return False
+
+def create_database_and_tables():
+    try:
+        # Connect to default 'postgres' database
+        conn = psycopg2.connect(
+            dbname="postgres", user=DB_USER, password=DB_PASSWORD, host=DB_HOST, port=DB_PORT
+        )
+        conn.set_session(autocommit=True)
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT 1 FROM pg_database WHERE datname = %s", (DB_NAME,))
+            exists = cursor.fetchone()
+
+            if not exists:
+                cursor.execute(f"CREATE DATABASE {DB_NAME}")
+                print(f"Database '{DB_NAME}' created.")
+            else:
+                print(f"Database '{DB_NAME}' already exists.")
+        conn.close()
+
+        # Wait for DB to become available
+        if not wait_for_database_availability(DB_NAME):
+            return
+
+        # Connect to the new DB and create tables
+        with psycopg2.connect(TARGET_CONN_STR) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS users (
+                        user_id SERIAL PRIMARY KEY,
+                        username VARCHAR(50) UNIQUE NOT NULL,
+                        password_hash VARCHAR(255) NOT NULL,
+                        email VARCHAR(100),
+                        full_name VARCHAR(100),
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                """)
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS devices (
+                        device_id VARCHAR PRIMARY KEY,
+                        user_id INT REFERENCES users(user_id),
+                        device_name VARCHAR,
+                        device_type VARCHAR,
+                        decoded JSONB,
+                        seq_number INT,
+                        status VARCHAR,
+                        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                """)
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS device_data (
+                        id SERIAL PRIMARY KEY,
+                        device_id VARCHAR REFERENCES devices(device_id),
+                        data_type VARCHAR,
+                        value VARCHAR,
+                        unit VARCHAR,
+                        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                """)
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS alerts (
+                        alert_id SERIAL PRIMARY KEY,
+                        device_id VARCHAR REFERENCES devices(device_id),
+                        alert_type VARCHAR,
+                        message TEXT,
+                        severity VARCHAR,
+                        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                """)
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS user_notifications (
+                        notification_id SERIAL PRIMARY KEY,
+                        user_id INT REFERENCES users(user_id),
+                        alert_id INT REFERENCES alerts(alert_id),
+                        notified_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                """)
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS device_types (
+                        device_type_id SERIAL PRIMARY KEY,
+                        type_name VARCHAR UNIQUE NOT NULL
+                    )
+                """)
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS device_metadata (
+                        id SERIAL PRIMARY KEY,
+                        device_id VARCHAR REFERENCES devices(device_id),
+                        seq_number INT,
+                        raw_payload JSONB,
+                        decoded_data JSONB,
+                        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                """)
+
+            conn.commit()
+            print("Tables created (or already exist).")
+    except Exception as e:
+        print(f"Error creating database or tables: {e}")
+
+def create_user(username, password_hash, email, full_name):
+    try:
+        with psycopg2.connect(TARGET_CONN_STR) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO users (username, password_hash, email, full_name)
+                    VALUES (%s, %s, %s, %s)
+                    RETURNING user_id
+                """, (username, password_hash, email, full_name))
+                user_id = cursor.fetchone()[0]
+            conn.commit()
+            print(f"User {username} created with ID {user_id}.")
+            return user_id
+    except Exception as e:
+        print(f"Error creating user: {e}")
+
+def save_device_info(device_id, user_id, device_name, device_type, decoded_data, seq_number, status):
+    try:
+        with psycopg2.connect(TARGET_CONN_STR) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO devices (device_id, user_id, device_name, device_type, decoded, seq_number, status)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                    ON CONFLICT (device_id) DO NOTHING
+                """, (device_id, user_id, device_name, device_type, json.dumps(decoded_data), seq_number, status))
+            conn.commit()
+            print(f"Device {device_id} saved to 'devices' table.")
+    except Exception as e:
+        print(f"Error saving device info: {e}")
+
+def save_device_data(device_id, data_type, value, unit=None):
+    try:
+        if data_type in ['water_detected', 'leak_detected'] and value:
+            with psycopg2.connect(TARGET_CONN_STR) as conn:
+                with conn.cursor() as cursor:
+                    cursor.execute("""
+                        INSERT INTO alerts (device_id, alert_type, message, severity)
+                        VALUES (%s, %s, %s, %s)
+                        RETURNING alert_id
+                    """, (device_id, data_type, f"{data_type} detected on device {device_id}", "high"))
+                    alert_id = cursor.fetchone()[0]
+                    
+                    cursor.execute("""
+                        INSERT INTO user_notifications (user_id, alert_id)
+                        SELECT user_id, %s FROM devices WHERE device_id = %s
+                    """, (alert_id, device_id))
+
+        with psycopg2.connect(TARGET_CONN_STR) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO device_data (device_id, data_type, value, unit)
+                    VALUES (%s, %s, %s, %s)
+                """, (device_id, data_type, str(value), unit))
+            conn.commit()
+            print(f"Data saved to 'device_data' table: {device_id}, {data_type}, {value}, {unit}")
+    except Exception as e:
+        print(f"Error saving device data: {e}")
+
+if __name__ == '__main__':
+    create_database_and_tables()
+
+    # Sample user creation
+    test_user_id = create_user(
+        username="testuser",
+        password_hash="hashedpassword",
+        email="testuser@example.com",
+        full_name="Test User"
+    )
+
+    # Add debug print to confirm user creation
+    print(f"User ID returned: {test_user_id}")
+
+    # Sample device info
+    test_device_id = "1fc57ca"
+    test_device_name = "PowerSensor01"
+    test_device_type = "PowerTemp"
+    test_decoded_data = {
+        "voltage": "220",
+        "temperature": "36.5",
+        "status": "normal"
+    }
+    test_seq_number = 100
+    test_status = "Active"
+
+    # Save device info (with existing user_id)
+    save_device_info(
+        test_device_id,
+        test_user_id,
+        test_device_name,
+        test_device_type,
+        test_decoded_data,
+        test_seq_number,
+        test_status
+    )
+
+    # Save each data value
+    for key, val in test_decoded_data.items():
+        save_device_data(test_device_id, key, val, unit=None)
