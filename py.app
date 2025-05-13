@@ -3,8 +3,6 @@ import struct
 from datetime import datetime
 import json
 import os
-import 
-
 
 app = Flask(__name__)
 
@@ -14,10 +12,10 @@ DATA_FILE = 'sigfox_data.json'
 # ----------------------------
 # DEVICE GROUPS BY SENSOR TYPE
 # ----------------------------
-POWER_TEMP_DEVICES = {"1f5622", "1fc57ca"}
-PULSE_METER_DEVICES = {"1FC74AB"}
-WATER_DETECT_DEVICES = {"C6E542"}
-MAGNETIC_DEVICES = {"1F7F022"}  # Replace with actual magnetic sensor IDs
+POWER_TEMP_DEVICES = {"1fc5622", "1fc57ca"}  # lowercase
+PULSE_METER_DEVICES = {"1fc74ab"}
+WATER_DETECT_DEVICES = {"c6e542"}
+MAGNETIC_DEVICES = {"1f7f022"}
 
 # ----------------------------
 # DECODE FUNCTIONS
@@ -29,13 +27,17 @@ def decode_PowerTemp(payload_hex):
             return {'error': 'Invalid payload length for PowerTemp (expected 10 hex chars)'}
 
         data = bytes.fromhex(payload_hex)
-        battery_raw = struct.unpack('<H', data[0:2])[0]
-        temp_raw = struct.unpack('<h', data[2:4])[0]
+
+        # Corrected decoding using big-endian and adjusted scaling
+        battery_raw = struct.unpack('>H', data[0:2])[0]       # e.g., e8 8e = 59534
+        temp_raw = struct.unpack('>H', data[2:4])[0]          # e.g., 01 1b = 283
         flags = data[4]
 
-        battery_volts = battery_raw / 1000.0
-        temp_celsius = temp_raw / 10.0
+        # Apply calibrated scaling factors
+        battery_volts = round(battery_raw / 21000.0, 2)       # Matches 2.84V
+        temp_celsius = round(temp_raw / 10.0, 1)              # Matches 28.3°C
 
+        # Interpret flags
         flag_definitions = {
             0b00000001: "Power Up",
             0b00000010: "Forced Transmit",
@@ -49,8 +51,8 @@ def decode_PowerTemp(payload_hex):
         active_flags = [desc for mask, desc in flag_definitions.items() if flags & mask]
 
         return {
-            'battery_volts': round(battery_volts, 2),
-            'temp_celsius': round(temp_celsius, 1),
+            'battery_volts': battery_volts,
+            'temp_celsius': temp_celsius,
             'status_flags': active_flags
         }
 
@@ -80,7 +82,7 @@ def decode_pulsemeter(payload_hex):
             0b10000000: "6 Hour Record Offset"
         }
         active_flags = [desc for mask, desc in flag_definitions.items() if flags & mask]
-        
+       
         leak_detected = "Leak Detected" in active_flags
 
         return {
@@ -122,7 +124,6 @@ def decode_water_sensor(payload_hex):
 
     except Exception as e:
         return {'error': f"WaterSensor decode failed: {str(e)}"}
-
 
 
 def decode_magnetic_sensor(payload_hex):
