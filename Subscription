@@ -2,259 +2,131 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Smart Irrigation System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Home Page with Login</title>
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      scroll-behavior: smooth;
-      background-color: #f0f9f1;
+      background: #f0f4f8;
     }
 
-    header {
+    .container {
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      transition: filter 0.3s ease;
+    }
+
+    .blurred {
+      filter: blur(5px);
+    }
+
+    .login-btn {
+      padding: 12px 24px;
+      font-size: 18px;
+      background-color: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+
+    .login-modal {
       position: fixed;
       top: 0;
-      width: 100%;
-      background-color: #2e8b57;
-      color: white;
-      padding: 15px 20px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
       align-items: center;
-      z-index: 1000;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      z-index: 10;
     }
 
-    header h1 {
-      font-size: 1.4em;
-    }
-
-    .login-icon {
-      background-color: white;
-      color: #2e8b57;
-      padding: 10px 15px;
-      border-radius: 20px;
-      text-decoration: none;
-      font-weight: bold;
-      transition: background-color 0.3s ease;
-    }
-
-    .login-icon:hover {
-      background-color: #c8f0d2;
-    }
-
-    main {
-      margin-top: 80px;
-      padding: 20px;
-    }
-
-    section {
-      margin-bottom: 50px;
-      padding: 20px;
-      background-color: #ffffff;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      opacity: 0;
-      transform: translateY(30px);
-      animation: fadeUp 1s ease forwards;
-    }
-
-    section:nth-child(2) { animation-delay: 0.3s; }
-    section:nth-child(3) { animation-delay: 0.6s; }
-    section:nth-child(4) { animation-delay: 0.9s; }
-
-    @keyframes fadeUp {
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    h2 {
-      color: #2e8b57;
-      margin-bottom: 20px;
-      text-align: center;
-    }
-
-    /* Interactive Pricing */
-    .pricing-tabs {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    .pricing-tabs button {
-      background-color: #e0f6e5;
-      border: 1px solid #2e8b57;
-      padding: 10px 20px;
-      margin: 0 5px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-weight: bold;
-      transition: all 0.3s;
-    }
-
-    .pricing-tabs button.active {
-      background-color: #2e8b57;
-      color: white;
-    }
-
-    .plan-display {
-      text-align: center;
-      padding: 20px;
-      background: #e6fff1;
-      border: 2px solid #2e8b57;
-      border-radius: 10px;
+    .login-box {
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      width: 100%;
       max-width: 400px;
-      margin: auto;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      animation: scaleIn 0.3s ease;
     }
 
-    .plan-display h3 {
-      color: #2e8b57;
+    @keyframes scaleIn {
+      from {
+        transform: scale(0.7);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
     }
 
-    .plan-display p {
-      font-size: 1.1em;
-    }
-
-    /* Contact Info */
-    .contact-info p {
-      font-size: 1.1em;
+    .login-box input {
+      width: 100%;
+      padding: 10px;
       margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
     }
 
-    /* Picture Gallery */
-    .gallery-container {
-      text-align: center;
+    .login-box button {
+      width: 100%;
+      padding: 10px;
+      background-color: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      margin-top: 10px;
+      cursor: pointer;
     }
 
-    .gallery {
-      display: inline-block;
-      margin: 10px;
-      vertical-align: top;
-    }
-
-    .gallery img {
-      width: 250px;
-      height: auto;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-      header {
-        flex-direction: column;
-        align-items: flex-start;
-        padding: 10px 15px;
-      }
-
-      header h1 {
-        font-size: 1.2em;
-        margin-bottom: 10px;
-      }
-
-      .login-icon {
-        align-self: flex-end;
-      }
-
-      .gallery img {
-        width: 90%;
-      }
+    .cancel-btn {
+      background-color: transparent;
+      color: #555;
+      margin-top: 8px;
+      text-decoration: underline;
     }
   </style>
 </head>
 <body>
+  <div class="container" id="mainContent">
+    <h1>Welcome to Our Site</h1>
+    <button class="login-btn" onclick="openLogin()">Login</button>
+  </div>
 
-  <header>
-    <h1>Smart Irrigation System</h1>
-    <a href="login.html" class="login-icon">Login</a>
-  </header>
+  <div class="login-modal" id="loginModal" style="display: none;">
+    <div class="login-box">
+      <h2 style="text-align: center;">Login</h2>
+      <input type="text" placeholder="Username" />
+      <input type="password" placeholder="Password" />
+      <button onclick="submitLogin()">Submit</button>
+      <button class="cancel-btn" onclick="closeLogin()">Cancel</button>
+    </div>
+  </div>
 
-  <main>
-
-    <!-- Interactive Subscription Pricing -->
-    <section id="pricing">
-      <h2>Subscription Pricing</h2>
-      <div class="pricing-tabs">
-        <button class="active" onclick="showPlan('basic')">Basic</button>
-        <button onclick="showPlan('pro')">Pro</button>
-        <button onclick="showPlan('enterprise')">Enterprise</button>
-      </div>
-      <div class="plan-display" id="planDisplay">
-        <h3>Basic Plan</h3>
-        <p>$9.99 / month</p>
-        <p>Remote pipe control and scheduling</p>
-      </div>
-    </section>
-    
-
-    <!-- System Contact Info -->
-    <section id="contact">
-      <h2>Contact Information</h2>
-      <div class="contact-info">
-        <p><strong>Email:</strong> support@smartirrigation.com</p>
-        <p><strong>Phone:</strong> +1 (234) 567-8901</p>
-        <p><strong>Address:</strong> 123 Green Field Ave, AgriCity, Earth</p>
-      </div>
-    </section>
-
-    <!-- System Image Gallery -->
-    <section id="picture">
-      <h2>System Demo Images</h2>
-      <div class="gallery-container">
-        <div class="gallery">
-          <img src="https://via.placeholder.com/250x150?text=Demo+1" alt="Demo 1">
-        </div>
-        <div class="gallery">
-          <img src="https://via.placeholder.com/250x150?text=Demo+2" alt="Demo 2">
-        </div>
-        <div class="gallery">
-          <img src="https://via.placeholder.com/250x150?text=Demo+3" alt="Demo 3">
-        </div>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- JavaScript for Interactive Pricing -->
   <script>
-    const plans = {
-      basic: {
-        title: 'Basic Plan',
-        price: '$9.99 / month',
-        desc: 'Remote pipe control and scheduling'
-      },
-      pro: {
-        title: 'Pro Plan',
-        price: '$19.99 / month',
-        desc: 'All features + weather prediction + auto-watering'
-      },
-      enterprise: {
-        title: 'Enterprise Plan',
-        price: 'Custom pricing',
-        desc: 'Best for large farms with full integrations'
-      }
-    };
+    function openLogin() {
+      document.getElementById('loginModal').style.display = 'flex';
+      document.getElementById('mainContent').classList.add('blurred');
+    }
 
-    function showPlan(type) {
-      const plan = plans[type];
-      document.getElementById('planDisplay').innerHTML = `
-        <h3>${plan.title}</h3>
-        <p>${plan.price}</p>
-        <p>${plan.desc}</p>
-      `;
+    function closeLogin() {
+      document.getElementById('loginModal').style.display = 'none';
+      document.getElementById('mainContent').classList.remove('blurred');
+    }
 
-      document.querySelectorAll('.pricing-tabs button').forEach(btn => {
-        btn.classList.remove('active');
-      });
-      event.target.classList.add('active');
+    function submitLogin() {
+      // Handle login logic here
+      alert('Login submitted');
+      closeLogin();
     }
   </script>
-
 </body>
 </html>
