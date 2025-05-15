@@ -89,8 +89,9 @@ def create_Users_table():
         cursor = conn.cursor()
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS Users (
-                User_ID SERIAL PRIMARY KEY,
+                user_ID SERIAL PRIMARY KEY,
                 username TEXT UNIQUE NOT NULL,
+                location VARCHAR,
                 password TEXT NOT NULL,
                 last_login TIMESTAMP
             )
@@ -134,9 +135,155 @@ def insert_users():
         if 'conn' in locals():
             conn.close()
 
+# Other tables are created from here 
+
+def create_PWR_TEMP_table():
+    try:
+        conn = psycopg2.connect(TARGET_CONN_STR)
+        cursor = conn.cursor()
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS PWR_TEMP (
+                device_id INTEGER PRIMARY KEY UNIQUE,
+                sequence INTEGER,
+                temp_celsius FLOAT,
+                received_at TIMESTAMP
+            );
+        """)
+        conn.commit()
+        print("✅ Table 'PWR_TEMP' is ready.")
+    except Exception as e:
+        print(f"❌ Error creating PWR_TEMP table: {e}")
+    finally:
+        if 'cursor' in locals():
+            cursor.close()
+        if 'conn' in locals():
+            conn.close()
+
+
+def create_WATER_DETECTOR_table():
+    try:
+        conn = psycopg2.connect(TARGET_CONN_STR)
+        cursor = conn.cursor()
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS WATER_DETECTOR (
+                device_id INTEGER PRIMARY KEY UNIQUE,
+                sequence INTEGER,
+                water_detected CHAR,
+                received_at TIMESTAMP
+            );
+        """)
+        conn.commit()
+        print("✅ Table 'WATER_DETECTOR' is ready.")
+    except Exception as e:
+        print(f"❌ Error creating WATER_DETECTOR table: {e}")
+    finally:
+        if 'cursor' in locals():
+            cursor.close()
+        if 'conn' in locals():
+            conn.close()
+
+
+def create_NOTIFICATIONS_table():
+    try:
+        conn = psycopg2.connect(TARGET_CONN_STR)
+        cursor = conn.cursor()
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS NOTIFICATIONS (
+                notification_id SERIAL PRIMARY KEY UNIQUE,
+                sequence INTEGER,
+                device_id INTEGER,
+                received_at TIMESTAMP,
+                user_id INTEGER REFERENCES Users(user_id),
+                alert_message VARCHAR
+            );
+        """)
+        conn.commit()
+        print("✅ Table 'NOTIFICATIONS' is ready.")
+    except Exception as e:
+        print(f"❌ Error creating NOTIFICATIONS table: {e}")
+    finally:
+        if 'cursor' in locals():
+            cursor.close()
+        if 'conn' in locals():
+            conn.close()
+
+
+def create_PULSE_DETECTOR_table():
+    try:
+        conn = psycopg2.connect(TARGET_CONN_STR)
+        cursor = conn.cursor()
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS PULSE_DETECTOR (
+                device_id INTEGER PRIMARY KEY UNIQUE,
+                sequence INTEGER,
+                pulse_count FLOAT,
+                leak_detected CHAR,
+                received_at TIMESTAMP
+            );
+        """)
+        conn.commit()
+        print("✅ Table 'PULSE_DETECTOR' is ready.")
+    except Exception as e:
+        print(f"❌ Error creating PULSE_DETECTOR table: {e}")
+    finally:
+        if 'cursor' in locals():
+            cursor.close()
+        if 'conn' in locals():
+            conn.close()
+
+
+def create_MAGNETIC_table():
+    try:
+        conn = psycopg2.connect(TARGET_CONN_STR)
+        cursor = conn.cursor()
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS MAGNETIC (
+                device_id VARCHAR PRIMARY KEY UNIQUE,
+                status TEXT,
+                sequence INTEGER,
+                received_at TIMESTAMP
+            );
+        """)
+        conn.commit()
+        print("✅ Table 'MAGNETIC' is ready.")
+    except Exception as e:
+        print(f"❌ Error creating MAGNETIC table: {e}")
+    finally:
+        if 'cursor' in locals():
+            cursor.close()
+        if 'conn' in locals():
+            conn.close()
+
+
+def create_USER_DEVICE_table():
+    try:
+        conn = psycopg2.connect(TARGET_CONN_STR)
+        cursor = conn.cursor()
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS USER_DEVICE (
+                device_id INTEGER PRIMARY KEY,
+                user_id INTEGER REFERENCES Users(user_id),
+                sensor_type CHAR
+            );
+        """)
+        conn.commit()
+        print("✅ Table 'USER_DEVICE' is ready.")
+    except Exception as e:
+        print(f"❌ Error creating USER_DEVICE table: {e}")
+    finally:
+        if 'cursor' in locals():
+            cursor.close()
+        if 'conn' in locals():
+            conn.close()
+
 if __name__ == "__main__":
-     create_database()
-    #  create_Admin_table()
-    #  insert_admins()
-     create_Users_table()
-     insert_users()
+      create_database()
+      create_Users_table()
+      insert_users()
+      create_PWR_TEMP_table()
+      create_WATER_DETECTOR_table()
+      create_NOTIFICATIONS_table()
+      create_PULSE_DETECTOR_table()
+      create_MAGNETIC_table()
+      create_USER_DEVICE_table()
+
