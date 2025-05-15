@@ -30,57 +30,57 @@ def create_database():
         print(f"❌ Error creating database: {e}")
     
 
-def create_Admin_table():
-    """Create the 'Admin' table in the 'SGS_Database' database if it does not exist."""
-    try:
-        conn = psycopg2.connect(TARGET_CONN_STR)
-        cursor = conn.cursor()
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS Admin (
-                Admin_ID SERIAL PRIMARY KEY,
-                username TEXT UNIQUE NOT NULL,
-                password TEXT NOT NULL,
-                last_login TIMESTAMP
-            )
-        """)
-        conn.commit()
-        print("✅ Table 'Admin' is ready.")
-    except Exception as e:
-        print(f"❌ Error creating table: {e}")
-    finally:
-        if 'cursor' in locals():
-            cursor.close()
-        if 'conn' in locals():
-            conn.close()
+# def create_Admin_table():
+#     """Create the 'Admin' table in the 'SGS_Database' database if it does not exist."""
+#     try:
+#         conn = psycopg2.connect(TARGET_CONN_STR)
+#         cursor = conn.cursor()
+#         cursor.execute("""
+#             CREATE TABLE IF NOT EXISTS Admin (
+#                 Admin_ID SERIAL PRIMARY KEY,
+#                 username TEXT UNIQUE NOT NULL,
+#                 password TEXT NOT NULL,
+#                 last_login TIMESTAMP
+#             )
+#         """)
+#         conn.commit()
+#         print("✅ Table 'Admin' is ready.")
+#     except Exception as e:
+#         print(f"❌ Error creating Admin table: {e}")
+#     finally:
+#         if 'cursor' in locals():
+#             cursor.close()
+#         if 'conn' in locals():
+#             conn.close()
 
-def insert_admins():
-    """Insert predefined Admins into the Admin table."""
-    try:
-        conn = psycopg2.connect(TARGET_CONN_STR)
-        cursor = conn.cursor()
+# def insert_admins():
+#     """Insert predefined Admins into the Admin table."""
+#     try:
+#         conn = psycopg2.connect(TARGET_CONN_STR)
+#         cursor = conn.cursor()
 
-        # Define user data
+#         now = datetime.now(timezone.utc)
+#         users = [
+#             ('Admin', 'Adminpass', now),
+#             ('Tshepang_Admin', 'Adminpass', now)
+#         ]
 
-        now = datetime.now(timezone.utc)
-        users = [
-            ('Admin', 'Adminpass',  now),
-            ('Tshepang_Admin', 'Adminpass', now)
-        ]
-            #Note since Admin_ID is auto incremented you dont have to add it 
-        for user in users: 
-            cursor.execute("""
-                INSERT INTO Admin (username, password, last_login)
-                VALUES (%s, %s, %s)
-                ON CONFLICT (username) DO NOTHING
-            """, user)
+#         for user in users: 
+#             cursor.execute("""
+#                 INSERT INTO Admin (username, password, last_login)
+#                 VALUES (%s, %s, %s)
+#                 ON CONFLICT (username) DO NOTHING
+#             """, user)
 
-        conn.commit()
-        print("✅ Admin inserted.")
-    except Exception as e:
-        print(f"❌ Error inserting users: {e}")
-    finally:
-        cursor.close()
-        conn.close()
+#         conn.commit()
+#         print("✅ Admins inserted.")
+#     except Exception as e:
+#         print(f"❌ Error inserting admins: {e}")
+#     finally:
+#         if 'cursor' in locals():
+#             cursor.close()
+#         if 'conn' in locals():
+#             conn.close()
 
 def create_Users_table(): 
     """Create the 'Users' table in the 'SGS_Database' database if it does not exist.""" 
@@ -90,17 +90,15 @@ def create_Users_table():
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS Users (
                 User_ID SERIAL PRIMARY KEY,
-                Admin_ID INTEGER,
                 username TEXT UNIQUE NOT NULL,
                 password TEXT NOT NULL,
-                last_login TIMESTAMP,
-                FOREIGN KEY (Admin_ID) REFERENCES Admin(Admin_ID) ON DELETE SET NULL
+                last_login TIMESTAMP
             )
         """)
         conn.commit()
         print("✅ Table 'Users' is ready.")
     except Exception as e:
-        print(f"❌ Error creating table: {e}")
+        print(f"❌ Error creating Users table: {e}")
     finally:
         if 'cursor' in locals():
             cursor.close()
@@ -114,17 +112,15 @@ def insert_users():
         cursor = conn.cursor()
 
         now = datetime.now(timezone.utc)
-
-        # Each tuple is: (Admin_ID, username, password, last_login)
         users = [
-            (1, 'User_1', 'Userpass', now),
-            (1, 'Ashock', 'Iamafarmer', now)
+            ('User_1', 'Userpass', now),
+            ('Ashock', 'Iamafarmer', now)
         ]
 
         for user in users:
             cursor.execute("""
-                INSERT INTO Users (Admin_ID, username, password, last_login)
-                VALUES (%s, %s, %s, %s)
+                INSERT INTO Users (username, password, last_login)
+                VALUES (%s, %s, %s)
                 ON CONFLICT (username) DO NOTHING
             """, user)
 
@@ -139,8 +135,8 @@ def insert_users():
             conn.close()
 
 if __name__ == "__main__":
-    create_database()
-    create_Admin_table()
-    insert_admins()
-    create_Users_table()
-    insert_users()
+     create_database()
+    #  create_Admin_table()
+    #  insert_admins()
+     create_Users_table()
+     insert_users()
