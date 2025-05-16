@@ -5,6 +5,11 @@ body {
   padding: 0;
   color: #333;
 }
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge, Opera */
+}
 /* End of styles for body */
 
 /* Start of styles for header */
