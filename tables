@@ -1,7 +1,9 @@
 
 USERS {
 	user_id integer pk unique
-	username string
+	name string
+	surname string
+	email text
 	last_login datetime
 	password varchar
 	location varchar
