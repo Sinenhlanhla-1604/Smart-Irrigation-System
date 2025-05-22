@@ -143,7 +143,8 @@ def create_PWR_TEMP_table():
         cursor = conn.cursor()
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS PWR_TEMP (
-                device_id INTEGER PRIMARY KEY UNIQUE,
+                device_id TEXT PRIMARY KEY Unique,
+                user_ID INTEGER REFERENCES Users(user_ID) ON DELETE CASCADE,
                 sequence INTEGER,
                 temp_celsius FLOAT,
                 received_at TIMESTAMP
@@ -166,7 +167,8 @@ def create_WATER_DETECTOR_table():
         cursor = conn.cursor()
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS WATER_DETECTOR (
-                device_id INTEGER PRIMARY KEY UNIQUE,
+                device_id TEXT PRIMARY KEY Unique,
+                user_ID INTEGER REFERENCES Users(user_ID) ON DELETE CASCADE,
                 sequence INTEGER,
                 water_detected CHAR,
                 received_at TIMESTAMP
@@ -191,7 +193,7 @@ def create_NOTIFICATIONS_table():
             CREATE TABLE IF NOT EXISTS NOTIFICATIONS (
                 notification_id SERIAL PRIMARY KEY UNIQUE,
                 sequence INTEGER,
-                device_id INTEGER,
+                device_id TEXT,
                 received_at TIMESTAMP,
                 user_id INTEGER REFERENCES Users(user_id),
                 alert_message VARCHAR
@@ -214,7 +216,8 @@ def create_PULSE_DETECTOR_table():
         cursor = conn.cursor()
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS PULSE_DETECTOR (
-                device_id INTEGER PRIMARY KEY UNIQUE,
+                device_id TEXT PRIMARY KEY Unique,
+                user_ID INTEGER REFERENCES Users(user_ID) ON DELETE CASCADE,
                 sequence INTEGER,
                 pulse_count FLOAT,
                 leak_detected CHAR,
@@ -238,7 +241,8 @@ def create_MAGNETIC_table():
         cursor = conn.cursor()
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS MAGNETIC (
-                device_id VARCHAR PRIMARY KEY UNIQUE,
+                device_id TEXT PRIMARY KEY Unique,
+                user_ID INTEGER REFERENCES Users(user_ID) ON DELETE CASCADE,
                 status TEXT,
                 sequence INTEGER,
                 received_at TIMESTAMP
@@ -261,7 +265,8 @@ def create_USER_DEVICE_table():
         cursor = conn.cursor()
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS USER_DEVICE (
-                device_id INTEGER PRIMARY KEY,
+                device_id TEXT PRIMARY KEY Unique,
+                user_ID INTEGER REFERENCES Users(user_ID) ON DELETE CASCADE,
                 user_id INTEGER REFERENCES Users(user_id),
                 sensor_type CHAR
             );
