@@ -1,233 +1,511 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Smart Irrigation Dashboard</title>
-  <link rel="stylesheet" href="/static/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GrowSmart Dashboard</title>
+  <link rel="stylesheet" href="/static/user.css" />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+  />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 </head>
 <body>
-  <!-- Header section -->
-  <header>Grow<span>Smart</span></header>
+  <div id="loading-spinner">Loading data...</div>
+  <div id="error-box" style="display:none; color:red;">Failed to load data. Please try again later.</div>
 
-  <!-- Start of notification icon div -->
-  <div class="notification-icon ()">
-    <svg xmlns="http://www.w3.org/2000/svg" height="28" width="28" viewBox="0 0 24 24" fill="white">
-      <path d="M12 2C8.13 2 5 5.13 5 9v5H3v2h18v-2h-2V9c0-3.87-3.13-7-7-7zM12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2z"/>
-    </svg>
-    <!--<span id="notif-count" class="notif-badge"></span>-->
-  </div>
-  <!-- End of notification icon div -->
-
-  <!-- Start of user info section -->
-  <div class="user-logged-in">
-    <div class="user-info">
-      <div class="user-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-        </svg>
+  <!-- Header -->
+  <header>
+    <div class="header-content">
+      <div class="logo">
+        <i class="fas fa-leaf"></i>
+        <h1>Grow<span>Smart</span></h1>
       </div>
-      <div class="user-details">
-        <div class="user-name">Farmer</div>
-        <div class="farm-name">Puntins</div>
+      <div class="header-graphic">
+        <div class="water-drop"></div>
+        <div class="water-drop delay-1"></div>
+        <div class="water-drop delay-2"></div>
       </div>
     </div>
-  </div>
-  <!-- End of user info section -->
+  </header>
 
-  <!-- Start of Main Dashboard Grid -->
+  <!-- User & Notifications -->
+  <div class="top-bar">
+    <div class="user-box">
+      <div class="avatar"><i class="fas fa-user"></i></div>
+      <div>
+        <div class="user-name" id="user-name">Farmer</div>
+        <div class="farm-name" id="farm-name">Puntins Farm</div>
+      </div>
+    </div>
+    <div class="notification-box">
+      <i class="fas fa-bell"></i>
+      <span class="notification-badge">3</span>
+    </div>
+  </div>
+
+  <!-- Dashboard Grid -->
   <div class="container">
-
-    <!-- Farm Overview Card -->
-    <div class="card">
-      <h3>Farm Overview</h3>
-      <p id="user-name"><strong>User:</strong> farmer_001</p>
-      <p><strong>Farm:</strong> <span id="farm-name">Puntins</span></p>
-      <div class="metrics-grid" style="margin-top: 1rem;">
-        <div class="metric-item">
-          <div>Today's Water</div>
-          <div class="metric-value" id="water-used">-- L</div>
+    <!-- Combined Notifications and Farm Overview Card -->
+    <div class="card combined-card">
+      <!-- Farm Overview Section -->
+      <div class="card-section">
+        <div class="card-header">
+          <h3><i class="fas fa-tractor"></i> Farm Overview</h3>
+          <div class="card-bg-icon"><i class="fas fa-seedling"></i></div>
         </div>
-        <div class="metric-item">
-          <div>Today's Cost</div>
-          <div class="metric-value" id="total-cost">R --</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Environmental Conditions -->
-    <div class="card">
-      <h3>Current Temperature</h3>
-      <p><strong>Temperature 1:</strong> <span id="temperature_1">-- °C</span></p>
-      <p><strong>Temperature 2:</strong> <span id="temperature_2">-- °C</span></p>
-      <div id="temp-alert" class="alert" style="display:none"></div>
-    </div>
-
-    <!-- Zone Status 
-    <div class="card">
-      <h3>Zone Status</h3>
-      <div id="zone-1-status" class="active-irrigation" style="display: none;">
-        <div><span class="status-indicator status-on"></span><strong>Zone 1:</strong> Irrigating</div>
-        <div style="margin-top: 0.3rem;">Time remaining: <span id="zone-1-remaining">--</span> min</div>
-      </div>
-      <div id="zone-2-status" class="active-irrigation" style="display: none;">
-        <div><span class="status-indicator status-on"></span><strong>Zone 2:</strong> Irrigating</div>
-        <div style="margin-top: 0.3rem;">Time remaining: <span id="zone-2-remaining">--</span> min</div>
-      </div>
-      <div id="zone-3-status" class="active-irrigation" style="display: none;">
-        <div><span class="status-indicator status-on"></span><strong>Zone 3:</strong> Irrigating</div>
-        <div style="margin-top: 0.3rem;">Time remaining: <span id="zone-3-remaining">--</span> min</div>
-      </div>
-      <div id="next-irrigation">
-        <p><strong>Next Irrigation:</strong> <span id="next-irrigation-time">--:--</span></p>
-      </div>
-    </div>-->
-
-    <!-- Water Detection Card -->
-    <div class="card">
-      <h3>Water Detection</h3>
-      <ul style="list-style: none; padding-left: 0;">
-        <li><span class="status-indicator" id="water-1-indicator"></span> Zone 1: <span id="water-1-status" class="water-status">--</span></li>
-        <li><span class="status-indicator" id="water-2-indicator"></span> Zone 2: <span id="water-2-status" class="water-status">--</span></li>
-        <li><span class="status-indicator" id="water-3-indicator"></span> Zone 3: <span id="water-3-status" class="water-status">--</span></li>
-      </ul>
-      <div id="water-alert" class="alert" style="display:none; margin-top: 1rem;"></div>
-    </div>
-
-    <!-- Pump & System Status Card 
-    <div class="card">
-      <h3>Pump & System Status</h3>
-      <p><strong>Pump:</strong> <span id="pump-status">--</span></p>
-      <p><strong>System:</strong> <span class="green">Operational</span></p>
-      <p><strong>Last Update:</strong> <span id="last-check">--</span></p>
-      <div id="pump-alert" class="alert" style="display:none; margin-top: 1rem;"></div>
-    </div>-->
-
-    <!-- Leak Detection Card -->
-    <div class="card" id="leak-card">
-      <h3>Pulse Detector</h3>
-      <p><strong>Pulse: </strong> <span id="pulse_count">--L</span></p>
-      <p><strong>Leakage Stat:</strong> 
-        <span id="leak-status">
-          <svg id="leak-icon" xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 24 24" class="leak-icon">
-            <path d="M12 2C8 7 6 10 6 13a6 6 0 0 0 12 0c0-3-2-6-6-11z"/>
-          </svg>
-          <span id="leak-text">No Leak</span>
-        </span>
-      </p>
-    </div>
-
-    <!-- Water Usage Analytics -->
-    <div class="card">
-      <h3>Water Usage Analytics</h3>
-      <canvas id="dailyChart"></canvas>
-      <p style="margin-top: 0.5rem;"><strong>Weekly Total:</strong> <span id="weekly-total">--</span> L</p>
-    </div>
-
-    <!-- Irrigation Schedule -->
-    <div class="card">
-      <h3>Irrigation Schedule</h3>
-      <div id="irrigation-controls">
-        <div class="zone-control">
-          <label>Zone 1:</label>
-          <input type="time" id="zone-1-time" value="06:00">
-          <input type="number" id="zone-1-duration" value="10" min="1" max="120">
-          <span>min</span>
-          <button disabled>Update</button>
-        </div>
-        <div class="zone-control">
-          <label>Zone 2:</label>
-          <input type="time" id="zone-2-time" value="06:30">
-          <input type="number" id="zone-2-duration" value="12" min="1" max="120">
-          <span>min</span>
-          <button disabled>Update</button>
-        </div>
-        <div class="zone-control">
-          <label>Zone 3:</label>
-          <input type="time" id="zone-3-time" value="07:00">
-          <input type="number" id="zone-3-duration" value="8" min="1" max="120">
-          <span>min</span>
-          <button disabled>Update</button>
+        <div class="card-content">
+          <div class="farm-info">
+            <p><i class="fas fa-user-tag"></i> <strong>User:</strong> <span id="user-id">farmer_001</span></p>
+            <p><i class="fas fa-map-marked-alt"></i> <strong>Farm:</strong> <span id="farm-name-display">Puntins</span></p>
+          </div>
+          <div class="metrics-grid">
+            <div class="metric-item">
+              <div class="metric-icon"><i class="fas fa-tint"></i></div>
+              <div class="metric-label">Today's Water</div>
+              <div class="metric-value" id="water-used">-- L</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-icon"><i class="fas fa-money-bill-wave"></i></div>
+              <div class="metric-label">Today's Cost</div>
+              <div class="metric-value" id="total-cost">R --</div>
+            </div>
+          </div>
         </div>
       </div>
-      <div id="schedule-alert" class="alert" style="display:none; margin-top: 1rem;"></div>
-    </div>
 
-    <!-- Water Detection Card -->
-    <div class="card">
-      <h3>Door Status</h3>
-      <ul style="list-style: none; padding-left: 0;">
-        <li><span class="status-indicator" id="Door-1-indicator"></span> Door 1: <span id="Door-1-status" class="Door-status">--</span></li>
-        <li><span class="status-indicator" id="Door-2-indicator"></span> Door 2: <span id="Door-2-status" class="Door-status">--</span></li>
-      </ul>
-      <div id="Door-alert" class="alert" style="display:none; margin-top: 1rem;"></div>
-    </div>
-
-    <div class="card">
-      <h3>Notifications</h3>
-      <ul>
-        <li></li>
-        <li></li>
-      </ul>
-    </div>
-  </div>
-  <div class="range-history">
-    <h3>System Usage History</h3>
-    
-    <div class="search-controls">
-      <div class="date-range">
-        <label for="start-date">From:</label>
-        <input type="date" id="start-date">
-        
-        <label for="end-date">To:</label>
-        <input type="date" id="end-date">
-        
-        <button id="search-btn" class="search-button">Search</button>
-      </div>
-      
-      <div class="filter-options">
-        <label for="metric-select">Metric:</label>
-        <select id="metric-select">
-          <option value="water">Water Usage</option>
-          <option value="energy">Energy Consumption</option>
-          <option value="duration">Irrigation Duration</option>
-          <option value="all">All Metrics</option>
-        </select>
-        
-        <label for="zone-select">Zone:</label>
-        <select id="zone-select">
-          <option value="all">All Zones</option>
-          <option value="1">Zone 1</option>
-          <option value="2">Zone 2</option>
-          <option value="3">Zone 3</option>
-        </select>
-      </div>
-    </div>
-    
-    <div class="results-container">
-      <div class="results-header">
-        <span class="header-date">Date</span>
-        <span class="header-zone">Zone</span>
-        <span class="header-metric">Water (L)</span>
-        <span class="header-metric">Energy (kWh)</span>
-        <span class="header-metric">Duration (min)</span>
-      </div>
-      
-      <div class="results-body" id="usage-results">
-        <!-- Results will be populated here by JavaScript -->
-        <div class="no-results">No data available for selected range</div>
-      </div>
-      
-      <div class="results-footer">
-        <div class="summary-stats">
-          <span>Total Water: <span id="total-water">0</span> L</span>
-          <span>Total Energy: <span id="total-energy">0</span> kWh</span>
-          <span>Total Duration: <span id="total-duration">0</span> min</span>
+      <!-- Notifications Section -->
+      <div class="card-section">
+        <div class="card-header">
+          <h3><i class="fas fa-bell"></i> Notifications</h3>
+          <div class="card-bg-icon"><i class="fas fa-exclamation"></i></div>
         </div>
-        <button id="export-btn" class="export-button">Export to CSV</button>
+        <div class="card-content">
+          <ul id="notifications-list">
+            <li><i class="fas fa-info-circle"></i> Irrigation scheduled for Zone 1 at 06:00</li>
+            <li><i class="fas fa-exclamation-triangle"></i> Temperature alert: Sensor 1 reading high</li>
+            <li><i class="fas fa-check-circle"></i> System update completed successfully</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Environmental Stats Card -->
+    <div class="card env-card">
+      <div class="card-header">
+        <h3><i class="fas fa-temperature-high"></i> Environment & Pulse</h3>
+        <div class="card-bg-icon"><i class="fas fa-heartbeat"></i></div>
+      </div>
+      <div class="card-content">
+        <div class="flex-2">
+          <div>
+            <div class="temp-reading">
+              <i class="fas fa-sun"></i>
+              <p><strong>Sensor 1:</strong> <span id="temperature_1">-- °C</span></p>
+            </div>
+            <div class="temp-reading">
+              <i class="fas fa-sun"></i>
+              <p><strong>Sensor 2:</strong> <span id="temperature_2">-- °C</span></p>
+            </div>
+            <canvas id="temp-gauge" style="max-width:300px;"></canvas>
+          </div>
+          <div class="pulse-info">
+            <p><i class="fas fa-wave-square"></i> <strong>Pulse:</strong> <span id="pulse_count">-- L</span></p>
+            <p><i class="fas fa-exclamation-triangle"></i> <strong>Leakage:</strong> <span id="leak-text">No Leak</span></p>
+            <div class="pulse-graphic">
+              <div class="pulse-line"></div>
+              <div class="pulse-circle"></div>
+            </div>
+          </div>
+        </div>
+        <div id="temp-alert" class="alert" style="display:none;"></div>
+      </div>
+    </div>
+
+    <!-- Combined Water and Door Status Card -->
+    <div class="card combined-card">
+      <!-- Water Detection Section -->
+      <div class="card-section">
+        <div class="card-header">
+          <h3><i class="fas fa-water"></i> Water Detection</h3>
+          <div class="card-bg-icon"><i class="fas fa-cloud-rain"></i></div>
+        </div>
+        <div class="card-content">
+          <ul class="status-list">
+            <li>
+              <span class="status-indicator" id="water-1-indicator"></span>
+              <i class="fas fa-map-pin"></i> Zone 1: <span id="water-1-status">--</span>
+            </li>
+            <li>
+              <span class="status-indicator" id="water-2-indicator"></span>
+              <i class="fas fa-map-pin"></i> Zone 2: <span id="water-2-status">--</span>
+            </li>
+            <li>
+              <span class="status-indicator" id="water-3-indicator"></span>
+              <i class="fas fa-map-pin"></i> Zone 3: <span id="water-3-status">--</span>
+            </li>
+          </ul>
+          <div class="water-graphic">
+            <div class="zone-graphic" id="zone-1-graphic"></div>
+            <div class="zone-graphic" id="zone-2-graphic"></div>
+            <div class="zone-graphic" id="zone-3-graphic"></div>
+          </div>
+          <div id="water-alert" class="alert" style="display:none;"></div>
+        </div>
+      </div>
+
+      <!-- Door Status Section -->
+      <div class="card-section">
+        <div class="card-header">
+          <h3><i class="fas fa-door-open"></i> Door Status</h3>
+          <div class="card-bg-icon"><i class="fas fa-door-closed"></i></div>
+        </div>
+        <div class="card-content">
+          <ul class="status-list">
+            <li>
+              <span class="status-indicator" id="Door-1-indicator"></span>
+              <i class="fas fa-door-open"></i> Door 1: <span id="Door-1-status">--</span>
+            </li>
+            <li>
+              <span class="status-indicator" id="Door-2-indicator"></span>
+              <i class="fas fa-door-open"></i> Door 2: <span id="Door-2-status">--</span>
+            </li>
+          </ul>
+          <div class="door-graphic">
+            <div class="door-visual" id="door-1-visual"></div>
+            <div class="door-visual" id="door-2-visual"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Water Usage Chart -->
+    <div class="card chart-card full-width">
+      <div class="card-header">
+        <h3><i class="fas fa-chart-line"></i> Water Analytics</h3>
+        <div class="card-bg-icon"><i class="fas fa-chart-bar"></i></div>
+      </div>
+      <div class="card-content">
+        <div class="chart-controls">
+          <label><i class="fas fa-calendar-alt"></i> View:</label>
+          <select id="period-select">
+            <option value="Daily">Daily</option>
+            <option value="Weekly" selected>Weekly</option>
+            <option value="Monthly">Monthly</option>
+            <option value="All">All Time</option>
+          </select>
+        </div>
+        <div style="height:300px;">
+          <canvas id="usage-chart"></canvas>
+        </div>
+        <div class="chart-footer">
+          <p><i class="fas fa-tint"></i> <strong>Total:</strong> <span id="usage-total">--</span> L</p>
+        </div>
       </div>
     </div>
   </div>
-  <!-- End of Main Dashboard Grid -->
+
+  <!-- SCRIPTS -->
+  <script>
+    // Global Charts references
+    let tempGaugeChart = null;
+    let usageChart = null;
+    let errorCount = 0;
+    let refreshInterval = 10000; // 10 seconds
+
+    document.addEventListener("DOMContentLoaded", () => {
+      startDataRefresh();
+      fetchWaterUsageChart();
+
+      document.getElementById("period-select").addEventListener("change", function () {
+        fetchWaterUsageChart(this.value);
+      });
+    });
+
+    function startDataRefresh() {
+      fetchAllData()
+        .catch(() => {
+          errorCount++;
+          if (errorCount > 3) refreshInterval = 30000; // slow down refresh on repeated errors
+          document.getElementById("error-box").style.display = "block";
+        })
+        .finally(() => {
+          document.getElementById("loading-spinner").style.display = "none";
+          setTimeout(startDataRefresh, refreshInterval);
+        });
+    }
+
+    async function fetchAllData() {
+      document.getElementById("loading-spinner").style.display = "block";
+      document.getElementById("error-box").style.display = "none";
+
+      const endpoints = [
+        "/api/temperature_stats",
+        "/api/leak_status",
+        "/api/door_status",
+        "/api/water_zones_status",
+        "/api/water_stats",
+        "/api/user_info",
+      ];
+
+      try {
+        const responses = await Promise.all(endpoints.map((url) => fetch(url)));
+
+        // Check all responses
+        for (const res of responses) {
+          if (!res.ok) throw new Error(`Failed to fetch ${res.url}`);
+        }
+
+        const data = await Promise.all(responses.map((res) => res.json()));
+
+        const [
+          tempData,
+          leakData,
+          doorData,
+          waterZoneData,
+          waterStatsData,
+          userInfo,
+        ] = data;
+
+        updateTemperatureUI(tempData);
+        updateLeakUI(leakData);
+        updateDoorUI(doorData);
+        updateWaterZonesUI(waterZoneData);
+        updateWaterStatsUI(waterStatsData);
+        updateUserInfoUI(userInfo);
+        errorCount = 0; // reset error counter on success
+      } catch (err) {
+        console.error(err);
+        document.getElementById("error-box").textContent =
+          "Failed to load data. Check console for details.";
+        document.getElementById("error-box").style.display = "block";
+        throw err;
+      } finally {
+        document.getElementById("loading-spinner").style.display = "none";
+      }
+    }
+
+    // Update Temperature UI & Gauge
+    function updateTemperatureUI(data) {
+      if (!data) return;
+      document.getElementById("temperature_1").textContent = data.temperature_1 + " °C";
+      document.getElementById("temperature_2").textContent = data.temperature_2 + " °C";
+
+      // Pulse count (assuming part of temperature data)
+      document.getElementById("pulse_count").textContent = data.pulse_count ?? "-- L";
+
+      // Temperature alert
+      const alertBox = document.getElementById("temp-alert");
+      if (data.temperature_alert) {
+        alertBox.textContent = data.temperature_alert;
+        alertBox.style.display = "block";
+      } else {
+        alertBox.style.display = "none";
+      }
+
+      // Draw/update temperature gauge chart
+      const gaugeValue = data.temperature_1 ?? 0;
+      const gaugeMax = 50;
+
+      const ctx = document.getElementById("temp-gauge").getContext("2d");
+      if (tempGaugeChart) {
+        tempGaugeChart.data.datasets[0].data[0] = gaugeValue;
+        tempGaugeChart.update();
+      } else {
+        tempGaugeChart = new Chart(ctx, {
+          type: "doughnut",
+          data: {
+            datasets: [
+              {
+                data: [gaugeValue, gaugeMax - gaugeValue],
+                backgroundColor: ["#ff6384", "#e0e0e0"],
+                borderWidth: 0,
+                cutout: "80%",
+              },
+            ],
+          },
+          options: {
+            rotation: -90,
+            circumference: 180,
+            plugins: {
+              tooltip: { enabled: false },
+              legend: { display: false },
+              title: {
+                display: true,
+                text: gaugeValue + "°C",
+                font: { size: 16 },
+              },
+            },
+          },
+        });
+      }
+    }
+
+    // Update Leak UI
+    function updateLeakUI(data) {
+      if (!data) return;
+      const leakText = document.getElementById("leak-text");
+      leakText.textContent = data.leak_detected ? "Leak Detected!" : "No Leak";
+      leakText.style.color = data.leak_detected ? "red" : "green";
+    }
+
+    // Update Door UI
+    function updateDoorUI(doorData) {
+      if (!doorData) return;
+
+      for (let i = 1; i <= 2; i++) {
+        const status = doorData[`Door_${i}`];
+        const statusSpan = document.getElementById(`Door-${i}-status`);
+        const indicator = document.getElementById(`Door-${i}-indicator`);
+        const visual = document.getElementById(`door-${i}-visual`);
+
+        if (!statusSpan || !indicator || !visual) continue;
+
+        if (status === "open") {
+          statusSpan.textContent = "Open";
+          indicator.style.backgroundColor = "green";
+          visual.style.backgroundColor = "#90ee90"; // Light green
+          visual.textContent = "Open";
+        } else if (status === "closed") {
+          statusSpan.textContent = "Closed";
+          indicator.style.backgroundColor = "red";
+          visual.style.backgroundColor = "#f08080"; // Light red
+          visual.textContent = "Closed";
+        } else {
+          statusSpan.textContent = "Unknown";
+          indicator.style.backgroundColor = "gray";
+          visual.style.backgroundColor = "gray";
+          visual.textContent = "N/A";
+        }
+      }
+    }
+
+    // Update Water Zones UI
+    function updateWaterZonesUI(waterZoneData) {
+      if (!waterZoneData || !waterZoneData.water_zones) return;
+
+      waterZoneData.water_zones.forEach((zone, index) => {
+        const zoneIndex = index + 1;
+        const statusSpan = document.getElementById(`water-${zoneIndex}-status`);
+        const indicator = document.getElementById(`water-${zoneIndex}-indicator`);
+        const graphic = document.getElementById(`zone-${zoneIndex}-graphic`);
+
+        if (!statusSpan || !indicator || !graphic) return;
+
+        if (zone.status === "wet") {
+          statusSpan.textContent = "Wet";
+          indicator.style.backgroundColor = "#007bff"; // Blue
+          graphic.style.backgroundColor = "#a0c4ff";
+          graphic.textContent = "Wet";
+        } else if (zone.status === "dry") {
+          statusSpan.textContent = "Dry";
+          indicator.style.backgroundColor = "gray";
+          graphic.style.backgroundColor = "#ccc";
+          graphic.textContent = "Dry";
+        } else {
+          statusSpan.textContent = "Unknown";
+          indicator.style.backgroundColor = "gray";
+          graphic.style.backgroundColor = "gray";
+          graphic.textContent = "N/A";
+        }
+      });
+    }
+
+    // Update Water Stats UI
+    function updateWaterStatsUI(waterStats) {
+      if (!waterStats) return;
+
+      document.getElementById("water-used").textContent = waterStats.water_used_today + " L";
+      document.getElementById("total-cost").textContent = "R " + waterStats.total_cost_today;
+
+      // Optional water alert
+      const waterAlert = document.getElementById("water-alert");
+      if (waterStats.water_alert) {
+        waterAlert.textContent = waterStats.water_alert;
+        waterAlert.style.display = "block";
+      } else {
+        waterAlert.style.display = "none";
+      }
+    }
+
+    // Update User Info UI
+    function updateUserInfoUI(userInfo) {
+      if (!userInfo) return;
+
+      if (userInfo.user_name) {
+        document.getElementById("user-name").textContent = userInfo.user_name;
+      }
+      if (userInfo.farm_name) {
+        document.getElementById("farm-name").textContent = userInfo.farm_name;
+        document.getElementById("farm-name-display").textContent = userInfo.farm_name;
+      }
+      if (userInfo.user_id) {
+        document.getElementById("user-id").textContent = userInfo.user_id;
+      }
+    }
+
+    // Fetch and render water usage analytics chart
+    async function fetchWaterUsageChart(period = "Weekly") {
+      const chartContainer = document.getElementById("usage-chart");
+      if (!chartContainer) return;
+
+      try {
+        const res = await fetch(`/api/water_usage?period=${period.toLowerCase()}`);
+        if (!res.ok) throw new Error("Failed to fetch water usage data");
+
+        const data = await res.json();
+
+        // Parse data for Chart.js
+        const labels = data.labels || [];
+        const usageValues = data.usage || [];
+        const total = data.total || 0;
+
+        document.getElementById("usage-total").textContent = total + " L";
+
+        if (usageChart) {
+          usageChart.data.labels = labels;
+          usageChart.data.datasets[0].data = usageValues;
+          usageChart.update();
+        } else {
+          const ctx = chartContainer.getContext("2d");
+          usageChart = new Chart(ctx, {
+            type: "line",
+            data: {
+              labels: labels,
+              datasets: [
+                {
+                  label: "Water Usage (L)",
+                  data: usageValues,
+                  fill: false,
+                  borderColor: "rgba(75,192,192,1)",
+                  backgroundColor: "rgba(75,192,192,0.2)",
+                  tension: 0.1,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              plugins: {
+                legend: { display: true },
+                tooltip: { enabled: true },
+              },
+              scales: {
+                y: {
+                  beginAtZero: true,
+                },
+              },
+            },
+          });
+        }
+      } catch (err) {
+        console.error(err);
+        document.getElementById("error-box").textContent =
+          "Failed to load water usage chart data.";
+        document.getElementById("error-box").style.display = "block";
+      }
+    }
+  </script>
 </body>
 </html>
