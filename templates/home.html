@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart Irrigation System</title>
+  <link rel="stylesheet" href="/static/home.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+
+  <header>
+<section class="logo_Title">
+    <h1>SMART GROW SOLUTIONS</h1>
+    <i>
+        Powered by 
+        <img 
+            src="/static/images/Macrocomm_White-400x124.png" 
+            alt="Macrocomm Logo" 
+            class="macrocomm-logo"
+        />
+    </i>
+</section>
+   
+    <nav>
+      <a href="#about">About</a>
+      <a href="#plans">Subscriptions</a>
+      <a href="#contact">Contact</a>
+      <button class="login-btn" onclick="toggleLoginForm()">Login</button>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <h2>Precision Irrigation. Smarter Farming.</h2>
+    <p>Real-time water monitoring & control for small-scale farmers using Sigfox IoT technology.</p>
+    
+
+  </section>
+<div class="about-wrapper">
+  <section id="about" class="section">
+    <h3>About Our System</h3>
+    <p class="center">
+        Our smart irrigation system leverages affordable IoT sensors to monitor essential parameters such as soil moisture, tank levels, and rainfall in real time. By using Sigfox for reliable, low-energy communication, the system ensures consistent and timely data transmission, even in remote areas where conventional communication networks might fail.
+        With its easy-to-use dashboard, the system empowers farmers to make informed decisions about water usage, reducing wastage and optimizing irrigation schedules. The sensors track moisture levels in the soil, ensuring that irrigation is only triggered when needed, preventing over-watering and conserving precious water resources.
+        In addition to monitoring soil conditions, the system also keeps an eye on tank levels and rainfall. By detecting when water levels are high, it allows farmers to make the most of rainfall, storing excess water for future use. The system also alerts farmers to any potential leaks, ensuring that water is not wasted due to faulty pipes or equipment.
+        Our solution is designed for ease of use and flexibility, offering farmers the ability to monitor their irrigation system remotely, all through a simple mobile or web interface. With no complex automation required, it provides a sustainable, affordable, and scalable solution to help farmers manage their irrigation more efficiently, even in areas with limited access to technology. This system is an ideal choice for small to medium-sized farms looking to optimize water usage while promoting sustainability and reducing operational costs.
+    </p>
+  </section>
+</div>
+  <section id="plans" class="plans">
+  <h2>Our Subscription Plans</h2>
+  <div class="pricing-tabs">
+    <button class="active" onclick="showPlan('basic', this)">Basic</button>
+    <button onclick="showPlan('standard', this)">Standard</button>
+    <button onclick="showPlan('advanced', this)">Advanced</button>
+    <button onclick="showPlan('premium', this)">Premium</button>
+    <button onclick="showPlan('enterprise', this)">Enterprise</button>
+  </div>
+  <div class="plan-display" id="planDisplay">
+    <h3>Basic Plan – "Monitor"</h3>
+    <p>R500 / month</p>
+    <p>Ideal for small-scale farms (up to 1 hectare). Includes full sensor readings for tank level, pulse meter, reed safe sensor, temperature alerts, and aqua level sensor. Provides dashboard alerts and Sigfox network connectivity to help monitor irrigation more efficiently.</p>
+  </div>
+</section>
+
+
+<section id="contact" class="contact">
+  <h3>Contact Us</h3>
+  <div class="contact-info">
+    <p>
+      ✉️ <strong>Email:</strong>
+      <a href="mailto:smartgrowsolutions8@gmail.com">smartgrowsolutions8@gmail.com</a>
+    </p>
+    <p>
+      📞 <strong>Phone:</strong>
+      <a href="tel:0104936871">010 493 6871</a>
+    </p>
+    <p>
+      📍 <strong>Location:</strong>
+      <a href="https://www.google.com/maps/place/Johannesburg,+South+Africa" target="_blank" rel="noopener">
+        Johannesburg, South Africa
+      </a>
+    </p>
+  </div>
+</section>
+
+<div id="loginModal" class="login-modal hidden">
+  <div class="login-form">
+    <h2>Login</h2>
+    <form method="POST" action="/login">
+      <input type="text" name="username" placeholder="Username" required />
+      <input type="password" name="password" placeholder="Password" required />
+      <button type="submit">Login</button>
+    </form>
+    <button class="close-btn" onclick="toggleLoginForm()">Close</button>
+  </div>
+</div>
+
+
+
+  <footer>
+    &copy; 2025 SmartIrrigate. All rights reserved.
+    <img src="/static/images/Macrocomm_White-400x124.png" alt="Macrocomm Logo" class="footer-logo">
+  </footer>
+
+  <script src="/static/script.js"></script>
+  <script>
+  function toggleLoginForm() {
+    const modal = document.getElementById("loginModal");
+    const body = document.body;
+
+    if (modal.classList.contains("hidden")) {
+      modal.classList.remove("hidden");
+      body.classList.add("modal-active");
+    } else {
+      modal.classList.add("hidden");
+      body.classList.remove("modal-active");
+    }
+  }
+</script>
+
+</body>
+</html>

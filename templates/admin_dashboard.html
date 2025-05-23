@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GrowSmart Admin</title>
+  <style>
+    :root {
+      --green-dark: #2f5930;
+      --green: #1a4b38;
+      --green-light: #dc811f;
+      --orange: #cd830d;
+      --orange-hover: #dc811f;
+      --white: #f2eded;
+      --gray-light: #ffffff;
+      --gray: #dc811f;
+      --text-dark: #030303;
+      --text-light: #0a0b0b;
+      --shadow: rgba(1, 1, 1, 0.05);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      margin: 0;
+      background-color: var(--gray-light);
+      color: var(--text-dark);
+    }
+
+    header {
+      background-color: var(--green-dark);
+      color: var(--white);
+      padding: 1.5rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 10px var(--shadow);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.8rem;
+    }
+
+    header span {
+      font-size: 0.9rem;
+      color: var(--green-light);
+    }
+
+    main {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 1rem;
+    }
+
+    .form-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .card {
+      background-color: var(--white);
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 4px 12px var(--shadow);
+      flex: 1;
+      min-width: 300px;
+      transition: transform 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+    }
+
+    .card h2 {
+      margin-top: 0;
+      margin-bottom: 1.2rem;
+      color: var(--green-dark);
+      font-size: 1.3rem;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 0.75rem;
+      margin-bottom: 1rem;
+      border: 1px solid var(--gray);
+      border-radius: 6px;
+      font-size: 1rem;
+      transition: border-color 0.2s ease;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--green);
+      outline: none;
+    }
+
+    .btn {
+      padding: 0.7rem 1.4rem;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 1rem;
+      border: none;
+    }
+
+    .btn-primary {
+      background-color: var(--green);
+      color: var(--white);
+    }
+
+    .btn-primary:hover {
+      background-color: var(--orange);
+    }
+
+    .btn-secondary {
+      background-color: transparent;
+      border: 2px solid var(--green-light);
+      color: var(--white);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--orange);
+      color: var(--white);
+      border-color: var(--orange-hover);
+    }
+
+    .btn-action {
+      padding: 0.4rem 0.9rem;
+      font-size: 0.9rem;
+      background-color: var(--green);
+      color: var(--white);
+      border: none;
+      border-radius: 5px;
+    }
+
+    .btn-action:hover {
+      background-color: var(--orange-hover);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    th, td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--gray);
+    }
+
+    thead {
+      background-color: var(--green-light);
+    }
+
+    tbody tr:nth-child(even) {
+      background-color: var(--gray-light);
+    }
+
+    .device-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .device-row > div {
+      background-color: #dbf6dd;
+      border: 1px solid #d68616;
+      padding: 1rem;
+      border-radius: 8px;
+      flex: 1;
+      min-width: 200px;
+    }
+
+    @media (max-width: 768px) {
+      .form-grid {
+        flex-direction: column;
+      }
+
+      .device-row {
+        flex-direction: column;
+      }
+
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>GrowSmart Admin Page <span>powered by Macrocomm</span></h1>
+    </div>
+    <div>
+      <button class="btn btn-secondary" onclick="confirmLogout()">Logout</button>
+    </div>
+  </header>
+
+  <main>
+    {% with messages = messages %}
+      {% if messages %}
+        <div style="margin-bottom: 1rem;">
+          {% for category, message in messages %}
+            <div style="background-color: {% if category == 'success' %}#d4edda{% else %}#f8d7da{% endif %}; 
+                        padding: 1rem; 
+                        margin-bottom: 0.5rem; 
+                        border-left: 5px solid {% if category == 'success' %}#28a745{% else %}#dc3545{% endif %}; 
+                        border-radius: 5px;">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <div class="form-grid">
+      <section class="card">
+        <h2>Add New User</h2>
+        <form method="post" action="/add_user">
+          <input type="email" name="email" placeholder="Email" required />
+          <input type="text" name="first_name" placeholder="First Name" required />
+          <input type="text" name="last_name" placeholder="Last Name" required />
+          <input type="password" name="password" placeholder="Password" required />
+          <input type="text" name="location" placeholder="Location" required />
+          <button type="submit" class="btn btn-primary">Add User</button>
+        </form>
+      </section>
+
+      <section class="card">
+        <h2>Assign Device</h2>
+        <form method="post" action="/assign_device">
+          <label for="user_id">User:</label>
+          <select name="user_id" id="user_id" required>
+            {% for user in users %}
+              <option value="{{ user.user_ID }}">{{ user.name }} {{ user.surname }} ({{ user.email }})</option>
+            {% endfor %}
+          </select>
+
+          <label for="device_info">Device:</label>
+          <select name="device_info" id="device_info" required>
+            {% for group in device_options %}
+              <optgroup label="{{ group.sensor_type }}">
+                {% for device_id in group.devices %}
+                  <option value="{{ device_id }}|{{ group.sensor_type }}">{{ device_id }}</option>
+                {% endfor %}
+              </optgroup>
+            {% endfor %}
+          </select>
+
+          <button type="submit" class="btn btn-primary">Assign Device</button>
+        </form>
+      </section>
+    </div>
+
+    <section class="card">
+      <h2>Assigned Devices</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Device ID</th>
+            <th>Sensor Type</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for assignment in assignments %}
+          <tr>
+            <td>{{ assignment.name }} {{ assignment.surname }}</td>
+            <td>{{ assignment.device_id }}</td>
+            <td>{{ assignment.sensor_type }}</td>
+            <td>
+              <form method="post" action="/unassign_device/{{ assignment.device_id }}" style="display:inline;">
+                <button type="submit" class="btn-action">Unassign</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>Registered Users</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Email</th>
+            <th>Name</th>
+            <th>Location</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in users %}
+          <tr>
+            <td>{{ user.email }}</td>
+            <td>{{ user.name }} {{ user.surname }}</td>
+            <td>{{ user.location }}</td>
+            <td>
+              <form method="post" action="/delete_user/{{ user.user_ID }}" onsubmit="return confirm('Delete this user?');">
+                <button type="submit" class="btn-action">Delete</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <script>
+    function confirmLogout() {
+      if (confirm("Are you sure you want to logout?")) {
+        window.location.href = "/logout";
+      }
+    }
+  </script>
+</body>
+</html>

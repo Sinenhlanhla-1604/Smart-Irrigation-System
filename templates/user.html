@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GrowSmart Dashboard</title>
+  <link rel="stylesheet" href="/static/user.css" />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+  />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+</head>
+<body>
+  <div id="loading-spinner">Loading data...</div>
+  <div id="error-box" style="display:none; color:red;">Failed to load data. Please try again later.</div>
+
+  <!-- Header -->
+  <header>
+    <div class="header-content">
+      <div class="logo">
+        <i class="fas fa-leaf"></i>
+        <h1>Grow<span>Smart</span></h1>
+      </div>
+      <div class="header-graphic">
+        <div class="water-drop"></div>
+        <div class="water-drop delay-1"></div>
+        <div class="water-drop delay-2"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- User & Notifications -->
+  <div class="top-bar">
+    <div class="user-box">
+      <div class="avatar"><i class="fas fa-user"></i></div>
+      <div>
+        <div class="user-name" id="user-name">Farmer</div>
+        <div class="farm-name" id="farm-name">Puntins Farm</div>
+      </div>
+    </div>
+    <div class="notification-box">
+      <i class="fas fa-bell"></i>
+      <span class="notification-badge">3</span>
+    </div>
+  </div>
+
+  <!-- Dashboard Grid -->
+  <div class="container">
+    <!-- Combined Notifications and Farm Overview Card -->
+    <div class="card combined-card">
+      <!-- Farm Overview Section -->
+      <div class="card-section">
+        <div class="card-header">
+          <h3><i class="fas fa-tractor"></i> Farm Overview</h3>
+          <div class="card-bg-icon"><i class="fas fa-seedling"></i></div>
+        </div>
+        <div class="card-content">
+          <div class="farm-info">
+            <p><i class="fas fa-user-tag"></i> <strong>User:</strong> <span id="user-id">farmer_001</span></p>
+            <p><i class="fas fa-map-marked-alt"></i> <strong>Farm:</strong> <span id="farm-name-display">Puntins</span></p>
+          </div>
+          <div class="metrics-grid">
+            <div class="metric-item">
+              <div class="metric-icon"><i class="fas fa-tint"></i></div>
+              <div class="metric-label">Today's Water</div>
+              <div class="metric-value" id="water-used">-- L</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-icon"><i class="fas fa-money-bill-wave"></i></div>
+              <div class="metric-label">Today's Cost</div>
+              <div class="metric-value" id="total-cost">R --</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notifications Section -->
+      <div class="card-section">
+        <div class="card-header">
+          <h3><i class="fas fa-bell"></i> Notifications</h3>
+          <div class="card-bg-icon"><i class="fas fa-exclamation"></i></div>
+        </div>
+        <div class="card-content">
+          <ul id="notifications-list">
+            <li><i class="fas fa-info-circle"></i> Irrigation scheduled for Zone 1 at 06:00</li>
+            <li><i class="fas fa-exclamation-triangle"></i> Temperature alert: Sensor 1 reading high</li>
+            <li><i class="fas fa-check-circle"></i> System update completed successfully</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Environmental Stats Card -->
+    <div class="card env-card">
+      <div class="card-header">
+        <h3><i class="fas fa-temperature-high"></i> Environment & Pulse</h3>
+        <div class="card-bg-icon"><i class="fas fa-heartbeat"></i></div>
+      </div>
+      <div class="card-content">
+        <div class="flex-2">
+          <div>
+            <div class="temp-reading">
+              <i class="fas fa-sun"></i>
+              <p><strong>Sensor 1:</strong> <span id="temperature_1">-- °C</span></p>
+            </div>
+            <div class="temp-reading">
+              <i class="fas fa-sun"></i>
+              <p><strong>Sensor 2:</strong> <span id="temperature_2">-- °C</span></p>
+            </div>
+            <canvas id="temp-gauge" style="max-width:300px;"></canvas>
+          </div>
+          <div class="pulse-info">
+            <p><i class="fas fa-wave-square"></i> <strong>Pulse:</strong> <span id="pulse_count">-- L</span></p>
+            <p><i class="fas fa-exclamation-triangle"></i> <strong>Leakage:</strong> <span id="leak-text">No Leak</span></p>
+            <div class="pulse-graphic">
+              <div class="pulse-line"></div>
+              <div class="pulse-circle"></div>
+            </div>
+          </div>
+        </div>
+        <div id="temp-alert" class="alert" style="display:none;"></div>
+      </div>
+    </div>
+
+    <!-- Combined Water and Door Status Card -->
+    <div class="card combined-card">
+      <!-- Water Detection Section -->
+      <div class="card-section">
+        <div class="card-header">
+          <h3><i class="fas fa-water"></i> Water Detection</h3>
+          <div class="card-bg-icon"><i class="fas fa-cloud-rain"></i></div>
+        </div>
+        <div class="card-content">
+          <ul class="status-list">
+            <li>
+              <span class="status-indicator" id="water-1-indicator"></span>
+              <i class="fas fa-map-pin"></i> Zone 1: <span id="water-1-status">--</span>
+            </li>
+            <li>
+              <span class="status-indicator" id="water-2-indicator"></span>
+              <i class="fas fa-map-pin"></i> Zone 2: <span id="water-2-status">--</span>
+            </li>
+            <li>
+              <span class="status-indicator" id="water-3-indicator"></span>
+              <i class="fas fa-map-pin"></i> Zone 3: <span id="water-3-status">--</span>
+            </li>
+          </ul>
+          <div class="water-graphic">
+            <div class="zone-graphic" id="zone-1-graphic"></div>
+            <div class="zone-graphic" id="zone-2-graphic"></div>
+            <div class="zone-graphic" id="zone-3-graphic"></div>
+          </div>
+          <div id="water-alert" class="alert" style="display:none;"></div>
+        </div>
+      </div>
+
+      <!-- Door Status Section -->
+      <div class="card-section">
+        <div class="card-header">
+          <h3><i class="fas fa-door-open"></i> Door Status</h3>
+          <div class="card-bg-icon"><i class="fas fa-door-closed"></i></div>
+        </div>
+        <div class="card-content">
+          <ul class="status-list">
+            <li>
+              <span class="status-indicator" id="Door-1-indicator"></span>
+              <i class="fas fa-door-open"></i> Door 1: <span id="Door-1-status">--</span>
+            </li>
+            <li>
+              <span class="status-indicator" id="Door-2-indicator"></span>
+              <i class="fas fa-door-open"></i> Door 2: <span id="Door-2-status">--</span>
+            </li>
+          </ul>
+          <div class="door-graphic">
+            <div class="door-visual" id="door-1-visual"></div>
+            <div class="door-visual" id="door-2-visual"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Water Usage Chart -->
+    <div class="card chart-card full-width">
+      <div class="card-header">
+        <h3><i class="fas fa-chart-line"></i> Water Analytics</h3>
+        <div class="card-bg-icon"><i class="fas fa-chart-bar"></i></div>
+      </div>
+      <div class="card-content">
+        <div class="chart-controls">
+          <label><i class="fas fa-calendar-alt"></i> View:</label>
+          <select id="period-select">
+            <option value="Daily">Daily</option>
+            <option value="Weekly" selected>Weekly</option>
+            <option value="Monthly">Monthly</option>
+            <option value="All">All Time</option>
+          </select>
+        </div>
+        <div style="height:300px;">
+          <canvas id="usage-chart"></canvas>
+        </div>
+        <div class="chart-footer">
+          <p><i class="fas fa-tint"></i> <strong>Total:</strong> <span id="usage-total">--</span> L</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+async function fetchData() {
+  try {
+    const response = await fetch('/api/user/data');
+    const data = await response.json();
+
+    document.getElementById('temperature_1').textContent = `${data.temperature_1 ?? '--'} °C`;
+    document.getElementById('temperature_2').textContent = `${data.temperature_2 ?? '--'} °C`;
+    document.getElementById('pulse_count').textContent = `${data.pulse_count ?? '--'} L`;
+    document.getElementById('leak-text').textContent = data.leak_detected === 'True' ? 'Leak Detected' : 'No Leak';
+
+    ['water-1-status', 'water-2-status', 'water-3-status'].forEach((id, i) => {
+      document.getElementById(id).textContent = data.water_status[i] === 'True' ? 'Water Detected' : 'No Water';
+    });
+
+    ['Door-1-status', 'Door-2-status'].forEach((id, i) => {
+      document.getElementById(id).textContent = data.door_status[i] === 'open' ? 'Open' : 'Closed';
+    });
+
+  } catch (error) {
+    console.error('❌ Error fetching data:', error);
+    document.getElementById('error-box').style.display = 'block';
+  }
+}
+
+// Refresh data every 10 seconds
+setInterval(fetchData, 10000);
+fetchData();
+</script>
+
+
+<script>
+let usageChart;
+
+async function updateUsageChart(period = 'Weekly') {
+  try {
+    const response = await fetch(`/api/user/usage?period=${period}`);
+    const data = await response.json();
+
+    if (usageChart) {
+      usageChart.data.labels = data.labels;
+      usageChart.data.datasets[0].data = data.values;
+      usageChart.update();
+    } else {
+      const ctx = document.getElementById('usage-chart').getContext('2d');
+      usageChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: data.labels,
+          datasets: [{
+            label: 'Water Usage (L)',
+            data: data.values,
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.3
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    }
+
+    const total = data.values.reduce((sum, val) => sum + val, 0);
+    document.getElementById('usage-total').textContent = total.toFixed(2);
+  } catch (error) {
+    console.error('❌ Error loading usage data:', error);
+  }
+}
+
+// Chart update on dropdown change
+document.getElementById('period-select').addEventListener('change', (e) => {
+  updateUsageChart(e.target.value);
+});
+
+updateUsageChart();  // Initial load
+</script>
+
+  </body>
+</html>

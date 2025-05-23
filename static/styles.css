@@ -1,0 +1,140 @@
+body {
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+    background-color: #fff;
+    color: #333;
+}
+
+.header {
+    background-color: #ff6b00;
+    padding: 20px;
+    text-align: center;
+    color: white;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.logo h1 {
+    margin: 0;
+    font-size: 28px;
+}
+
+.logo span {
+    font-size: 16px;
+    display: block;
+    margin-top: 5px;
+    font-weight: normal;
+    color: #fff2e6;
+}
+
+main {
+    padding: 40px;
+    max-width: 1200px;
+    margin: auto;
+}
+
+h2 {
+    color: #ff6b00;
+    margin-bottom: 15px;
+}
+
+.card {
+    margin-bottom: 30px;
+}
+
+/* Form & Table Styles */
+form {
+    background-color: #fffaf5;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #ffd7b5;
+    box-shadow: 0 2px 5px rgba(255, 107, 0, 0.1);
+}
+
+form input, form select, form button {
+    display: block;
+    width: 100%;
+    margin-bottom: 15px;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+form button {
+    background-color: #ff6b00;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+form button:hover {
+    background-color: #e55d00;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    background-color: #fffaf5;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(255, 107, 0, 0.1);
+}
+
+th, td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #ffd7b5;
+    text-align: left;
+}
+
+th {
+    background-color: #ff6b00;
+    color: white;
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+.table-actions button {
+    background-color: #e63946;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: none;
+}
+
+.table-actions button:hover {
+    background-color: #c92c3b;
+}
+
+/* Layout: Add User + Assign Device side-by-side */
+.form-grid {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.form-grid .card {
+    flex: 1;
+    min-width: 300px;
+}
+
+/* Row layout for available devices */
+.device-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.device-card {
+    flex: 1 1 220px;
+    background-color: #fffaf5;
+    border: 1px solid #ffd7b5;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 2px 5px rgba(255, 107, 0, 0.1);
+}
