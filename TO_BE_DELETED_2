@@ -1,180 +1,281 @@
-from datetime import datetime, timedelta
-import json
+// Global variables
+let usageChart;
+let dashboardData = {};
 
-@app_pages.route('/api/user/data')
-def api_user_data():
-    if not is_logged_in() or session.get('role') != 'user':
-        return jsonify({"error": "Unauthorized"}), 403
+// Initialize dashboard
+document.addEventListener('DOMContentLoaded', function() {
+  initializeDashboard();
+  fetchSensorData();
+  updateUsageChart();
+  
+  // Set up periodic updates
+  setInterval(fetchSensorData, 10000); // Update every 10 seconds
+  setInterval(() => updateUsageChart(), 30000); // Update chart every 30 seconds
+  
+  // Chart period selector
+  document.getElementById('period-select').addEventListener('change', function(e) {
+    updateUsageChart(e.target.value);
+  });
+});
 
-    user_id = session['user_id']
+function initializeDashboard() {
+  // Update last updated time
+  document.getElementById('last-updated').textContent = new Date().toLocaleString();
+  
+  // User info will be populated from session data via the backend template
+}
 
-    try:
-        with get_db_connection() as conn:
-            with conn.cursor() as cur:
-                # Get user device assignments
-                cur.execute("""
-                    SELECT device_id, sensor_type
-                    FROM USER_DEVICE
-                    WHERE user_id = %s AND user_id IS NOT NULL
-                """, (user_id,))
-                assignments = cur.fetchall()
+async function fetchSensorData() {
+  try {
+    // Fetch real-time data from Flask API
+    const response = await fetch('/api/user/data');
+    
+    if (!response.ok) {
+      if (response.status === 403) {
+        showError('Session expired. Please login again.');
+        setTimeout(() => window.location.href = '/', 3000);
+        return;
+      }
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    // Update temperature displays
+    document.getElementById('temperature1').textContent = 
+      data.temperature_1 ? `${data.temperature_1} °C` : '-- °C';
+    document.getElementById('temperature2').textContent = 
+      data.temperature_2 ? `${data.temperature_2} °C` : '-- °C';
+    
+    // Calculate average temperature
+    if (data.temperature_1 && data.temperature_2) {
+      const avgTemp = ((parseFloat(data.temperature_1) + parseFloat(data.temperature_2)) / 2).toFixed(1);
+      document.getElementById('avg-temp').textContent = `${avgTemp}°C`;
+      
+      // Update temperature indicators
+      updateIndicator('temp1-indicator', parseFloat(data.temperature_1) > 30 ? 'warning' : 'active');
+      updateIndicator('temp2-indicator', parseFloat(data.temperature_2) > 30 ? 'warning' : 'active');
+    } else {
+      document.getElementById('avg-temp').textContent = '--°C';
+    }
+    
+    // Update water detection status
+    if (data.water_status && Array.isArray(data.water_status)) {
+      data.water_status.forEach((status, i) => {
+        if (i < 3) { // Only update first 3 zones
+          const waterStatus = status === 'True' || status === true ? 'Water Detected' : 'No Water';
+          const elementId = `water${i+1}-status`;
+          const indicatorId = `water${i+1}-indicator`;
+          
+          if (document.getElementById(elementId)) {
+            document.getElementById(elementId).textContent = waterStatus;
+            updateIndicator(indicatorId, status === 'True' || status === true ? 'warning' : 'active');
+          }
+        }
+      });
+    }
+    
+    // Update door status
+    if (data.door_status && Array.isArray(data.door_status)) {
+      data.door_status.forEach((status, i) => {
+        if (i < 2) { // Only update first 2 doors
+          const doorStatus = status === 'open' ? 'Open' : 'Closed';
+          const elementId = `door${i+1}-status`;
+          const indicatorId = `door${i+1}-indicator`;
+          
+          if (document.getElementById(elementId)) {
+            document.getElementById(elementId).textContent = doorStatus;
+            updateIndicator(indicatorId, status === 'open' ? 'warning' : 'active');
+          }
+        }
+      });
+    }
+    
+    // Update pulse meter data
+    document.getElementById('pulse-count').textContent = data.pulse_count ?? '--';
+    
+    // Update leak detection
+    const leakDetected = data.leak_detected === 'True' || data.leak_detected === true;
+    document.getElementById('leak-status').textContent = leakDetected ? 'LEAK' : 'OK';
+    document.getElementById('leak-text').textContent = leakDetected ? 'Leak Detected!' : 'No Leak Detected';
+    updateIndicator('leak-indicator', leakDetected ? 'danger' : 'active');
+    
+    // Update system metrics
+    const activeSensors = calculateActiveSensors(data);
+    const alertsCount = calculateAlerts(data);
+    
+    document.getElementById('active-sensors').textContent = activeSensors;
+    document.getElementById('alerts-count').textContent = alertsCount;
+    document.getElementById('uptime').textContent = '99.5%'; // This could come from your system monitoring
+    
+    // Update last updated time
+    document.getElementById('last-updated').textContent = new Date().toLocaleString();
+    
+    // Clear any existing error messages
+    clearError();
+    
+  } catch (error) {
+    console.error('Error fetching sensor data:', error);
+    showError('Failed to fetch sensor data. Please check your connection.');
+    
+    // Set error states in UI
+    document.getElementById('temperature1').textContent = 'Error °C';
+    document.getElementById('temperature2').textContent = 'Error °C';
+    document.getElementById('avg-temp').textContent = '--°C';
+    document.getElementById('pulse-count').textContent = 'Error';
+  }
+}
 
-                data = {
-                    "temperature_1": None,
-                    "temperature_2": None,
-                    "pulse_count": None,
-                    "leak_detected": "False",
-                    "water_status": [None, None, None],
-                    "door_status": [None, None],
-                    "system_uptime": "99.5%",
-                    "last_updated": datetime.now().isoformat()
-                }
+async function updateUsageChart(period = 'Weekly') {
+  try {
+    // Fetch usage data from Flask API
+    const response = await fetch(`/api/user/usage?period=${period}`);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const chartData = await response.json();
+    
+    if (!chartData.labels || !chartData.values) {
+      console.warn('No usage data available');
+      return;
+    }
+    
+    const totalUsage = chartData.values.reduce((sum, val) => sum + (val || 0), 0);
+    document.getElementById('total-usage').textContent = totalUsage.toLocaleString();
+    
+    if (usageChart) {
+      usageChart.destroy();
+    }
+    
+    const ctx = document.getElementById('usage-chart').getContext('2d');
+    usageChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: chartData.labels,
+        datasets: [{
+          label: 'Water Usage (L)',
+          data: chartData.values,
+          backgroundColor: 'rgba(76, 175, 80, 0.2)',
+          borderColor: 'rgba(76, 175, 80, 1)',
+          borderWidth: 3,
+          fill: true,
+          tension: 0.4,
+          pointBackgroundColor: 'rgba(76, 175, 80, 1)',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: 5
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: true,
+            position: 'top'
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: 'rgba(0,0,0,0.1)'
+            },
+            ticks: {
+              callback: function(value) {
+                return value + 'L';
+              }
+            }
+          },
+          x: {
+            grid: {
+              color: 'rgba(0,0,0,0.1)'
+            }
+          }
+        },
+        animation: {
+          duration: 1000,
+          easing: 'easeInOutQuart'
+        }
+      }
+    });
+    
+  } catch (error) {
+    console.error('Error updating usage chart:', error);
+    showError('Failed to load usage chart');
+  }
+}
 
-                temp_sensors = []
-                water_sensors = []
-                door_sensors = []
+// Helper function to calculate active sensors
+function calculateActiveSensors(data) {
+  let count = 0;
+  if (data.temperature_1) count++;
+  if (data.temperature_2) count++;
+  if (data.water_status) {
+    count += data.water_status.filter(status => status !== null).length;
+  }
+  if (data.door_status) {
+    count += data.door_status.filter(status => status !== null).length;
+  }
+  if (data.pulse_count !== null && data.pulse_count !== undefined) count++;
+  return count;
+}
 
-                for device_id, sensor_type in assignments:
-                    if sensor_type == "decode_PowerTemp":
-                        cur.execute("""
-                            SELECT temp_celsius, received_at
-                            FROM PWR_TEMP
-                            WHERE device_id = %s
-                            ORDER BY received_at DESC
-                            LIMIT 1
-                        """, (device_id,))
-                        temp_row = cur.fetchone()
-                        if temp_row:
-                            temp_sensors.append(float(temp_row[0]))
+// Helper function to calculate alerts
+function calculateAlerts(data) {
+  let alerts = 0;
+  
+  // Temperature alerts (above 30°C)
+  if (data.temperature_1 && parseFloat(data.temperature_1) > 30) alerts++;
+  if (data.temperature_2 && parseFloat(data.temperature_2) > 30) alerts++;
+  
+  // Water detection alerts
+  if (data.water_status) {
+    alerts += data.water_status.filter(status => status === 'True' || status === true).length;
+  }
+  
+  // Door open alerts
+  if (data.door_status) {
+    alerts += data.door_status.filter(status => status === 'open').length;
+  }
+  
+  // Leak detection alert
+  if (data.leak_detected === 'True' || data.leak_detected === true) alerts++;
+  
+  return alerts;
+}
 
-                    elif sensor_type == "decode_pulsemeter":
-                        cur.execute("""
-                            SELECT pulse_count, leak_detected, received_at
-                            FROM PULSE_DETECTOR
-                            WHERE device_id = %s
-                            ORDER BY received_at DESC
-                            LIMIT 1
-                        """, (device_id,))
-                        pulse_row = cur.fetchone()
-                        if pulse_row:
-                            data["pulse_count"] = int(pulse_row[0]) if pulse_row[0] else 0
-                            data["leak_detected"] = str(pulse_row[1]) if pulse_row[1] else "False"
+function updateIndicator(indicatorId, status) {
+  const indicator = document.getElementById(indicatorId);
+  if (indicator) {
+    // Remove all status classes
+    indicator.className = indicator.className.replace(/status-\w+/, '');
+    indicator.className += ` status-${status}`;
+  }
+}
 
-                    elif sensor_type == "decode_water_sensor":
-                        cur.execute("""
-                            SELECT water_detected, received_at
-                            FROM WATER_DETECTOR
-                            WHERE device_id = %s
-                            ORDER BY received_at DESC
-                            LIMIT 1
-                        """, (device_id,))
-                        water_row = cur.fetchone()
-                        if water_row:
-                            water_sensors.append(str(water_row[0]))
+function showError(message) {
+  // Create or update error message
+  let errorDiv = document.getElementById('error-message');
+  if (!errorDiv) {
+    errorDiv = document.createElement('div');
+    errorDiv.id = 'error-message';
+    errorDiv.className = 'error';
+    document.querySelector('.container').insertBefore(errorDiv, document.querySelector('.dashboard-grid'));
+  }
+  errorDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${message}`;
+  
+  // Auto-hide after 10 seconds
+  setTimeout(() => {
+    clearError();
+  }, 10000);
+}
 
-                    elif sensor_type == "decode_magnetic_sensor":
-                        cur.execute("""
-                            SELECT status, received_at
-                            FROM MAGNETIC
-                            WHERE device_id = %s
-                            ORDER BY received_at DESC
-                            LIMIT 1
-                        """, (device_id,))
-                        door_row = cur.fetchone()
-                        if door_row:
-                            door_sensors.append(str(door_row[0]))
-
-                # Assign temperature values
-                if len(temp_sensors) >= 1:
-                    data["temperature_1"] = temp_sensors[0]
-                if len(temp_sensors) >= 2:
-                    data["temperature_2"] = temp_sensors[1]
-
-                # Assign water sensor values
-                for i, status in enumerate(water_sensors[:3]):
-                    data["water_status"][i] = status
-
-                # Assign door sensor values
-                for i, status in enumerate(door_sensors[:2]):
-                    data["door_status"][i] = status
-
-        return jsonify(data)
-
-    except Exception as e:
-        print(f"❌ API error: {e}")
-        return jsonify({"error": "Internal server error"}), 500
-
-@app_pages.route('/api/user/usage')
-def api_user_usage():
-    if not is_logged_in() or session.get('role') != 'user':
-        return jsonify({"error": "Unauthorized"}), 403
-
-    user_id = session['user_id']
-    period = request.args.get("period", "Weekly")
-
-    try:
-        with get_db_connection() as conn:
-            with conn.cursor() as cur:
-                # Get all pulse meters assigned to user
-                cur.execute("""
-                    SELECT device_id FROM USER_DEVICE
-                    WHERE user_id = %s AND sensor_type = 'decode_pulsemeter'
-                """, (user_id,))
-                device_ids = [row[0] for row in cur.fetchall()]
-
-                if not device_ids:
-                    return jsonify({"labels": [], "values": []})
-
-                # Define time filters and grouping
-                if period == "Daily":
-                    query = """
-                        SELECT to_char(date_trunc('hour', received_at), 'HH24:00') as label,
-                               COALESCE(SUM(pulse_count), 0) as total
-                        FROM PULSE_DETECTOR
-                        WHERE device_id = ANY(%s) 
-                        AND received_at >= now() - interval '1 day'
-                        GROUP BY date_trunc('hour', received_at)
-                        ORDER BY date_trunc('hour', received_at)
-                    """
-                elif period == "Weekly":
-                    query = """
-                        SELECT to_char(date_trunc('day', received_at), 'Day') as label,
-                               COALESCE(SUM(pulse_count), 0) as total
-                        FROM PULSE_DETECTOR
-                        WHERE device_id = ANY(%s) 
-                        AND received_at >= now() - interval '7 days'
-                        GROUP BY date_trunc('day', received_at)
-                        ORDER BY date_trunc('day', received_at)
-                    """
-                elif period == "Monthly":
-                    query = """
-                        SELECT to_char(date_trunc('day', received_at), 'MM-DD') as label,
-                               COALESCE(SUM(pulse_count), 0) as total
-                        FROM PULSE_DETECTOR
-                        WHERE device_id = ANY(%s) 
-                        AND received_at >= now() - interval '30 days'
-                        GROUP BY date_trunc('day', received_at)
-                        ORDER BY date_trunc('day', received_at)
-                    """
-                else:  # All time
-                    query = """
-                        SELECT to_char(date_trunc('day', received_at), 'MM-DD') as label,
-                               COALESCE(SUM(pulse_count), 0) as total
-                        FROM PULSE_DETECTOR
-                        WHERE device_id = ANY(%s)
-                        GROUP BY date_trunc('day', received_at)
-                        ORDER BY date_trunc('day', received_at)
-                        LIMIT 30
-                    """
-
-                cur.execute(query, (device_ids,))
-                results = cur.fetchall()
-
-                labels = [row[0] for row in results]
-                values = [int(row[1]) if row[1] else 0 for row in results]
-
-                return jsonify({"labels": labels, "values": values})
-
-    except Exception as e:
-        print(f"❌ Error loading usage chart: {e}")
-        return jsonify({"error": "Internal server error"}), 500
+function clearError() {
+  const errorDiv = document.getElementById('error-message');
+  if (errorDiv && errorDiv.parentNode) {
+    errorDiv.parentNode.removeChild(errorDiv);
+  }
+}
