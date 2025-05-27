@@ -1,108 +1,180 @@
-async function fetchSensorData() {
-  try {
-    // Replace simulation with real API call
-    const response = await fetch('/api/user/data');
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    const data = await response.json();
-    
-    // Update temperature displays
-    document.getElementById('temperature1').textContent = `${data.temperature_1 ?? '--'} °C`;
-    document.getElementById('temperature2').textContent = `${data.temperature_2 ?? '--'} °C`;
-    
-    // Calculate average temperature
-    if (data.temperature_1 && data.temperature_2) {
-      const avgTemp = ((parseFloat(data.temperature_1) + parseFloat(data.temperature_2)) / 2).toFixed(1);
-      document.getElementById('avg-temp').textContent = `${avgTemp}°C`;
-      
-      // Update temperature indicators
-      updateIndicator('temp1-indicator', parseFloat(data.temperature_1) > 30 ? 'warning' : 'active');
-      updateIndicator('temp2-indicator', parseFloat(data.temperature_2) > 30 ? 'warning' : 'active');
-    }
-    
-    // Update water detection status
-    if (data.water_status && Array.isArray(data.water_status)) {
-      data.water_status.forEach((status, i) => {
-        const waterStatus = status === 'True' ? 'Water Detected' : 'No Water';
-        document.getElementById(`water${i+1}-status`).textContent = waterStatus;
-        updateIndicator(`water${i+1}-indicator`, status === 'True' ? 'warning' : 'active');
-      });
-    }
-    
-    // Update door status
-    if (data.door_status && Array.isArray(data.door_status)) {
-      data.door_status.forEach((status, i) => {
-        const doorStatus = status === 'open' ? 'Open' : 'Closed';
-        document.getElementById(`door${i+1}-status`).textContent = doorStatus;
-        updateIndicator(`door${i+1}-indicator`, status === 'open' ? 'warning' : 'active');
-      });
-    }
-    
-    // Update pulse meter data
-    document.getElementById('pulse-count').textContent = data.pulse_count ?? '--';
-    
-    // Update leak detection
-    const leakDetected = data.leak_detected === 'True';
-    document.getElementById('leak-status').textContent = leakDetected ? 'LEAK' : 'OK';
-    document.getElementById('leak-text').textContent = leakDetected ? 'Leak Detected!' : 'No Leak Detected';
-    updateIndicator('leak-indicator', leakDetected ? 'danger' : 'active');
-    
-    // Update system metrics
-    const activeSensors = calculateActiveSensors(data);
-    const alertsCount = calculateAlerts(data);
-    
-    document.getElementById('active-sensors').textContent = activeSensors;
-    document.getElementById('alerts-count').textContent = alertsCount;
-    document.getElementById('uptime').textContent = data.system_uptime ?? '99.5%';
-    
-    // Update last updated time
-    document.getElementById('last-updated').textContent = new Date().toLocaleString();
-    
-  } catch (error) {
-    console.error('Error fetching sensor data:', error);
-    showError('Failed to fetch sensor data. Please check your connection.');
-    
-    // Fallback to show connection error in UI
-    document.getElementById('temperature1').textContent = 'Error °C';
-    document.getElementById('temperature2').textContent = 'Error °C';
-    document.getElementById('avg-temp').textContent = '--°C';
-  }
-}
+from datetime import datetime, timedelta
+import json
 
-// Helper function to calculate active sensors
-function calculateActiveSensors(data) {
-  let count = 0;
-  if (data.temperature_1) count++;
-  if (data.temperature_2) count++;
-  if (data.water_status) count += data.water_status.length;
-  if (data.door_status) count += data.door_status.length;
-  if (data.pulse_count !== null) count++;
-  return count;
-}
+@app_pages.route('/api/user/data')
+def api_user_data():
+    if not is_logged_in() or session.get('role') != 'user':
+        return jsonify({"error": "Unauthorized"}), 403
 
-// Helper function to calculate alerts
-function calculateAlerts(data) {
-  let alerts = 0;
-  
-  // Temperature alerts
-  if (parseFloat(data.temperature_1) > 30) alerts++;
-  if (parseFloat(data.temperature_2) > 30) alerts++;
-  
-  // Water detection alerts
-  if (data.water_status) {
-    alerts += data.water_status.filter(status => status === 'True').length;
-  }
-  
-  // Door open alerts
-  if (data.door_status) {
-    alerts += data.door_status.filter(status => status === 'open').length;
-  }
-  
-  // Leak detection alert
-  if (data.leak_detected === 'True') alerts++;
-  
-  return alerts;
-}
+    user_id = session['user_id']
+
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                # Get user device assignments
+                cur.execute("""
+                    SELECT device_id, sensor_type
+                    FROM USER_DEVICE
+                    WHERE user_id = %s AND user_id IS NOT NULL
+                """, (user_id,))
+                assignments = cur.fetchall()
+
+                data = {
+                    "temperature_1": None,
+                    "temperature_2": None,
+                    "pulse_count": None,
+                    "leak_detected": "False",
+                    "water_status": [None, None, None],
+                    "door_status": [None, None],
+                    "system_uptime": "99.5%",
+                    "last_updated": datetime.now().isoformat()
+                }
+
+                temp_sensors = []
+                water_sensors = []
+                door_sensors = []
+
+                for device_id, sensor_type in assignments:
+                    if sensor_type == "decode_PowerTemp":
+                        cur.execute("""
+                            SELECT temp_celsius, received_at
+                            FROM PWR_TEMP
+                            WHERE device_id = %s
+                            ORDER BY received_at DESC
+                            LIMIT 1
+                        """, (device_id,))
+                        temp_row = cur.fetchone()
+                        if temp_row:
+                            temp_sensors.append(float(temp_row[0]))
+
+                    elif sensor_type == "decode_pulsemeter":
+                        cur.execute("""
+                            SELECT pulse_count, leak_detected, received_at
+                            FROM PULSE_DETECTOR
+                            WHERE device_id = %s
+                            ORDER BY received_at DESC
+                            LIMIT 1
+                        """, (device_id,))
+                        pulse_row = cur.fetchone()
+                        if pulse_row:
+                            data["pulse_count"] = int(pulse_row[0]) if pulse_row[0] else 0
+                            data["leak_detected"] = str(pulse_row[1]) if pulse_row[1] else "False"
+
+                    elif sensor_type == "decode_water_sensor":
+                        cur.execute("""
+                            SELECT water_detected, received_at
+                            FROM WATER_DETECTOR
+                            WHERE device_id = %s
+                            ORDER BY received_at DESC
+                            LIMIT 1
+                        """, (device_id,))
+                        water_row = cur.fetchone()
+                        if water_row:
+                            water_sensors.append(str(water_row[0]))
+
+                    elif sensor_type == "decode_magnetic_sensor":
+                        cur.execute("""
+                            SELECT status, received_at
+                            FROM MAGNETIC
+                            WHERE device_id = %s
+                            ORDER BY received_at DESC
+                            LIMIT 1
+                        """, (device_id,))
+                        door_row = cur.fetchone()
+                        if door_row:
+                            door_sensors.append(str(door_row[0]))
+
+                # Assign temperature values
+                if len(temp_sensors) >= 1:
+                    data["temperature_1"] = temp_sensors[0]
+                if len(temp_sensors) >= 2:
+                    data["temperature_2"] = temp_sensors[1]
+
+                # Assign water sensor values
+                for i, status in enumerate(water_sensors[:3]):
+                    data["water_status"][i] = status
+
+                # Assign door sensor values
+                for i, status in enumerate(door_sensors[:2]):
+                    data["door_status"][i] = status
+
+        return jsonify(data)
+
+    except Exception as e:
+        print(f"❌ API error: {e}")
+        return jsonify({"error": "Internal server error"}), 500
+
+@app_pages.route('/api/user/usage')
+def api_user_usage():
+    if not is_logged_in() or session.get('role') != 'user':
+        return jsonify({"error": "Unauthorized"}), 403
+
+    user_id = session['user_id']
+    period = request.args.get("period", "Weekly")
+
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                # Get all pulse meters assigned to user
+                cur.execute("""
+                    SELECT device_id FROM USER_DEVICE
+                    WHERE user_id = %s AND sensor_type = 'decode_pulsemeter'
+                """, (user_id,))
+                device_ids = [row[0] for row in cur.fetchall()]
+
+                if not device_ids:
+                    return jsonify({"labels": [], "values": []})
+
+                # Define time filters and grouping
+                if period == "Daily":
+                    query = """
+                        SELECT to_char(date_trunc('hour', received_at), 'HH24:00') as label,
+                               COALESCE(SUM(pulse_count), 0) as total
+                        FROM PULSE_DETECTOR
+                        WHERE device_id = ANY(%s) 
+                        AND received_at >= now() - interval '1 day'
+                        GROUP BY date_trunc('hour', received_at)
+                        ORDER BY date_trunc('hour', received_at)
+                    """
+                elif period == "Weekly":
+                    query = """
+                        SELECT to_char(date_trunc('day', received_at), 'Day') as label,
+                               COALESCE(SUM(pulse_count), 0) as total
+                        FROM PULSE_DETECTOR
+                        WHERE device_id = ANY(%s) 
+                        AND received_at >= now() - interval '7 days'
+                        GROUP BY date_trunc('day', received_at)
+                        ORDER BY date_trunc('day', received_at)
+                    """
+                elif period == "Monthly":
+                    query = """
+                        SELECT to_char(date_trunc('day', received_at), 'MM-DD') as label,
+                               COALESCE(SUM(pulse_count), 0) as total
+                        FROM PULSE_DETECTOR
+                        WHERE device_id = ANY(%s) 
+                        AND received_at >= now() - interval '30 days'
+                        GROUP BY date_trunc('day', received_at)
+                        ORDER BY date_trunc('day', received_at)
+                    """
+                else:  # All time
+                    query = """
+                        SELECT to_char(date_trunc('day', received_at), 'MM-DD') as label,
+                               COALESCE(SUM(pulse_count), 0) as total
+                        FROM PULSE_DETECTOR
+                        WHERE device_id = ANY(%s)
+                        GROUP BY date_trunc('day', received_at)
+                        ORDER BY date_trunc('day', received_at)
+                        LIMIT 30
+                    """
+
+                cur.execute(query, (device_ids,))
+                results = cur.fetchall()
+
+                labels = [row[0] for row in results]
+                values = [int(row[1]) if row[1] else 0 for row in results]
+
+                return jsonify({"labels": labels, "values": values})
+
+    except Exception as e:
+        print(f"❌ Error loading usage chart: {e}")
+        return jsonify({"error": "Internal server error"}), 500
