@@ -1,0 +1,24 @@
+// Replace the simulated data in fetchSensorData() with:
+const response = await fetch('/api/user/data');
+const data = await response.json();
+
+// Update temperature displays
+document.getElementById('temperature1').textContent = `${data.temperature_1 ?? '--'} °C`;
+document.getElementById('temperature2').textContent = `${data.temperature_2 ?? '--'} °C`;
+
+// Update pulse meter
+document.getElementById('pulse-count').textContent = data.pulse_count ?? '--';
+document.getElementById('leak-text').textContent = 
+  data.leak_detected === 'True' ? 'Leak Detected!' : 'No Leak Detected';
+
+// Update water status
+data.water_status.forEach((status, i) => {
+  document.getElementById(`water${i+1}-status`).textContent = 
+    status === 'True' ? 'Water Detected' : 'No Water';
+});
+
+// Update door status  
+data.door_status.forEach((status, i) => {
+  document.getElementById(`door${i+1}-status`).textContent = 
+    status === 'open' ? 'Open' : 'Closed';
+});
