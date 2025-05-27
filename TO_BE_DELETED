@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Smart Growth Dashboard</title>
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+  />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      color: #333;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      color: white;
+    }
+
+    .header h1 {
+      font-size: 3rem;
+      font-weight: 700;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      margin-bottom: 10px;
+    }
+
+    .header .subtitle {
+      font-size: 1.2rem;
+      opacity: 0.9;
+    }
+
+    /* Grid Layout */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 25px;
+      margin-bottom: 30px;
+    }
+
+    .full-width {
+      grid-column: 1 / -1;
+    }
+
+    /* Cards */
+    .card {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      padding: 25px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.3);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #4CAF50, #2196F3, #FF9800);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .card-header h3 {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #2c3e50;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card-header i {
+      color: #4CAF50;
+      font-size: 1.5rem;
+    }
+
+    /* Status Indicators */
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+    }
+
+    .status-item {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+      border-radius: 12px;
+      border-left: 4px solid #4CAF50;
+      transition: all 0.3s ease;
+    }
+
+    .status-item:hover {
+      background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+      transform: scale(1.02);
+    }
+
+    .status-indicator {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 10px;
+      animation: pulse 2s infinite;
+    }
+
+    .status-active {
+      background: #4CAF50;
+      box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+    }
+
+    .status-warning {
+      background: #FF9800;
+      box-shadow: 0 0 10px rgba(255, 152, 0, 0.5);
+    }
+
+    .status-inactive {
+      background: #9E9E9E;
+    }
+
+    .status-danger {
+      background: #f44336;
+      box-shadow: 0 0 10px rgba(244, 67, 54, 0.5);
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.7; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* Metrics */
+    .metrics-row {
+      display: flex;
+      justify-content: space-around;
+      margin: 20px 0;
+    }
+
+    .metric {
+      text-align: center;
+      padding: 15px;
+      background: linear-gradient(135deg, #f1f3f4, #e8eaed);
+      border-radius: 15px;
+      min-width: 120px;
+      transition: transform 0.3s ease;
+    }
+
+    .metric:hover {
+      transform: translateY(-3px);
+    }
+
+    .metric-value {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #2196F3;
+      margin-bottom: 5px;
+    }
+
+    .metric-label {
+      font-size: 0.9rem;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Chart Container */
+    .chart-container {
+      background: white;
+      border-radius: 15px;
+      padding: 20px;
+      height: 400px;
+      position: relative;
+    }
+
+    /* Controls */
+    .controls {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+      align-items: center;
+    }
+
+    .controls select {
+      padding: 10px 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      background: white;
+      font-size: 1rem;
+      transition: border-color 0.3s ease;
+    }
+
+    .controls select:focus {
+      outline: none;
+      border-color: #4CAF50;
+    }
+
+    /* Loading & Error States */
+    .loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px;
+      color: #666;
+    }
+
+    .loading i {
+      animation: spin 1s linear infinite;
+      margin-right: 10px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .error {
+      background: linear-gradient(135deg, #ffebee, #ffcdd2);
+      border: 1px solid #f44336;
+      border-radius: 10px;
+      padding: 15px;
+      color: #c62828;
+      text-align: center;
+      margin: 10px 0;
+    }
+
+    /* User Info */
+    .user-info {
+      background: linear-gradient(135deg, #e8f5e8, #c8e6c9);
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .user-info h4 {
+      color: #2e7d32;
+      margin-bottom: 10px;
+    }
+
+    /* Temperature Gauge */
+    .temp-gauge {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 200px;
+      position: relative;
+    }
+
+    .gauge {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      background: conic-gradient(from 0deg, #4CAF50 0deg, #FFC107 120deg, #f44336 240deg, #4CAF50 360deg);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    .gauge::before {
+      content: '';
+      width: 130px;
+      height: 130px;
+      background: white;
+      border-radius: 50%;
+      position: absolute;
+    }
+
+    .gauge-value {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #333;
+      z-index: 1;
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .card {
+      animation: fadeInUp 0.6s ease forwards;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .header h1 {
+        font-size: 2rem;
+      }
+      
+      .metrics-row {
+        flex-direction: column;
+        gap: 10px;
+      }
+    }
+
+    /* Data Table */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .data-table th,
+    .data-table td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .data-table th {
+      background: linear-gradient(135deg, #4CAF50, #45a049);
+      color: white;
+      font-weight: 600;
+    }
+
+    .data-table tr:hover {
+      background: #f5f5f5;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1><i class="fas fa-seedling"></i> Smart Growth Dashboard</h1>
+      <div class="subtitle">Real-time Agricultural Monitoring System</div>
+    </div>
+
+    <!-- User Info Card -->
+    <div class="card">
+      <div class="user-info">
+        <h4><i class="fas fa-user"></i> Current Session</h4>
+        <p><strong>User:</strong> <span id="user-name">Loading...</span></p>
+        <p><strong>Location:</strong> <span id="user-location">Loading...</span></p>
+        <p><strong>Last Updated:</strong> <span id="last-updated">--</span></p>
+      </div>
+    </div>
+
+    <!-- Dashboard Grid -->
+    <div class="dashboard-grid">
+      <!-- Temperature Sensors Card -->
+      <div class="card">
+        <div class="card-header">
+          <h3><i class="fas fa-thermometer-half"></i> Temperature Sensors</h3>
+        </div>
+        <div class="status-grid">
+          <div class="status-item">
+            <span class="status-indicator status-active" id="temp1-indicator"></span>
+            <div>
+              <div><strong>Sensor 1</strong></div>
+              <div id="temperature1">-- °C</div>
+            </div>
+          </div>
+          <div class="status-item">
+            <span class="status-indicator status-active" id="temp2-indicator"></span>
+            <div>
+              <div><strong>Sensor 2</strong></div>
+              <div id="temperature2">-- °C</div>
+            </div>
+          </div>
+        </div>
+        <div class="temp-gauge">
+          <div class="gauge">
+            <div class="gauge-value" id="avg-temp">--°C</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Water Detection Card -->
+      <div class="card">
+        <div class="card-header">
+          <h3><i class="fas fa-tint"></i> Water Detection</h3>
+        </div>
+        <div class="status-grid">
+          <div class="status-item">
+            <span class="status-indicator" id="water1-indicator"></span>
+            <div>
+              <div><strong>Zone 1</strong></div>
+              <div id="water1-status">--</div>
+            </div>
+          </div>
+          <div class="status-item">
+            <span class="status-indicator" id="water2-indicator"></span>
+            <div>
+              <div><strong>Zone 2</strong></div>
+              <div id="water2-status">--</div>
+            </div>
+          </div>
+          <div class="status-item">
+            <span class="status-indicator" id="water3-indicator"></span>
+            <div>
+              <div><strong>Zone 3</strong></div>
+              <div id="water3-status">--</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Door Status Card -->
+      <div class="card">
+        <div class="card-header">
+          <h3><i class="fas fa-door-open"></i> Door Status</h3>
+        </div>
+        <div class="status-grid">
+          <div class="status-item">
+            <span class="status-indicator" id="door1-indicator"></span>
+            <div>
+              <div><strong>Door 1</strong></div>
+              <div id="door1-status">--</div>
+            </div>
+          </div>
+          <div class="status-item">
+            <span class="status-indicator" id="door2-indicator"></span>
+            <div>
+              <div><strong>Door 2</strong></div>
+              <div id="door2-status">--</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pulse Meter Card -->
+      <div class="card">
+        <div class="card-header">
+          <h3><i class="fas fa-wave-square"></i> Water Flow</h3>
+        </div>
+        <div class="metrics-row">
+          <div class="metric">
+            <div class="metric-value" id="pulse-count">--</div>
+            <div class="metric-label">Pulse Count</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value" id="leak-status">--</div>
+            <div class="metric-label">Leak Status</div>
+          </div>
+        </div>
+        <div class="status-item">
+          <span class="status-indicator" id="leak-indicator"></span>
+          <div>
+            <div><strong>Leak Detection:</strong></div>
+            <div id="leak-text">No Data</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Water Usage Chart -->
+    <div class="card full-width">
+      <div class="card-header">
+        <h3><i class="fas fa-chart-line"></i> Water Usage Analytics</h3>
+      </div>
+      <div class="controls">
+        <label><i class="fas fa-calendar-alt"></i> Time Period:</label>
+        <select id="period-select">
+          <option value="Daily">Daily</option>
+          <option value="Weekly" selected>Weekly</option>
+          <option value="Monthly">Monthly</option>
+          <option value="All">All Time</option>
+        </select>
+        <div class="metric">
+          <div class="metric-value" id="total-usage">--</div>
+          <div class="metric-label">Total Usage (L)</div>
+        </div>
+      </div>
+      <div class="chart-container">
+        <canvas id="usage-chart" width="400" height="200"></canvas>
+      </div>
+    </div>
+
+    <!-- System Status Summary -->
+    <div class="card full-width">
+      <div class="card-header">
+        <h3><i class="fas fa-cog"></i> System Status</h3>
+      </div>
+      <div class="metrics-row">
+        <div class="metric">
+          <div class="metric-value" id="active-sensors">--</div>
+          <div class="metric-label">Active Sensors</div>
+        </div>
+        <div class="metric">
+          <div class="metric-value" id="alerts-count">--</div>
+          <div class="metric-label">Active Alerts</div>
+        </div>
+        <div class="metric">
+          <div class="metric-value" id="uptime">--</div>
+          <div class="metric-label">System Uptime</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Global variables
+    let usageChart;
+    let dashboardData = {};
+
+    // Initialize dashboard
+    document.addEventListener('DOMContentLoaded', function() {
+      initializeDashboard();
+      fetchSensorData();
+      updateUsageChart();
+      
+      // Set up periodic updates
+      setInterval(fetchSensorData, 10000); // Update every 10 seconds
+      
+      // Chart period selector
+      document.getElementById('period-select').addEventListener('change', function(e) {
+        updateUsageChart(e.target.value);
+      });
+    });
+
+    function initializeDashboard() {
+      // Update last updated time
+      document.getElementById('last-updated').textContent = new Date().toLocaleString();
+      
+      // Initialize user info (this would come from session in real Flask app)
+      document.getElementById('user-name').textContent = 'Demo User';
+      document.getElementById('user-location').textContent = 'Demo Farm';
+    }
+
+    async function fetchSensorData() {
+      try {
+        // Simulate API calls to your Flask endpoints
+        // In real implementation, these would be actual fetch calls to your Flask routes
+        
+        // Simulate temperature data
+        const temp1 = (20 + Math.random() * 15).toFixed(1);
+        const temp2 = (22 + Math.random() * 12).toFixed(1);
+        
+        document.getElementById('temperature1').textContent = `${temp1} °C`;
+        document.getElementById('temperature2').textContent = `${temp2} °C`;
+        
+        // Calculate average temperature
+        const avgTemp = ((parseFloat(temp1) + parseFloat(temp2)) / 2).toFixed(1);
+        document.getElementById('avg-temp').textContent = `${avgTemp}°C`;
+        
+        // Update temperature indicators
+        updateIndicator('temp1-indicator', parseFloat(temp1) > 30 ? 'warning' : 'active');
+        updateIndicator('temp2-indicator', parseFloat(temp2) > 30 ? 'warning' : 'active');
+        
+        // Simulate water detection
+        const waterStatuses = ['No Water', 'Water Detected', 'No Water'];
+        waterStatuses.forEach((status, i) => {
+          const isDetected = Math.random() > 0.7;
+          const actualStatus = isDetected ? 'Water Detected' : 'No Water';
+          document.getElementById(`water${i+1}-status`).textContent = actualStatus;
+          updateIndicator(`water${i+1}-indicator`, isDetected ? 'warning' : 'active');
+        });
+        
+        // Simulate door status
+        const doorStatuses = ['Closed', 'Open'];
+        [1, 2].forEach(i => {
+          const isOpen = Math.random() > 0.6;
+          const status = isOpen ? 'Open' : 'Closed';
+          document.getElementById(`door${i}-status`).textContent = status;
+          updateIndicator(`door${i}-indicator`, isOpen ? 'warning' : 'active');
+        });
+        
+        // Simulate pulse meter data
+        const pulseCount = Math.floor(Math.random() * 1000);
+        const leakDetected = Math.random() > 0.9;
+        
+        document.getElementById('pulse-count').textContent = pulseCount;
+        document.getElementById('leak-status').textContent = leakDetected ? 'LEAK' : 'OK';
+        document.getElementById('leak-text').textContent = leakDetected ? 'Leak Detected!' : 'No Leak Detected';
+        updateIndicator('leak-indicator', leakDetected ? 'danger' : 'active');
+        
+        // Update system metrics
+        document.getElementById('active-sensors').textContent = '8';
+        document.getElementById('alerts-count').textContent = leakDetected ? '1' : '0';
+        document.getElementById('uptime').textContent = '99.5%';
+        
+        // Update last updated time
+        document.getElementById('last-updated').textContent = new Date().toLocaleString();
+        
+      } catch (error) {
+        console.error('Error fetching sensor data:', error);
+        showError('Failed to fetch sensor data');
+      }
+    }
+
+    async function updateUsageChart(period = 'Weekly') {
+      try {
+        // Simulate usage data
+        let labels = [];
+        let data = [];
+        
+        if (period === 'Daily') {
+          for (let i = 0; i < 24; i++) {
+            labels.push(`${i}:00`);
+            data.push(Math.floor(Math.random() * 50 + 10));
+          }
+        } else if (period === 'Weekly') {
+          const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+          labels = days;
+          data = days.map(() => Math.floor(Math.random() * 200 + 50));
+        } else if (period === 'Monthly') {
+          for (let i = 1; i <= 30; i++) {
+            labels.push(`Day ${i}`);
+            data.push(Math.floor(Math.random() * 300 + 100));
+          }
+        }
+        
+        const totalUsage = data.reduce((sum, val) => sum + val, 0);
+        document.getElementById('total-usage').textContent = totalUsage.toLocaleString();
+        
+        if (usageChart) {
+          usageChart.destroy();
+        }
+        
+        const ctx = document.getElementById('usage-chart').getContext('2d');
+        usageChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'Water Usage (L)',
+              data: data,
+              backgroundColor: 'rgba(76, 175, 80, 0.2)',
+              borderColor: 'rgba(76, 175, 80, 1)',
+              borderWidth: 3,
+              fill: true,
+              tension: 0.4,
+              pointBackgroundColor: 'rgba(76, 175, 80, 1)',
+              pointBorderColor: '#fff',
+              pointBorderWidth: 2,
+              pointRadius: 5
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: true,
+                position: 'top'
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                grid: {
+                  color: 'rgba(0,0,0,0.1)'
+                },
+                ticks: {
+                  callback: function(value) {
+                    return value + 'L';
+                  }
+                }
+              },
+              x: {
+                grid: {
+                  color: 'rgba(0,0,0,0.1)'
+                }
+              }
+            },
+            animation: {
+              duration: 1000,
+              easing: 'easeInOutQuart'
+            }
+          }
+        });
+        
+      } catch (error) {
+        console.error('Error updating usage chart:', error);
+        showError('Failed to load usage chart');
+      }
+    }
+
+    function updateIndicator(indicatorId, status) {
+      const indicator = document.getElementById(indicatorId);
+      if (indicator) {
+        indicator.className = `status-indicator status-${status}`;
+      }
+    }
+
+    function showError(message) {
+      // Create or update error message
+      let errorDiv = document.getElementById('error-message');
+      if (!errorDiv) {
+        errorDiv = document.createElement('div');
+        errorDiv.id = 'error-message';
+        errorDiv.className = 'error';
+        document.querySelector('.container').insertBefore(errorDiv, document.querySelector('.dashboard-grid'));
+      }
+      errorDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${message}`;
+      
+      // Auto-hide after 5 seconds
+      setTimeout(() => {
+        if (errorDiv.parentNode) {
+          errorDiv.parentNode.removeChild(errorDiv);
+        }
+      }, 5000);
+    }
+  </script>
+</body>
+</html>
