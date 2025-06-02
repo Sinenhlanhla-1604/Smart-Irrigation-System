@@ -6,17 +6,44 @@
   <title>GrowSmart Admin</title>
   <style>
     :root {
-      --green-dark: #2f5930;
-      --green: #1a4b38;
-      --green-light: #dc811f;
-      --orange: #cd830d;
-      --orange-hover: #dc811f;
-      --white: #f2eded;
-      --gray-light: #ffffff;
-      --gray: #dc811f;
-      --text-dark: #030303;
-      --text-light: #0a0b0b;
-      --shadow: rgba(1, 1, 1, 0.05);
+      --primary: #ff6b35;
+      --primary-hover: #e55a2e;
+      --primary-light: rgba(255, 107, 53, 0.1);
+      --secondary: #ff8c42;
+      --secondary-hover: #e67a37;
+      --accent: #ffa726;
+      --accent-hover: #ff9800;
+      --danger: #ff4444;
+      --danger-hover: #cc3333;
+      --success: #ff6b35;
+      --warning: #ff8c42;
+      --info: #ffa726;
+      
+      --bg-primary: #0a0a0a;
+      --bg-secondary: #1a1a1a;
+      --bg-sidebar: #000000;
+      --bg-card: #1e1e1e;
+      --bg-hover: #2a2a2a;
+      
+      --text-primary: #ffffff;
+      --text-secondary: #cccccc;
+      --text-muted: #888888;
+      --text-white: #ffffff;
+      --text-black: #000000;
+      
+      --border: #333333;
+      --border-light: #2a2a2a;
+      --border-dark: #444444;
+      
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.4);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.5);
+      --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.6);
+      --shadow-orange: 0 4px 12px rgba(255, 107, 53, 0.2);
+      
+      --radius: 8px;
+      --radius-lg: 12px;
+      --radius-xl: 16px;
     }
 
     * {
@@ -24,297 +51,713 @@
     }
 
     body {
-      font-family: 'Segoe UI', Tahoma, sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       margin: 0;
-      background-color: var(--gray-light);
-      color: var(--text-dark);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
     }
 
+    /* Modern Header */
     header {
-      background-color: var(--green-dark);
-      color: var(--white);
-      padding: 1.5rem 2rem;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      box-shadow: 0 4px 10px var(--shadow);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(8px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-black);
+      font-weight: bold;
+      font-size: 1.2rem;
+      box-shadow: var(--shadow-orange);
     }
 
     header h1 {
       margin: 0;
-      font-size: 1.8rem;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-primary);
     }
 
-    header span {
-      font-size: 0.9rem;
-      color: var(--green-light);
+    header .subtitle {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-left: 0.5rem;
     }
 
-    main {
-      max-width: 1200px;
-      margin: 2rem auto;
-      padding: 1rem;
-    }
-
-    .form-grid {
+    .header-right {
       display: flex;
-      flex-wrap: wrap;
-      gap: 2rem;
-      margin-bottom: 2rem;
+      align-items: center;
+      gap: 1rem;
     }
 
-    .card {
-      background-color: var(--white);
-      border-radius: 12px;
+    .user-menu {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem;
+      border-radius: var(--radius);
+      transition: background-color 0.2s;
+    }
+
+    .user-menu:hover {
+      background: var(--bg-hover);
+    }
+
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-black);
+      font-weight: 600;
+      font-size: 0.9rem;
+      box-shadow: var(--shadow-orange);
+    }
+
+    /* Main Layout */
+    main {
+      max-width: 1400px;
+      margin: 0 auto;
       padding: 2rem;
-      box-shadow: 0 4px 12px var(--shadow);
-      flex: 1;
-      min-width: 300px;
-      transition: transform 0.2s ease;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+
+    /* Modern Cards */
+    .card {
+      background: var(--bg-card);
+      border-radius: var(--radius-xl);
+      padding: 2rem;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
     }
 
     .card:hover {
-      transform: translateY(-3px);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-xl), var(--shadow-orange);
+      border-color: var(--primary);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .card-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-black);
+      font-size: 1.2rem;
+      box-shadow: var(--shadow-orange);
     }
 
     .card h2 {
-      margin-top: 0;
-      margin-bottom: 1.2rem;
-      color: var(--green-dark);
-      font-size: 1.3rem;
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    /* Form Styling */
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
     }
 
     input, select {
       width: 100%;
-      padding: 0.75rem;
-      margin-bottom: 1rem;
-      border: 1px solid var(--gray);
-      border-radius: 6px;
+      padding: 0.875rem 1rem;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
       font-size: 1rem;
-      transition: border-color 0.2s ease;
+      font-family: inherit;
+      transition: all 0.2s ease;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
     }
 
     input:focus, select:focus {
-      border-color: var(--green);
       outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2);
     }
 
+    input::placeholder {
+      color: var(--text-muted);
+    }
+
+    select option {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+    }
+
+    /* Modern Buttons */
     .btn {
-      padding: 0.7rem 1.4rem;
-      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.875rem 1.5rem;
+      border-radius: var(--radius-lg);
       font-weight: 600;
+      font-size: 0.95rem;
       cursor: pointer;
-      transition: all 0.3s ease;
-      font-size: 1rem;
+      transition: all 0.2s ease;
       border: none;
+      text-decoration: none;
+      font-family: inherit;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+      transition: left 0.5s;
+    }
+
+    .btn:hover::before {
+      left: 100%;
     }
 
     .btn-primary {
-      background-color: var(--green);
-      color: var(--white);
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+      color: var(--text-black);
+      box-shadow: var(--shadow-orange);
     }
 
     .btn-primary:hover {
-      background-color: var(--orange);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg), var(--shadow-orange);
     }
 
     .btn-secondary {
-      background-color: transparent;
-      border: 2px solid var(--green-light);
-      color: var(--white);
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      border: 2px solid var(--border);
     }
 
     .btn-secondary:hover {
-      background-color: var(--orange);
-      color: var(--white);
-      border-color: var(--orange-hover);
+      background: var(--bg-hover);
+      border-color: var(--border-dark);
+      transform: translateY(-1px);
+      color: var(--text-primary);
     }
 
-    .btn-action {
-      padding: 0.4rem 0.9rem;
-      font-size: 0.9rem;
-      background-color: var(--green);
-      color: var(--white);
-      border: none;
-      border-radius: 5px;
+    .btn-danger {
+      background: linear-gradient(135deg, var(--danger) 0%, var(--danger-hover) 100%);
+      color: var(--text-white);
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
     }
 
-    .btn-action:hover {
-      background-color: var(--orange-hover);
+    .btn-danger:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow);
+    }
+
+    /* Table Styling */
+    .table-container {
+      background: var(--bg-card);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      box-shadow: var(--shadow);
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 1rem;
     }
 
-    th, td {
-      padding: 1rem;
+    th {
+      background: linear-gradient(135deg, var(--bg-secondary) 0%, #2a2a2a 100%);
+      padding: 1.25rem 1.5rem;
       text-align: left;
-      border-bottom: 1px solid var(--gray);
+      font-weight: 600;
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--border);
     }
 
-    thead {
-      background-color: var(--green-light);
+    td {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border-light);
+      color: var(--text-primary);
     }
 
-    tbody tr:nth-child(even) {
-      background-color: var(--gray-light);
+    tbody tr {
+      transition: background-color 0.2s ease;
     }
 
-    .device-row {
+    tbody tr:hover {
+      background: var(--bg-hover);
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Message Notifications */
+    .messages {
+      margin-bottom: 2rem;
+    }
+
+    .message {
+      padding: 1rem 1.25rem;
+      margin-bottom: 1rem;
+      border-radius: var(--radius-lg);
+      border-left: 4px solid;
       display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
+      align-items: center;
+      gap: 0.75rem;
+      animation: slideIn 0.3s ease-out;
     }
 
-    .device-row > div {
-      background-color: #dbf6dd;
-      border: 1px solid #d68616;
-      padding: 1rem;
-      border-radius: 8px;
-      flex: 1;
-      min-width: 200px;
+    .message.success {
+      background: rgba(255, 107, 53, 0.1);
+      border-left-color: var(--success);
+      color: var(--primary);
+    }
+
+    .message.error {
+      background: rgba(255, 68, 68, 0.1);
+      border-left-color: var(--danger);
+      color: var(--danger);
+    }
+
+    .message-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: bold;
+      color: var(--text-black);
+    }
+
+    .message.success .message-icon {
+      background: var(--success);
+    }
+
+    .message.error .message-icon {
+      background: var(--danger);
+    }
+
+    /* Status Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    .badge-success {
+      background: var(--primary-light);
+      color: var(--primary);
+      border: 1px solid var(--primary);
+    }
+
+    .badge-warning {
+      background: rgba(255, 140, 66, 0.1);
+      color: var(--secondary);
+      border: 1px solid var(--secondary);
+    }
+
+    /* Animations */
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    /* Loading States */
+    .loading {
+      position: relative;
+    }
+
+    .loading::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 16px;
+      height: 16px;
+      margin: -8px 0 0 -8px;
+      border: 2px solid transparent;
+      border-top: 2px solid var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg-secondary);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--primary);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--primary-hover);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+      main {
+        padding: 1.5rem;
+      }
+      
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
     }
 
     @media (max-width: 768px) {
-      .form-grid {
-        flex-direction: column;
-      }
-
-      .device-row {
-        flex-direction: column;
-      }
-
       header {
+        padding: 1rem;
         flex-direction: column;
         align-items: flex-start;
         gap: 1rem;
       }
+
+      .header-right {
+        width: 100%;
+        justify-content: flex-end;
+      }
+
+      main {
+        padding: 1rem;
+      }
+
+      .card {
+        padding: 1.5rem;
+      }
+
+      th, td {
+        padding: 1rem;
+      }
+
+      .table-container {
+        overflow-x: auto;
+      }
+    }
+
+    /* Focus States for Accessibility */
+    *:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
+    }
+
+    /* Enhanced Orange Glows */
+    .btn-primary:hover {
+      box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3), var(--shadow-lg);
+    }
+
+    .card:hover {
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 107, 53, 0.1);
+    }
+
+    input:focus, select:focus {
+      box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2), 0 0 10px rgba(255, 107, 53, 0.1);
     }
   </style>
 </head>
 <body>
   <header>
-    <div>
-      <h1>GrowSmart Admin Page <span>powered by Macrocomm</span></h1>
+    <div class="header-left">
+      <div class="logo">
+        <div class="logo-icon">GS</div>
+        <div>
+          <h1>GrowSmart Admin</h1>
+          <span class="subtitle">powered by Macrocomm</span>
+        </div>
+      </div>
     </div>
-    <div>
-      <button class="btn btn-secondary" onclick="confirmLogout()">Logout</button>
+    <div class="header-right">
+      <div class="user-menu">
+        <div class="user-avatar">A</div>
+        <button class="btn btn-secondary" onclick="confirmLogout()">Logout</button>
+      </div>
     </div>
   </header>
 
   <main>
     {% with messages = messages %}
       {% if messages %}
-        <div style="margin-bottom: 1rem;">
+        <div class="messages">
           {% for category, message in messages %}
-            <div style="background-color: {% if category == 'success' %}#d4edda{% else %}#f8d7da{% endif %}; 
-                        padding: 1rem; 
-                        margin-bottom: 0.5rem; 
-                        border-left: 5px solid {% if category == 'success' %}#28a745{% else %}#dc3545{% endif %}; 
-                        border-radius: 5px;">
-              {{ message }}
+            <div class="message {{ category }}">
+              <div class="message-icon">
+                {% if category == 'success' %}✓{% else %}!{% endif %}
+              </div>
+              <span>{{ message }}</span>
             </div>
           {% endfor %}
         </div>
       {% endif %}
     {% endwith %}
 
-    <div class="form-grid">
-      <section class="card">
-        <h2>Add New User</h2>
+    <div class="dashboard-grid">
+      <section class="card fade-in">
+        <div class="card-header">
+          <div class="card-icon">👤</div>
+          <h2>Add New User</h2>
+        </div>
         <form method="post" action="/add_user">
-          <input type="email" name="email" placeholder="Email" required />
-          <input type="text" name="first_name" placeholder="First Name" required />
-          <input type="text" name="last_name" placeholder="Last Name" required />
-          <input type="password" name="password" placeholder="Password" required />
-          <input type="text" name="location" placeholder="Location" required />
-          <button type="submit" class="btn btn-primary">Add User</button>
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" name="email" id="email" placeholder="Enter user's email address" required />
+          </div>
+          
+          <div class="form-group">
+            <label for="first_name">First Name</label>
+            <input type="text" name="first_name" id="first_name" placeholder="Enter first name" required />
+          </div>
+          
+          <div class="form-group">
+            <label for="last_name">Last Name</label>
+            <input type="text" name="last_name" id="last_name" placeholder="Enter last name" required />
+          </div>
+          
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" name="password" id="password" placeholder="Create a secure password" required />
+          </div>
+          
+          <div class="form-group">
+            <label for="location">Location</label>
+            <input type="text" name="location" id="location" placeholder="Enter location" required />
+          </div>
+          
+          <button type="submit" class="btn btn-primary">
+            <span>Add User</span>
+          </button>
         </form>
       </section>
 
-      <section class="card">
-        <h2>Assign Device</h2>
+      <section class="card fade-in">
+        <div class="card-header">
+          <div class="card-icon">📱</div>
+          <h2>Assign Device</h2>
+        </div>
         <form method="post" action="/assign_device">
-          <label for="user_id">User:</label>
-          <select name="user_id" id="user_id" required>
-            {% for user in users %}
-              <option value="{{ user.user_ID }}">{{ user.name }} {{ user.surname }} ({{ user.email }})</option>
-            {% endfor %}
-          </select>
+          <div class="form-group">
+            <label for="user_id">Select User</label>
+            <select name="user_id" id="user_id" required>
+              <option value="">Choose a user...</option>
+              {% for user in users %}
+                <option value="{{ user.user_ID }}">{{ user.name }} {{ user.surname }} ({{ user.email }})</option>
+              {% endfor %}
+            </select>
+          </div>
 
-          <label for="device_info">Device:</label>
-          <select name="device_info" id="device_info" required>
-            {% for group in device_options %}
-              <optgroup label="{{ group.sensor_type }}">
-                {% for device_id in group.devices %}
-                  <option value="{{ device_id }}|{{ group.sensor_type }}">{{ device_id }}</option>
-                {% endfor %}
-              </optgroup>
-            {% endfor %}
-          </select>
+          <div class="form-group">
+            <label for="device_info">Select Device</label>
+            <select name="device_info" id="device_info" required>
+              <option value="">Choose a device...</option>
+              {% for group in device_options %}
+                <optgroup label="{{ group.sensor_type }}">
+                  {% for device_id in group.devices %}
+                    <option value="{{ device_id }}|{{ group.sensor_type }}">{{ device_id }}</option>
+                  {% endfor %}
+                </optgroup>
+              {% endfor %}
+            </select>
+          </div>
 
-          <button type="submit" class="btn btn-primary">Assign Device</button>
+          <button type="submit" class="btn btn-primary">
+            <span>Assign Device</span>
+          </button>
         </form>
       </section>
     </div>
 
-    <section class="card">
-      <h2>Assigned Devices</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>User</th>
-            <th>Device ID</th>
-            <th>Sensor Type</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for assignment in assignments %}
-          <tr>
-            <td>{{ assignment.name }} {{ assignment.surname }}</td>
-            <td>{{ assignment.device_id }}</td>
-            <td>{{ assignment.sensor_type }}</td>
-            <td>
-              <form method="post" action="/unassign_device/{{ assignment.device_id }}" style="display:inline;">
-                <button type="submit" class="btn-action">Unassign</button>
-              </form>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+    <section class="card fade-in">
+      <div class="card-header">
+        <div class="card-icon">🔗</div>
+        <h2>Assigned Devices</h2>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Device ID</th>
+              <th>Sensor Type</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for assignment in assignments %}
+            <tr>
+              <td>
+                <div>
+                  <div style="font-weight: 600;">{{ assignment.name }} {{ assignment.surname }}</div>
+                </div>
+              </td>
+              <td>
+                <span class="badge badge-success">{{ assignment.device_id }}</span>
+              </td>
+              <td>{{ assignment.sensor_type }}</td>
+              <td>
+                <div class="badge badge-success">Active</div>
+              </td>
+              <td>
+                <form method="post" action="/unassign_device/{{ assignment.device_id }}" style="display:inline;">
+                  <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to unassign this device?')">
+                    Unassign
+                  </button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     </section>
 
-    <section class="card">
-      <h2>Registered Users</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Email</th>
-            <th>Name</th>
-            <th>Location</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for user in users %}
-          <tr>
-            <td>{{ user.email }}</td>
-            <td>{{ user.name }} {{ user.surname }}</td>
-            <td>{{ user.location }}</td>
-            <td>
-              <form method="post" action="/delete_user/{{ user.user_ID }}" onsubmit="return confirm('Delete this user?');">
-                <button type="submit" class="btn-action">Delete</button>
-              </form>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+    <section class="card fade-in">
+      <div class="card-header">
+        <div class="card-icon">👥</div>
+        <h2>Registered Users</h2>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Email</th>
+              <th>Location</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for user in users %}
+            <tr>
+              <td>
+                <div style="font-weight: 600;">{{ user.name }} {{ user.surname }}</div>
+              </td>
+              <td>{{ user.email }}</td>
+              <td>{{ user.location }}</td>
+              <td>
+                <div class="badge badge-success">Active</div>
+              </td>
+              <td>
+                <form method="post" action="/delete_user/{{ user.user_ID }}" onsubmit="return confirm('Are you sure you want to delete this user? This action cannot be undone.');">
+                  <button type="submit" class="btn btn-danger">
+                    Delete
+                  </button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     </section>
   </main>
 
@@ -322,6 +765,41 @@
     function confirmLogout() {
       if (confirm("Are you sure you want to logout?")) {
         window.location.href = "/logout";
+      }
+    }
+
+    // Enhanced form submission with loading states
+    document.addEventListener('DOMContentLoaded', function() {
+      const forms = document.querySelectorAll('form');
+      
+      forms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+          const submitBtn = form.querySelector('button[type="submit"]');
+          if (submitBtn && !submitBtn.classList.contains('btn-danger')) {
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<span class="loading"></span>';
+            submitBtn.disabled = true;
+            
+            // Re-enable after 3 seconds as fallback
+            setTimeout(() => {
+              submitBtn.innerHTML = originalText;
+              submitBtn.disabled = false;
+            }, 3000);
+          }
+        });
+      });
+
+      // Add fade-in animation to cards
+      const cards = document.querySelectorAll('.card');
+      cards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+      });
+    });
+
+    // Enhanced confirmation dialogs
+    function confirmAction(message, callback) {
+      if (confirm(message)) {
+        callback();
       }
     }
   </script>
