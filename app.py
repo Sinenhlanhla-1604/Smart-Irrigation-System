@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify, render_template, redirect, url_for
 import struct
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 import json
 from pages import app_pages
 from auth import auth
@@ -35,94 +35,99 @@ def root():
 # Decoders
 # ----------------------------
 
-def decode_PowerTemp(payload_hex):
-    """
-    Decodes PowerTemp sensor data from a 5-byte hex payload.
-    Uses dynamic divisor selection to estimate temperature accurately,
-    and extracts battery voltage and status flags.
-    """
+from datetime import datetime, timedelta
+
+def convert_to_signed(byte_str):
+    val = int(byte_str, 16)
+    return val - 256 if val > 127 else val
+
+def decode_PowerTemp(payload_hex, base_unix_time=1748265008):
     try:
-        data = bytes.fromhex(payload_hex)
+        tx_flag = int(payload_hex[0:2], 16)
+        is_periodic = (tx_flag & 0x10) == 0x10
 
-        if len(data) != 5:
-            return {
-                'battery_volts': None,
-                'temp_celsius': None,
-                'status_flags': []
-            }
+        battery_voltage = round(int(payload_hex[2:4], 16) * 0.02, 2)
+        status_mask = int(payload_hex[4:6], 16)
+        temp_current = convert_to_signed(payload_hex[6:8])
 
-        # Battery (2 bytes)
-        battery_raw = struct.unpack('>H', data[0:2])[0]
-        battery_volts = round(battery_raw / 20958.0, 2)
-
-        # Temperature (2 bytes)
-        temp_raw = struct.unpack('>H', data[2:4])[0]
-
-        # Dynamic divisor selection for best temp estimate (realistic 5-50 °C range)
-        best_temp = None
-        best_divisor = None
-        min_error = float('inf')
-
-        for divisor in [x / 10 for x in range(200, 1001)]:  # Divisor from 20.0 to 100.0 step 0.1
-            temp = temp_raw / divisor
-            if 5 <= temp <= 50:  # realistic temperature range for this sensor
-                rounded_temp = round(temp)
-                error = abs(temp - rounded_temp)
-                if error < min_error:
-                    best_temp = round(temp, 1)
-                    best_divisor = divisor
-                    min_error = error
-                    if error == 0:
-                        break  # perfect match
-
-        temp_celsius = best_temp
-
-        # Flags (1 byte)
-        flags = data[4]
-        active_flags = []
-        if flags & 0b00000001: active_flags.append("Power Up")
-        if flags & 0b00000010: active_flags.append("Forced Transmit")
-        if flags & 0b00000100: active_flags.append("Power Alert")
-        if flags & 0b00001000: active_flags.append("Temperature Alert")
-        if flags & 0b00010000: active_flags.append("Periodic Update")
-        if flags & 0b00100000: active_flags.append("TX Update Timer")
-
-        tx_index = (flags >> 5) & 0b00000111
-        if tx_index == 7:
-            active_flags.append("24 Hour Tx 6 Hour Record Offset")
-
-        return {
-            'battery_volts': battery_volts,
-            'temp_celsius': temp_celsius,
-            'status_flags': active_flags,
-            'debug_temp_raw': temp_raw,
-            'debug_best_divisor': round(best_divisor, 2) if best_divisor else None
+        result = {
+            'tx_flag': tx_flag,
+            'is_periodic': is_periodic,
+            'battery_volts': battery_voltage,
+            'status_mask': status_mask,
+            'temp_celsius': temp_current,
+            'timestamp': datetime.utcfromtimestamp(base_unix_time).isoformat(),
+            'temp_history': [],
+            'alerts': []
         }
 
-    except Exception:
+        if is_periodic:
+            # Determine periodic interval in hours from tx_flag (bits 5,6,7)
+            device_interval = (tx_flag >> 5) & 0x07
+            interval_map = {
+                0: -0.25,
+                1: -0.5,
+                2: -1,
+                3: -2,
+                4: -3,
+                5: -4,
+                6: -5,
+                7: -6
+            }
+            time_period = interval_map.get(device_interval, -1)
+
+            base_time = datetime.utcfromtimestamp(base_unix_time)
+            history = []
+
+            # Extract and timestamp the 4 historical temperature min/max pairs
+            for i in range(4):
+                offset = 8 + i * 4
+                t_min = convert_to_signed(payload_hex[offset:offset+2])
+                t_max = convert_to_signed(payload_hex[offset+2:offset+4])
+                timestamp = base_time + timedelta(hours=time_period * i)
+                history.append({
+                    'min_temp': t_min,
+                    'max_temp': t_max,
+                    'timestamp': timestamp.isoformat()
+                })
+            result['temp_history'] = history
+
+        else:
+            # It's an alert payload
+            tx_info_mask = int(payload_hex[8:10], 16)
+            if (tx_flag & 0x08):
+                result['alerts'].append('Temperature Alert')
+            if (tx_flag & 0x04):
+                result['alerts'].append('Power Alert')
+            if tx_info_mask & 0x40:
+                result['alerts'].append('Temperature Low Alert')
+
+        return result
+
+    except Exception as e:
         return {
             'battery_volts': None,
             'temp_celsius': None,
-            'status_flags': []
+            'status_flags': [],
+            'error': f'Decode error: {str(e)}'
         }
 
 
-def decode_pulsemeter(payload_hex):
+def decode_pulsemeter(payload_hex, timestamp_unix=1748265008):
     """
-    Decodes PulseMeter data (12-byte or 8-byte payload).
-    Returns only required fields for database insertion.
+    Decodes PulseMeter data (12-byte periodic or 8-byte alert payload).
+    Returns structured data for storage or logging.
     """
     try:
         data = bytes.fromhex(payload_hex)
         length = len(data)
 
-        if length not in [8, 12]:
-            return {'error': f'Unknown PulseMeter payload length: {length} bytes'}
+        if length not in [8, 9, 12]:
+            return {'error': f'Unknown PulseMeter payload length: {length} bytes', 'raw_hex': payload_hex, 'raw_bytes': data.hex()}
 
         txflags = data[0]
         battery_raw = data[1]
         battery_volts = round(battery_raw * 0.02, 2)
-        pulse_count = int.from_bytes(data[2:6], byteorder='big')
 
         # Decode flags into human-readable strings
         active_flags = []
@@ -132,12 +137,73 @@ def decode_pulsemeter(payload_hex):
         if txflags & 0b00001000: active_flags.append("Leak Detected")
         if txflags & 0b00010000: active_flags.append("Tamper Detected")
 
-        return {
-            'pulse_count': pulse_count,
+        result = {
             'battery_volts': battery_volts,
             'leak_detected': "Leak Detected" in active_flags,
-            'status_flags': active_flags
+            'status_flags': active_flags,
+            'debug_info': {
+                'payload_length': length,
+                'raw_hex': payload_hex,
+                'txflags_binary': f'{txflags:08b}',
+                'battery_raw': battery_raw
+            }
         }
+
+        if length == 12:
+            # Periodic payload
+            device_interval = (txflags >> 5) & 0b111
+            interval_map = {
+                0: -0.25,
+                1: -0.5,
+                2: -1,
+                3: -2,
+                4: -3,
+                5: -4,
+                6: -5,
+                7: -6
+            }
+            timer_period = interval_map.get(device_interval, 0)
+
+            counter0 = int.from_bytes(data[2:6], byteorder='big')
+            offset1 = int.from_bytes(data[6:8], byteorder='big')
+            offset2 = int.from_bytes(data[8:10], byteorder='big')
+            offset3 = int.from_bytes(data[10:12], byteorder='big')
+
+            # Use the modern datetime approach with timezone awareness
+            counter0_time = datetime.fromtimestamp(timestamp_unix, tz=timezone.utc)
+            counter1_time = counter0_time + timedelta(hours=timer_period * 1)
+            counter2_time = counter0_time + timedelta(hours=timer_period * 2)
+            counter3_time = counter0_time + timedelta(hours=timer_period * 3)
+
+            result.update({
+                'pulse_count': counter0,
+                'history': [
+                    {'timestamp': counter0_time.isoformat(), 'value': counter0},
+                    {'timestamp': counter1_time.isoformat(), 'value': counter0 - offset1},
+                    {'timestamp': counter2_time.isoformat(), 'value': counter0 - offset2},
+                    {'timestamp': counter3_time.isoformat(), 'value': counter0 - offset3}
+                ]
+            })
+
+        elif length == 8:
+            # Alert payload
+            pulse_count = int.from_bytes(data[2:6], byteorder='big')
+            result.update({
+                'pulse_count': pulse_count
+            })
+
+        elif length == 9:
+            # 9-byte payload - need to determine structure
+            # For now, treat similar to 8-byte but capture extra byte
+            pulse_count = int.from_bytes(data[2:6], byteorder='big')
+            extra_data = data[6:9].hex()  # Last 3 bytes as hex string
+            result.update({
+                'pulse_count': pulse_count,
+                'extra_data': extra_data,
+                'payload_type': '9-byte_variant'
+            })
+
+        return result
 
     except Exception as e:
         return {'error': f"PulseMeter decode failed: {str(e)}"}
@@ -145,44 +211,39 @@ def decode_pulsemeter(payload_hex):
 
 
 
-def decode_water_sensor(payload_hex, timestamp=None, water_threshold=100):
+def decode_water_sensor(payload_hex, timestamp=None, water_threshold=150):
     try:
-        if len(payload_hex) != 16:
-            return {'error': 'Payload must be 16 hex characters'}
+        # Convert payload to usable hex segments
+        tx_flag = int(payload_hex[0:2], 16)
+        water_detected = int(payload_hex[2:4], 16) == 1
+        water_raw = int(payload_hex[4:6], 16)
+        battery_hex = int(payload_hex[6:8], 16)
+        battery_volts = battery_hex * 0.02
+        counter_value = int(payload_hex[8:16], 16)
 
-        data = bytes.fromhex(payload_hex)
+        # Determine if this was a state change (bit 1 = 0x02)
+        is_state_change = (tx_flag & 0x02) == 0x02
 
-        # --- Battery Voltage (calibrated) ---
-        battery_raw = struct.unpack('<H', data[0:2])[0]
-        battery_volts = round(battery_raw * 0.01 + 2.3, 2)
-
-        # --- Water Detection ---
-        water_raw = data[2]
-        water_detected = (water_raw < water_threshold)
-
-        # --- Config Flags ---
-        config_flags = data[3]
-        transmit_mode_values = ["water_detect", "no_water", "both", "unknown"]
-        transmit_mode = transmit_mode_values[config_flags & 0x03]
-        heartbeat_hours = (config_flags >> 2) & 0x0F
-        sensitivity_values = ["low", "medium", "high", "very_high"]
-        sensitivity = sensitivity_values[(config_flags >> 6) & 0x03]
-
-        # --- RTX Value ---
-        rtx_value = struct.unpack('<I', data[4:8])[0]
+        alerts = []
+        if water_detected and water_raw <= water_threshold:
+            alerts.append("Water detected below threshold")
+        if battery_volts < 2.5:
+            alerts.append("Low battery")
 
         return {
-            'battery_volts': battery_volts,
+            'tx_flag': tx_flag,
+            'is_state_change': is_state_change,
             'water_detected': water_detected,
             'water_raw_value': water_raw,
-            'alerts': [],
+            'battery_volts': round(battery_volts, 2),
+            'counter_value': counter_value,
+            'alerts': alerts,
             'raw_payload': payload_hex,
             'timestamp': timestamp or datetime.now().isoformat()
         }
 
     except Exception as e:
-        return {'error': f"Decode error: {str(e)}"}
-    
+        return {'error': f"Decode error: {str(e)}"}    
 
 def decode_magnetic_sensor(payload_hex):
     try:
