@@ -163,32 +163,39 @@
         </div>
 
 
-        <!-- Water & Door Detection Section -->
-        <div class="sensor-section">
-          <div class="section-header">
-            <h4><i class="fas fa-tint"></i> Detection Status</h4>
-          </div>
-          <div class="detection-grid">
-            <div class="detection-group">
-              <h5>Water Detection</h5>
-              <div class="sensors-mini-grid" id="water-sensors-grid">
-                <!-- Water sensors populated here -->
-              </div>
-            </div>
-            <div class="detection-group">
-              <h5>Door Status</h5>
-              <div class="sensors-mini-grid" id="door-sensors-grid">
-                <!-- Door sensors populated here -->
-              </div>
-            </div>
-          </div>
+          <!-- Water Detection Section -->
+    <div class="sensor-section">
+      <div class="section-header">
+        <h4><i class="fas fa-tint"></i> Water Detection Status</h4>
+      </div>
+      <div class="detection-group">
+        <h5>Water Detection</h5>
+        <div class="sensors-mini-grid" id="water-sensors-grid">
+          <!-- Water sensors populated here -->
         </div>
       </div>
+    </div>
 
-      <!-- Water Usage Analytics Card -->
+    <!-- Door Status Section -->
+    <div class="sensor-section">
+      <div class="section-header">
+        <h4><i class="fas fa-door-closed"></i> Door Status</h4>
+      </div>
+      <div class="detection-group">
+        <h5>Magnetic Door Sensors</h5>
+        <div class="sensors-mini-grid" id="door-sensors-grid">
+          <!-- Door sensors populated here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+        <!-- Water Usage Analytics Card -->
       <div class="main-card analytics-card" id="water-usage-card" style="display: none;">
+        <h3><i class="fas fa-chart-area"></i> Sensor Charts </h3>
+        <br>
         <div class="card-header">
-          <h3><i class="fas fa-chart-area"></i> Water Usage Analytics</h3>
+          <h3> Water Usage Analytics</h3>
           <div class="analytics-controls">
             <select id="period-select" class="period-selector">
               <option value="Daily">Daily</option>
@@ -215,7 +222,6 @@
         </div>
       </div>
     </div>
-  </div>
 
   <!-- Loading Overlay -->
   <div class="loading-overlay" id="loading">
