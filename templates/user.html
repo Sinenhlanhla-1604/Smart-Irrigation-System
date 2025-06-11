@@ -188,12 +188,40 @@
         </div>
       </div>
     </div>
-  </div>
-
-        <!-- Water Usage Analytics Card -->
+  </div>  
+        <!-- Usage Analytics Card -->
       <div class="main-card analytics-card" id="water-usage-card" style="display: none;">
         <h3><i class="fas fa-chart-area"></i> Sensor Charts </h3>
         <br>
+              <!-- Temperature Analytics Section (inside same analytics card container) -->
+      <div class="card-header">
+        <h3>Temperature Analytics</h3>
+        <div class="analytics-controls">
+          <select id="temp-period-select" class="period-selector">
+            <option value="Daily">Daily</option>
+            <option value="Weekly" selected>Weekly</option>
+            <option value="Monthly">Monthly</option>
+            <option value="All">All Time</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="usage-summary">
+        <div class="usage-metric">
+          <div class="usage-value" id="avg-temp-value">--</div>
+          <div class="usage-label">Avg Temp (°C)</div>
+        </div>
+        <div class="usage-metric cost">
+          <div class="usage-value" id="max-temp-value">--</div>
+          <div class="usage-label">Max Temp (°C)</div>
+        </div>
+      </div>
+
+      <div class="chart-container">
+        <canvas id="temp-chart"></canvas>
+      </div>
+
+          <!-- Water Usage Analytics Card -->
         <div class="card-header">
           <h3> Water Usage Analytics</h3>
           <div class="analytics-controls">
