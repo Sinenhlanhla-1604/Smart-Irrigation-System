@@ -698,3 +698,107 @@ def api_user_chart_data():
             "values": []
         }), 500
 
+@app_pages.route('/api/user/temperature')
+def api_user_temperature():
+    if not is_logged_in() or session.get('role') != 'user':
+        return jsonify({"error": "Unauthorized"}), 403
+
+    user_id = session.get('user_id')
+    period = request.args.get('period', 'Weekly')
+
+    time_configs = {
+        "Daily": {
+            "trunc": "DATE_TRUNC('hour', received_at)",
+            "where": "received_at >= NOW() - INTERVAL '1 day'",
+            "format": "%H:%M"
+        },
+        "Weekly": {
+            "trunc": "DATE_TRUNC('day', received_at)",
+            "where": "received_at >= NOW() - INTERVAL '7 days'",
+            "format": "%m-%d"
+        },
+        "Monthly": {
+            "trunc": "DATE_TRUNC('day', received_at)",
+            "where": "received_at >= NOW() - INTERVAL '30 days'",
+            "format": "%m-%d"
+        },
+        "All": {
+            "trunc": "DATE_TRUNC('day', received_at)",
+            "where": "1=1",
+            "format": "%Y-%m-%d"
+        }
+    }
+
+    config = time_configs.get(period, time_configs["Weekly"])
+
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                # Get all assigned temperature devices
+                cur.execute("""
+                    SELECT device_id 
+                    FROM USER_DEVICE 
+                    WHERE user_id = %s AND sensor_type = 'decode_PowerTemp'
+                """, (user_id,))
+                devices = cur.fetchall()
+
+                if not devices:
+                    return jsonify({"charts": {}})
+
+                charts = {}
+
+                for (device_id,) in devices:
+                    # Time series data
+                    cur.execute(f"""
+                        SELECT {config['trunc']} AS interval, 
+                               AVG(temp_celsius) as avg_temp,
+                               MAX(temp_celsius) as max_temp,
+                               MIN(temp_celsius) as min_temp
+                        FROM PWR_TEMP
+                        WHERE device_id = %s AND {config['where']}
+                        GROUP BY interval
+                        ORDER BY interval
+                    """, (device_id,))
+                    rows = cur.fetchall()
+
+                    labels = []
+                    avg_values = []
+                    max_values = []
+                    min_values = []
+
+                    for row in rows:
+                        time_val, avg_temp, max_temp, min_temp = row
+                        labels.append(time_val.strftime(config['format']))
+                        avg_values.append(round(avg_temp, 1) if avg_temp is not None else None)
+                        max_values.append(round(max_temp, 1) if max_temp is not None else None)
+                        min_values.append(round(min_temp, 1) if min_temp is not None else None)
+
+                    # Stats: avg, max, min
+                    cur.execute(f"""
+                        SELECT 
+                            AVG(temp_celsius),
+                            MAX(temp_celsius),
+                            MIN(temp_celsius)
+                        FROM PWR_TEMP
+                        WHERE device_id = %s AND {config['where']}
+                    """, (device_id,))
+                    stat_row = cur.fetchone()
+                    avg_val, max_val, min_val = stat_row
+
+                    charts[device_id] = {
+                        "labels": labels,
+                        "avg_temperatures": avg_values,
+                        "max_temperatures": max_values,
+                        "min_temperatures": min_values,
+                        "avg": round(avg_val, 1) if avg_val is not None else "--",
+                        "max": round(max_val, 1) if max_val is not None else "--",
+                        "min": round(min_val, 1) if min_val is not None else "--",
+                        "device_id": device_id
+                    }
+
+                return jsonify({"charts": charts})
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
