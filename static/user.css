@@ -654,8 +654,10 @@ body {
 .logo i {
   font-size: 2rem;
   background: linear-gradient(135deg, #16a34a, #22c55e);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  -webkit-background-clip: text;  /* For Safari */
+  -webkit-text-fill-color: transparent;  /* For Safari */
+  color: transparent; /* Fallback for browsers that support standard 'background-clip' */
 }
 
 .header-right {
@@ -804,6 +806,67 @@ body {
   padding: 10px;
   background: #181212;
   border-radius: 8px;
+}
+
+.temperature-charts-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.chart-card {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  flex: 1 1 300px;
+  min-width: 300px;
+}
+
+/* temperature chart css */
+.chart-card {
+    background: #1e293b;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid #334155;
+}
+
+.chart-card .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.chart-card .chart-header h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #f8fafc;
+}
+
+.chart-card .chart-stats {
+    display: flex;
+    gap: 1rem;
+}
+
+.chart-card .chart-stats span {
+    font-size: 0.85rem;
+    color: #94a3b8;
+}
+
+.chart-card .chart-container {
+    height: 250px;
+    width: 100%;
+    position: relative;
+}
+
+.no-data {
+    text-align: center;
+    padding: 2rem;
+    color: #94a3b8;
+    font-size: 0.9rem;
 }
 
 .settings-btn {
