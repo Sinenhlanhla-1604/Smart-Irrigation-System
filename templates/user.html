@@ -190,10 +190,9 @@
     </div>
   </div>  
         <!-- Usage Analytics Card -->
-      <div class="main-card analytics-card" id="water-usage-card" style="display: none;">
+      <div class="main-card analytics-card" >
         <h3><i class="fas fa-chart-area"></i> Sensor Charts </h3>
         <br>
-              <!-- Temperature Analytics Section (inside same analytics card container) -->
       <div class="card-header">
         <h3>Temperature Analytics</h3>
         <div class="analytics-controls">
@@ -206,22 +205,11 @@
         </div>
       </div>
 
-      <div class="usage-summary">
-        <div class="usage-metric">
-          <div class="usage-value" id="avg-temp-value">--</div>
-          <div class="usage-label">Avg Temp (°C)</div>
-        </div>
-        <div class="usage-metric cost">
-          <div class="usage-value" id="max-temp-value">--</div>
-          <div class="usage-label">Max Temp (°C)</div>
-        </div>
-      </div>
-
-      <div class="chart-container">
-        <canvas id="temp-chart"></canvas>
-      </div>
-
+     <div id="temperature-charts-container" class="temperature-charts-wrapper"></div>
+        <br>
           <!-- Water Usage Analytics Card -->
+       
+          <div id="water-usage-section" style="display: none;"></div>
         <div class="card-header">
           <h3> Water Usage Analytics</h3>
           <div class="analytics-controls">
@@ -246,7 +234,7 @@
         </div>
         
         <div class="chart-container">
-          <canvas id="usage-chart"></canvas>
+          <canvas id="water-usage-chart"></canvas>
         </div>
       </div>
     </div>
@@ -275,6 +263,7 @@
       setupEventListeners();
       fetchAssignedDevices();
       fetchSensorData();
+      loadTemperatureCharts();
       
       // Set up periodic updates (10 seconds)
       autoRefreshInterval = setInterval(fetchSensorData, 10000);
@@ -321,6 +310,10 @@
       document.getElementById('period-select').addEventListener('change', function(e) {
         updateUsageChart(e.target.value);
       });
+          // Add this for temperature period selector
+      document.getElementById('temp-period-select').addEventListener('change', function(e) {
+          loadTemperatureCharts(e.target.value);
+      });
       
       // Logout button
       document.getElementById('logout-btn').addEventListener('click', function() {
@@ -364,7 +357,8 @@
         
         // Show/hide water usage chart based on pulse meters
         const hasPulseMeters = assignedDevices.some(d => d.sensor_type === 'decode_pulsemeter');
-        document.getElementById('water-usage-card').style.display = hasPulseMeters ? 'block' : 'none';
+        document.getElementById('water-usage-section').style.display = hasPulseMeters ? 'block' : 'none';
+
         
         if (hasPulseMeters) {
           updateUsageChart();
@@ -694,7 +688,7 @@
         }
         
         // Create new line chart
-        const ctx = document.getElementById('usage-chart').getContext('2d');
+        const ctx = document.getElementById('water-usage-chart').getContext('2d');
         usageChart = new Chart(ctx, {
           type: 'line',
           data: {
@@ -831,6 +825,189 @@
         }, 300);
       }, 5000);
     }
+
+   // Temparture Sensor
+    //  Press tab twice
+      async function loadTemperatureCharts(period = 'Weekly') {
+    try {
+        const response = await fetch(`/api/user/temperature?period=${period}`);
+        const data = await response.json();
+        
+        if (data.error) {
+            console.error('Error loading temperature data:', data.error);
+            return;
+        }
+
+        const chartsContainer = document.getElementById('temperature-charts-container');
+        chartsContainer.innerHTML = '';
+        
+        if (!data.charts || Object.keys(data.charts).length === 0) {
+            chartsContainer.innerHTML = '<div class="no-data">No temperature data available</div>';
+            return;
+        }
+        
+        for (const [deviceId, chartData] of Object.entries(data.charts)) {
+            const chartCard = document.createElement('div');
+            chartCard.className = 'chart-card';
+            chartCard.innerHTML = `
+                <div class="chart-header">
+                    <h4>Device ${deviceId}</h4>
+                    <div class="chart-stats">
+                        // <span>Avg: ${chartData.avg}°C</span>
+                        // <span>Max: ${chartData.max}°C</span>
+                        // <span>Min: ${chartData.min}°C</span>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="chart-${deviceId}"></canvas>
+                </div>
+            `;
+            chartsContainer.appendChild(chartCard);
+            
+            renderTemperatureChart(`chart-${deviceId}`, chartData);
+        }
+    } catch (error) {
+        console.error('Failed to load temperature data:', error);
+        showError('Failed to load temperature charts');
+    }
+}
+
+function renderTemperatureChart(canvasId, chartData) {
+    const ctx = document.getElementById(canvasId).getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: chartData.labels,
+            datasets: [
+                {
+                    label: 'Average Temp',
+                    data: chartData.avg_temperatures,
+                    borderColor: '#4ade80',
+                    backgroundColor: 'rgba(74, 222, 128, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.1,
+                    fill: true
+                },
+                {
+                    label: 'Max Temp',
+                    data: chartData.max_temperatures,
+                    borderColor: '#f97316',
+                    backgroundColor: 'rgba(249, 115, 22, 0.1)',
+                    borderWidth: 1,
+                    borderDash: [5, 5],
+                    tension: 0.1
+                },
+                {
+                    label: 'Min Temp',
+                    data: chartData.min_temperatures,
+                    borderColor: '#60a5fa',
+                    backgroundColor: 'rgba(96, 165, 250, 0.1)',
+                    borderWidth: 1,
+                    borderDash: [5, 5],
+                    tension: 0.1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        color: '#e2e8f0'
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: '#e2e8f0'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Temperature (°C)',
+                        color: '#e2e8f0'
+                    }
+                },
+                x: {
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: '#e2e8f0'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Time',
+                        color: '#e2e8f0'
+                    }
+                }
+            }
+        }
+    });
+}
+    function renderTemperatureChart(containerId, chartData) {
+        const ctx = document.getElementById(containerId).getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: chartData.labels,
+                datasets: [
+                    {
+                        label: 'Average Temp',
+                        data: chartData.avg_temperatures,
+                        borderColor: '#4ade80',
+                        backgroundColor: 'rgba(74, 222, 128, 0.1)',
+                        tension: 0.1,
+                        fill: true
+                    },
+                    {
+                        label: 'Max Temp',
+                        data: chartData.max_temperatures,
+                        borderColor: '#f97316',
+                        backgroundColor: 'rgba(249, 115, 22, 0.1)',
+                        borderDash: [5, 5],
+                        tension: 0.1
+                    },
+                    {
+                        label: 'Min Temp',
+                        data: chartData.min_temperatures,
+                        borderColor: '#60a5fa',
+                        backgroundColor: 'rgba(96, 165, 250, 0.1)',
+                        borderDash: [5, 5],
+                        tension: 0.1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        title: {
+                            display: true,
+                            text: 'Temperature (°C)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Time'
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Call this when the page loads
+    document.addEventListener('DOMContentLoaded', loadTemperatureCharts);
   </script>
 </body>
 </html>
