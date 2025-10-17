@@ -1,3 +1,22 @@
+"""Utility script to hash plaintext passwords and update Users table.
+
+Purpose:
+- Connects to the local PostgreSQL database (SGS_Database).
+- Generates Werkzeug password hashes from plaintext values.
+- Updates the Users.password field for specified emails.
+
+Intended use:
+- For local development / maintenance when you need to quickly reset or
+  migrate sample user passwords to hashed values.
+- Edit the `raw` variables to the desired plaintext password(s) and run:
+      python pass.py
+
+Security notes:
+- Do NOT run this on production databases without proper safeguards.
+- Avoid committing plaintext passwords or credentials into source control.
+- Prefer secure admin workflows for password resets in production.
+"""
+
 from werkzeug.security import generate_password_hash
 import psycopg2
 
