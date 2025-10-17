@@ -23,7 +23,7 @@ def get_db_connection():
         host="localhost",
         database="SGS_Database",
         user="postgres",
-        password="123456"
+        password="123"
     )
 
 def is_logged_in():
