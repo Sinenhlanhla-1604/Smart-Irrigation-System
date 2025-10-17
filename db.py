@@ -6,9 +6,9 @@ import json
 import os
 
 # DB connection strings
-BASE_CONN_STR = "postgresql://postgres:123456@localhost:5432/postgres?"
+BASE_CONN_STR = "postgresql://postgres:123@localhost:5432/postgres?"
 TARGET_DB_NAME = "SGS_Database"
-TARGET_CONN_STR = f"dbname='{TARGET_DB_NAME}' user='postgres' password='123456' host='localhost' port='5432'"
+TARGET_CONN_STR = f"dbname='{TARGET_DB_NAME}' user='postgres' password='123' host='localhost' port='5432'"
 
 # Updated sensor tables to support historical data (multiple records per device)
 sensor_tables = {
@@ -60,7 +60,7 @@ def get_db_connection():
         host="localhost",
         database=TARGET_DB_NAME,
         user="postgres",
-        password="123456"
+        password="123"
     )
 
 def create_database():
@@ -431,6 +431,7 @@ def unassign_device(device_id):
 def insert_users():
     users = [
         ('User_1', 'Surname1', 'user1@example.com', 'Userpass', 'Location1'),
+        ('Sine', 'Mlotshw', 'sine@eg.com', '123', 'Location2'),
         ('Ashock', 'Surname2', 'ashock@example.com', 'Iamafarmer', 'Location2')
     ]
     try:
@@ -499,3 +500,4 @@ if __name__ == "__main__":
     
     # Uncomment the line below if you need to migrate from old table structure
     # drop_and_recreate_tables()
+
