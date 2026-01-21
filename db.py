@@ -430,9 +430,7 @@ def unassign_device(device_id):
 
 def insert_users():
     users = [
-        ('User_1', 'Surname1', 'user1@example.com', 'Userpass', 'Location1'),
-        ('Sine', 'Mlotshw', 'sine@eg.com', '123', 'Location2'),
-        ('Ashock', 'Surname2', 'ashock@example.com', 'Iamafarmer', 'Location2')
+        ('User_1', 'Surname1', 'user1@example.com', 'Userpass', 'Location1')
     ]
     try:
         with get_db_connection() as conn:

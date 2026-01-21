@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Smart Growth Dashboard</title>
+  <title>GrowSmart - Agricultural IoT Dashboard</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="/static/user.css">
@@ -14,7 +14,7 @@
     <div class="header-left">
       <div class="logo">
         <i class="fas fa-seedling"></i>
-        <span>Smart Growth</span>
+        <span>GrowSmart</span>
       </div>
     </div>
     
@@ -383,7 +383,7 @@
           const sensorItem = document.createElement('div');
           sensorItem.className = 'sensor-item';
           
-          // Extract temperature value from last_value (format: "23.5°C")
+          // Extract temperature value from last_value (format: "23.5Â°C")
           let tempValue = '--';
           if (device.last_value) {
             tempValue = parseFloat(device.last_value.replace('°C', '')).toFixed(1);
@@ -776,7 +776,7 @@
    function calculateAlerts(data) {
   let alerts = 0;
   
-  // Temperature alerts (over 30°C)
+  // Temperature alerts (over 30Â°C)
   if (data.temperature_sensors) {
     alerts += data.temperature_sensors.filter(sensor => parseFloat(sensor.temp_celsius) > 30).length;
   }
@@ -799,7 +799,7 @@
     }
   }
   
-  console.log(`🚨 Total alerts calculated: ${alerts}`);
+  console.log(`ðŸš¨ Total alerts calculated: ${alerts}`);
   return alerts;
 }
 
@@ -853,9 +853,9 @@
                 <div class="chart-header">
                     <h4>Device ${deviceId}</h4>
                     <div class="chart-stats">
-                        // <span>Avg: ${chartData.avg}°C</span>
-                        // <span>Max: ${chartData.max}°C</span>
-                        // <span>Min: ${chartData.min}°C</span>
+                         <span>Avg: ${chartData.avg}°C</span>
+                        | <span>Max: ${chartData.max}°C</span>
+                        | <span>Min: ${chartData.min}°C</span>
                     </div>
                 </div>
                 <div class="chart-container">
@@ -1008,6 +1008,15 @@ function renderTemperatureChart(canvasId, chartData) {
 
     // Call this when the page loads
     document.addEventListener('DOMContentLoaded', loadTemperatureCharts);
+
+    // Fallback to hide loading screen
+    setTimeout(() => {
+      const loadingElement = document.getElementById('loading');
+      if (loadingElement) {
+        console.log('Fallback: Hiding loading screen');
+        loadingElement.classList.remove('active');
+      }
+    }, 2000);
   </script>
 </body>
 </html>

@@ -5,7 +5,7 @@ import json
 from pages import app_pages
 from auth import auth
 from functools import wraps
-from db import save_useful_data, save_to_db
+from db import get_db_connection, save_useful_data, save_to_db
 
 app = Flask(__name__)
 app.secret_key = 'your-super-secret-key'
@@ -319,6 +319,101 @@ def sigfox_callback():
 # ----------------------------
 # Data API
 # ----------------------------
+@app.route('/api/user/temperature')
+def get_temperature_charts():
+    period = request.args.get('period', 'Weekly')
+
+    period_map = {
+        'Daily': "1 day",
+        'Weekly': "7 days",
+        'Monthly': "30 days",
+        'All': "365 days"
+    }
+
+    interval = period_map.get(period, "7 days")
+
+    query = """
+    SELECT
+        device_id,
+        DATE(received_at) AS day,
+        AVG(temp_celsius) AS avg_temp,
+        MAX(temp_celsius) AS max_temp,
+        MIN(temp_celsius) AS min_temp
+    FROM PWR_TEMP
+    WHERE received_at >= NOW() - INTERVAL %s
+    GROUP BY device_id, day
+    ORDER BY day;
+    """
+
+    charts = {}
+
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(query, (interval,))
+            rows = cur.fetchall()
+
+            for device_id, day, avg_t, max_t, min_t in rows:
+                charts.setdefault(device_id, {
+                    "labels": [],
+                    "avg_temperatures": [],
+                    "max_temperatures": [],
+                    "min_temperatures": [],
+                    "avg": None,
+                    "max": None,
+                    "min": None
+                })
+
+                charts[device_id]["labels"].append(day.strftime("%m-%d"))
+                charts[device_id]["avg_temperatures"].append(round(avg_t, 1))
+                charts[device_id]["max_temperatures"].append(round(max_t, 1))
+                charts[device_id]["min_temperatures"].append(round(min_t, 1))
+
+            for device_id, data in charts.items():
+                data["avg"] = round(sum(data["avg_temperatures"]) / len(data["avg_temperatures"]), 1)
+                data["max"] = max(data["max_temperatures"])
+                data["min"] = min(data["min_temperatures"])
+
+    return jsonify({"charts": charts})
+
+
+@app.route('/api/user/usage')
+def get_water_usage():
+    period = request.args.get('period', 'Weekly')
+
+    period_map = {
+        'Daily': '1 day',
+        'Weekly': '7 days',
+        'Monthly': '30 days',
+        'All': '365 days'
+    }
+
+    interval = period_map.get(period, '7 days')
+
+    query = """
+    SELECT
+        DATE(received_at) AS day,
+        MAX(pulse_count) - MIN(pulse_count) AS daily_usage
+    FROM PULSE_DETECTOR
+    WHERE received_at >= NOW() - INTERVAL %s
+    GROUP BY day
+    ORDER BY day;
+    """
+
+    labels = []
+    values = []
+
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(query, (interval,))
+            for day, usage in cur.fetchall():
+                labels.append(day.strftime('%a'))
+                values.append(int(usage or 0))
+
+    return jsonify({
+        "labels": labels,
+        "values": values
+    })
+
 
 
 # ----------------------------
