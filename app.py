@@ -18,9 +18,9 @@ app.register_blueprint(auth)
 # ----------------------------
 # Sensor Group Configuration
 # ----------------------------
-POWER_TEMP_DEVICES = {"1fc5622", "1fc57ca"}
+POWER_TEMP_DEVICES = {"1fc5622", "1fc57ca", "1fc56c3"}
 PULSE_METER_DEVICES = {"1fc74ab","1fa5f9c"}
-WATER_DETECT_DEVICES = {"c6e542", "c53d89", "c6d3a6"}
+WATER_DETECT_DEVICES = {"c6e542", "c53d89", "c6d3a6", "c6da55"}
 MAGNETIC_DEVICES = {"1f7f022","c52fce"}
 
 # ----------------------------
@@ -276,7 +276,7 @@ def get_decoder_by_device(device_id):
     return None
 
 # ----------------------------
-# Sigfox Receiver
+# Sigfox API Receiver
 # ----------------------------
 
 @app.route('/sigfox', methods=['POST'])
