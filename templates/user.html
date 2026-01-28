@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>GrowSmart - Agricultural IoT Dashboard</title>
+  <title>Smart Growth Dashboard</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="/static/user.css">
@@ -14,7 +14,7 @@
     <div class="header-left">
       <div class="logo">
         <i class="fas fa-seedling"></i>
-        <span>GrowSmart</span>
+        <span>Smart Growth</span>
       </div>
     </div>
     
@@ -127,116 +127,371 @@
           <div class="status-indicator active"></div>
         </div>
         
-        <!-- Temperature Section -->
-        <div class="sensor-section">
-          <div class="section-header">
-            <h4><i class="fas fa-thermometer-half"></i> Temperature</h4>
-            <div class="temp-display">
-              <span class="temp-value" id="avg-temp">--</span>
-              <span class="temp-unit">°C</span>
-            </div>
-          </div>
-          <div class="sensors-grid" id="temp-sensors-grid">
-            <!-- Temperature sensors populated here -->
-          </div>
+        /* Add tab styles */
+        <style>
+        .dashboard-grid {
+          grid-template-columns: 1fr !important;
+          max-width: 100% !important;
+        }
+        .main-card {
+          width: 100% !important;
+        }
+        .sensor-tabs {
+          display: flex;
+          border-bottom: 2px solid #334155;
+          margin-bottom: 1.5rem;
+          overflow-x: auto;
+        }
+        .tab-btn {
+          background: transparent;
+          border: none;
+          color: #94a3b8;
+          padding: 1rem 1.5rem;
+          font-size: 0.9rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          border-bottom: 2px solid transparent;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          white-space: nowrap;
+        }
+        .tab-btn:hover {
+          color: #e2e8f0;
+          background: rgba(255, 255, 255, 0.05);
+        }
+        .tab-btn.active {
+          color: #22c55e;
+          border-bottom-color: #22c55e;
+          background: rgba(34, 197, 94, 0.1);
+        }
+        .tab-content {
+          position: relative;
+        }
+        .tab-pane {
+          display: none;
+        }
+        .tab-pane.active {
+          display: block;
+        }
+        .overview-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          gap: 1.5rem;
+          margin-bottom: 1rem;
+        }
+        .overview-card {
+          background: linear-gradient(135deg, #0f172a, #1e293b);
+          border: 1px solid #334155;
+          border-radius: 12px;
+          padding: 2rem;
+          text-align: center;
+          transition: all 0.3s ease;
+          position: relative;
+          flex: 1;
+        }
+        .overview-card::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 3px;
+          background: linear-gradient(90deg, #22c55e, #16a34a);
+        }
+        .overview-card.temp-card::before {
+          background: linear-gradient(90deg, #f97316, #ea580c);
+        }
+        .overview-card.flow-card::before {
+          background: linear-gradient(90deg, #3b82f6, #2563eb);
+        }
+        .overview-card.water-card::before {
+          background: linear-gradient(90deg, #06b6d4, #0891b2);
+        }
+        .overview-card.door-card::before {
+          background: linear-gradient(90deg, #8b5cf6, #7c3aed);
+        }
+        .overview-header {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+          margin-bottom: 1rem;
+          color: #94a3b8;
+        }
+        .overview-header h5 {
+          margin: 0;
+          font-size: 0.9rem;
+          font-weight: 500;
+        }
+        .overview-value {
+          font-size: 1.8rem;
+          font-weight: 700;
+          color: #f8fafc;
+          margin-bottom: 0.5rem;
+          font-family: 'JetBrains Mono', monospace;
+        }
+        .overview-status {
+          font-size: 0.8rem;
+          color: #64748b;
+          font-weight: 500;
+        }
+        .charts-section {
+          background: #0f172a;
+          border-radius: 12px;
+          padding: 1.5rem;
+          border: 1px solid #334155;
+        }
+        .charts-section .card-header {
+          margin-bottom: 1.5rem;
+          padding-bottom: 1rem;
+          border-bottom: 1px solid #334155;
+        }
+        .usage-summary {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 1rem;
+          margin-bottom: 1.5rem;
+        }
+        .usage-metric {
+          background: linear-gradient(135deg, #1e293b, #0f172a);
+          padding: 1rem;
+          border-radius: 8px;
+          border: 1px solid #334155;
+          text-align: center;
+        }
+        .usage-value {
+          font-size: 1.5rem;
+          font-weight: 700;
+          color: #22c55e;
+          font-family: 'JetBrains Mono', monospace;
+        }
+        .usage-label {
+          font-size: 0.8rem;
+          color: #94a3b8;
+          margin-top: 0.5rem;
+        }
+        .chart-wrapper {
+          background: rgba(15, 23, 42, 0.5);
+          border-radius: 8px;
+          padding: 1rem;
+          height: 400px;
+        }
+        </style>
+        
+        <!-- Sensor Tabs Navigation -->
+        <div class="sensor-tabs">
+          <button class="tab-btn active" onclick="showTab('overview')">
+            <i class="fas fa-tachometer-alt"></i> Overview
+          </button>
+          <button class="tab-btn" onclick="showTab('temperature')">
+            <i class="fas fa-thermometer-half"></i> Temperature
+          </button>
+          <button class="tab-btn" onclick="showTab('water-flow')">
+            <i class="fas fa-wave-square"></i> Water Flow
+          </button>
+          <button class="tab-btn" onclick="showTab('water-detection')">
+            <i class="fas fa-tint"></i> Water Detection
+          </button>
+          <button class="tab-btn" onclick="showTab('door-status')">
+            <i class="fas fa-door-closed"></i> Door Status
+          </button>
         </div>
 
-        <!-- Water Flow Section -->
-        <div class="sensor-section">
-          <div class="section-header">
-            <h4><i class="fas fa-wave-square"></i> Water Flow</h4>
-            <div class="flow-metrics">
-              <!--div class="mini-metric">
-                <span id="current-flow-rate">-- L/min</span>
-                <small>Flow Rate</small>
-              </div-->
-              <div class="mini-metric">
-                <span id="pulse-count">--</span>
-                <small>Pulses</small>
+        <!-- Tab Content Container -->
+        <div class="tab-content">
+          
+          <!-- Overview Tab -->
+          <div class="tab-pane active" id="overview-tab">
+            <div class="overview-grid">
+              <div class="overview-card temp-card">
+                <div class="overview-header">
+                  <i class="fas fa-thermometer-half"></i>
+                  <h5>Temperature</h5>
+                </div>
+                <div class="overview-value" id="overview-temp">--°C</div>
+                <div class="overview-status" id="overview-temp-status">--</div>
+              </div>
+              
+              <div class="overview-card flow-card">
+                <div class="overview-header">
+                  <i class="fas fa-wave-square"></i>
+                  <h5>Water Flow</h5>
+                </div>
+                <div class="overview-value" id="overview-flow">-- Pulses</div>
+                <div class="overview-status" id="overview-flow-status">--</div>
+              </div>
+              
+              <div class="overview-card water-card">
+                <div class="overview-header">
+                  <i class="fas fa-tint"></i>
+                  <h5>Water Detection</h5>
+                </div>
+                <div class="overview-value" id="overview-water">--</div>
+                <div class="overview-status" id="overview-water-status">--</div>
+              </div>
+              
+              <div class="overview-card door-card">
+                <div class="overview-header">
+                  <i class="fas fa-door-closed"></i>
+                  <h5>Door Status</h5>
+                </div>
+                <div class="overview-value" id="overview-door">--</div>
+                <div class="overview-status" id="overview-door-status">--</div>
               </div>
             </div>
           </div>
-          <div class="leak-status">
-            <div class="leak-indicator" id="leak-indicator"></div>
-            <span id="leak-text">No Data</span>
+
+          <!-- Temperature Tab -->
+          <div class="tab-pane" id="temperature-tab">
+            <div class="sensor-section">
+              <div class="section-header">
+                <h4><i class="fas fa-thermometer-half"></i> Temperature Monitoring</h4>
+                <div class="temp-display">
+                  <span class="temp-value" id="avg-temp">--</span>
+                  <span class="temp-unit">°C</span>
+                </div>
+              </div>
+              <div class="sensors-grid" id="temp-sensors-grid">
+                <!-- Temperature sensors populated here -->
+              </div>
+            </div>
+            
+            <!-- Temperature Charts Section -->
+            <div class="charts-section" style="margin-top: 2rem;">
+              <div class="card-header">
+                <h3>Temperature Analytics</h3>
+                <div class="analytics-controls">
+                  <select id="temp-period-select" class="period-selector">
+                    <option value="Daily">Daily</option>
+                    <option value="Weekly" selected>Weekly</option>
+                    <option value="Monthly">Monthly</option>
+                    <option value="All">All Time</option>
+                  </select>
+                </div>
+              </div>
+              <div id="temperature-charts-container" class="temperature-charts-wrapper"></div>
+            </div>
           </div>
-        </div>
 
-
-          <!-- Water Detection Section -->
-    <div class="sensor-section">
-      <div class="section-header">
-        <h4><i class="fas fa-tint"></i> Water Detection Status</h4>
-      </div>
-      <div class="detection-group">
-        <h5>Water Detection</h5>
-        <div class="sensors-mini-grid" id="water-sensors-grid">
-          <!-- Water sensors populated here -->
-        </div>
-      </div>
-    </div>
-
-    <!-- Door Status Section -->
-    <div class="sensor-section">
-      <div class="section-header">
-        <h4><i class="fas fa-door-closed"></i> Door Status</h4>
-      </div>
-      <div class="detection-group">
-        <h5>Magnetic Door Sensors</h5>
-        <div class="sensors-mini-grid" id="door-sensors-grid">
-          <!-- Door sensors populated here -->
-        </div>
-      </div>
-    </div>
-  </div>  
-        <!-- Usage Analytics Card -->
-      <div class="main-card analytics-card" >
-        <h3><i class="fas fa-chart-area"></i> Sensor Charts </h3>
-        <br>
-      <div class="card-header">
-        <h3>Temperature Analytics</h3>
-        <div class="analytics-controls">
-          <select id="temp-period-select" class="period-selector">
-            <option value="Daily">Daily</option>
-            <option value="Weekly" selected>Weekly</option>
-            <option value="Monthly">Monthly</option>
-            <option value="All">All Time</option>
-          </select>
-        </div>
-      </div>
-
-     <div id="temperature-charts-container" class="temperature-charts-wrapper"></div>
-        <br>
-          <!-- Water Usage Analytics Card -->
-       
-          <div id="water-usage-section" style="display: none;"></div>
-        <div class="card-header">
-          <h3> Water Usage Analytics</h3>
-          <div class="analytics-controls">
-            <select id="period-select" class="period-selector">
-              <option value="Daily">Daily</option>
-              <option value="Weekly" selected>Weekly</option>
-              <option value="Monthly">Monthly</option>
-              <option value="All">All Time</option>
-            </select>
+          <!-- Water Flow Tab -->
+          <div class="tab-pane" id="water-flow-tab">
+            <div class="sensor-section">
+              <div class="section-header">
+                <h4><i class="fas fa-wave-square"></i> Water Flow Monitoring</h4>
+                <div class="flow-metrics">
+                  <div class="mini-metric">
+                    <span id="pulse-count">--</span>
+                    <small>Pulses</small>
+                  </div>
+                </div>
+              </div>
+              <div class="leak-status">
+                <div class="leak-indicator" id="leak-indicator"></div>
+                <span id="leak-text">No Data</span>
+              </div>
+            </div>
+            
+            <!-- Water Usage Charts Section -->
+            <div class="charts-section" style="margin-top: 2rem;">
+              <div class="card-header">
+                <h3>Water Usage Analytics</h3>
+                <div class="analytics-controls">
+                  <select id="period-select" class="period-selector">
+                    <option value="Daily">Daily</option>
+                    <option value="Weekly" selected>Weekly</option>
+                    <option value="Monthly">Monthly</option>
+                    <option value="All">All Time</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div class="usage-summary">
+                <div class="usage-metric">
+                  <div class="usage-value" id="total-usage">--</div>
+                  <div class="usage-label">Total Usage (L)</div>
+                </div>
+                <div class="usage-metric cost">
+                  <div class="usage-value" id="water-cost">--</div>
+                  <div class="usage-label">Estimated Cost</div>
+                </div>
+                <div class="usage-metric efficiency">
+                  <div class="usage-value" id="efficiency">--</div>
+                  <div class="usage-label">Efficiency</div>
+                </div>
+              </div>
+              
+              <div class="chart-wrapper">
+                <canvas id="usageChart"></canvas>
+              </div>
+            </div>
           </div>
+
+          <!-- Water Detection Tab -->
+          <div class="tab-pane" id="water-detection-tab">
+            <div class="sensor-section">
+              <div class="section-header">
+                <h4><i class="fas fa-tint"></i> Water Detection Status</h4>
+              </div>
+              <div class="detection-group">
+                <h5>Water Detection Sensors</h5>
+                <div class="sensors-mini-grid" id="water-sensors-grid">
+                  <!-- Water sensors populated here -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Door Status Tab -->
+          <div class="tab-pane" id="door-status-tab">
+            <div class="sensor-section">
+              <div class="section-header">
+                <h4><i class="fas fa-door-closed"></i> Door Status Monitoring</h4>
+              </div>
+              <div class="detection-group">
+                <h5>Magnetic Door Sensors</h5>
+                <div class="sensors-mini-grid" id="door-sensors-grid">
+                  <!-- Door sensors populated here -->
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
         
-        <div class="usage-summary">
-          <div class="usage-metric">
-            <div class="usage-value" id="total-usage">--</div>
-            <div class="usage-label">Total Usage (L)</div>
-          </div>
-          <div class="usage-metric cost">
-            <div class="usage-value" id="water-cost">--</div>
-            <div class="usage-label">Estimated Cost</div>
-          </div>
-        </div>
+        <!-- Tab functionality script -->
+        <script>
+        function showTab(tabName) {
+          // Remove active class from all tabs and panes
+          document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+          document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+          
+          // Add active class to clicked tab and corresponding pane
+          event.target.closest('.tab-btn').classList.add('active');
+          document.getElementById(tabName + '-tab').classList.add('active');
+          
+          // Handle chart loading based on selected tab
+          if (tabName === 'temperature') {
+            // Load temperature charts when temperature tab is selected
+            setTimeout(() => {
+              if (typeof loadTemperatureCharts === 'function') {
+                loadTemperatureCharts();
+              }
+            }, 100);
+          } else if (tabName === 'water-flow') {
+            // Load water usage data when water flow tab is selected  
+            setTimeout(() => {
+              if (typeof loadWaterUsageData === 'function') {
+                loadWaterUsageData();
+              }
+            }, 100);
+          }
+          
+          console.log('Switched to tab:', tabName);
+        }
+        </script>
         
-        <div class="chart-container">
-          <canvas id="water-usage-chart"></canvas>
-        </div>
-      </div>
     </div>
 
   <!-- Loading Overlay -->
@@ -256,6 +511,62 @@
     const waterPricePerLiter = 0.015;
     let pulseToLiterRatio = 100;
     let autoRefreshInterval;
+    
+    // Update overview cards with sensor data
+    function updateOverviewCards(data) {
+      console.log('📊 Updating overview cards with data:', data);
+      
+      // Temperature overview
+      if (data.temperature_sensors && data.temperature_sensors.length > 0) {
+        const avgTemp = data.temperature_sensors.reduce((sum, sensor) => sum + sensor.temp_celsius, 0) / data.temperature_sensors.length;
+        const tempElement = document.getElementById('overview-temp');
+        const tempStatusElement = document.getElementById('overview-temp-status');
+        
+        if (tempElement) tempElement.textContent = avgTemp.toFixed(1) + '°C';
+        if (tempStatusElement) tempStatusElement.textContent = `${data.temperature_sensors.length} sensors active`;
+      }
+
+      // Flow overview
+      if (data.pulse_meters && data.pulse_meters.length > 0) {
+        const totalPulses = data.pulse_meters.reduce((sum, meter) => sum + meter.pulse_count, 0);
+        const flowElement = document.getElementById('overview-flow');
+        const flowStatusElement = document.getElementById('overview-flow-status');
+        
+        if (flowElement) flowElement.textContent = totalPulses + ' Pulses';
+        
+        const hasLeaks = data.pulse_meters.some(meter => meter.leak_detected === 'True');
+        if (flowStatusElement) {
+          flowStatusElement.textContent = hasLeaks ? 'Leak Detected' : 'Normal';
+          flowStatusElement.className = hasLeaks ? 'overview-status alert' : 'overview-status';
+        }
+      }
+
+      // Water detection overview
+      if (data.water_sensors && data.water_sensors.length > 0) {
+        const detectedCount = data.water_sensors.filter(sensor => sensor.water_detected === 'True').length;
+        const waterElement = document.getElementById('overview-water');
+        const waterStatusElement = document.getElementById('overview-water-status');
+        
+        if (waterElement) {
+          waterElement.textContent = detectedCount > 0 ? 'Water Detected' : 'No Water';
+          waterElement.className = detectedCount > 0 ? 'overview-value alert' : 'overview-value';
+        }
+        if (waterStatusElement) waterStatusElement.textContent = `${data.water_sensors.length} sensors`;
+      }
+
+      // Door status overview
+      if (data.door_sensors && data.door_sensors.length > 0) {
+        const openCount = data.door_sensors.filter(sensor => sensor.status === 'open').length;
+        const doorElement = document.getElementById('overview-door');
+        const doorStatusElement = document.getElementById('overview-door-status');
+        
+        if (doorElement) {
+          doorElement.textContent = openCount > 0 ? `${openCount} Open` : 'All Closed';
+          doorElement.className = openCount > 0 ? 'overview-value alert' : 'overview-value';
+        }
+        if (doorStatusElement) doorStatusElement.textContent = `${data.door_sensors.length} doors`;
+      }
+    }
     
     // Initialize dashboard
     document.addEventListener('DOMContentLoaded', function() {
@@ -386,7 +697,7 @@
           // Extract temperature value from last_value (format: "23.5Â°C")
           let tempValue = '--';
           if (device.last_value) {
-            tempValue = parseFloat(device.last_value.replace('°C', '')).toFixed(1);
+            tempValue = parseFloat(device.last_value.replace('Â°C', '')).toFixed(1);
           }
           
           const status = tempValue > 30 ? 'warning' : 'normal';
@@ -395,7 +706,7 @@
             <div class="sensor-status ${status}"></div>
             <div class="sensor-info">
               <span class="sensor-id">${device.device_id}</span>
-              <span class="sensor-value">${tempValue}°C</span>
+              <span class="sensor-value">${tempValue}Â°C</span>
             </div>
           `;
           tempGrid.appendChild(sensorItem);
@@ -404,7 +715,7 @@
         // Calculate average temperature
         const avgTemp = tempDevices.reduce((sum, device) => {
           if (device.last_value) {
-            return sum + parseFloat(device.last_value.replace('°C', ''));
+            return sum + parseFloat(device.last_value.replace('Â°C', ''));
           }
           return sum;
         }, 0) / tempDevices.length;
@@ -513,6 +824,9 @@
         updateDetectionDisplay(data);
         updateSystemMetrics(data);
         
+        // Update overview cards
+        updateOverviewCards(data);
+        
       } catch (error) {
         console.error('Error fetching sensor data:', error);
         showError('Failed to fetch sensor data');
@@ -534,7 +848,7 @@
             <div class="sensor-status ${status}"></div>
             <div class="sensor-info">
               <span class="sensor-id">${sensor.device_id}</span>
-              <span class="sensor-value">${temp}°C</span>
+              <span class="sensor-value">${temp}Â°C</span>
             </div>
           `;
           tempGrid.appendChild(sensorItem);
@@ -853,9 +1167,9 @@
                 <div class="chart-header">
                     <h4>Device ${deviceId}</h4>
                     <div class="chart-stats">
-                         <span>Avg: ${chartData.avg}°C</span>
-                        | <span>Max: ${chartData.max}°C</span>
-                        | <span>Min: ${chartData.min}°C</span>
+                        // <span>Avg: ${chartData.avg}Â°C</span>
+                        // <span>Max: ${chartData.max}Â°C</span>
+                        // <span>Min: ${chartData.min}Â°C</span>
                     </div>
                 </div>
                 <div class="chart-container">
@@ -930,7 +1244,7 @@ function renderTemperatureChart(canvasId, chartData) {
                     },
                     title: {
                         display: true,
-                        text: 'Temperature (°C)',
+                        text: 'Temperature (Â°C)',
                         color: '#e2e8f0'
                     }
                 },
@@ -992,7 +1306,7 @@ function renderTemperatureChart(canvasId, chartData) {
                         beginAtZero: false,
                         title: {
                             display: true,
-                            text: 'Temperature (°C)'
+                            text: 'Temperature (Â°C)'
                         }
                     },
                     x: {
@@ -1008,15 +1322,6 @@ function renderTemperatureChart(canvasId, chartData) {
 
     // Call this when the page loads
     document.addEventListener('DOMContentLoaded', loadTemperatureCharts);
-
-    // Fallback to hide loading screen
-    setTimeout(() => {
-      const loadingElement = document.getElementById('loading');
-      if (loadingElement) {
-        console.log('Fallback: Hiding loading screen');
-        loadingElement.classList.remove('active');
-      }
-    }, 2000);
   </script>
 </body>
 </html>
