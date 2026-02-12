@@ -486,6 +486,7 @@ def get_temperature_history():
         "data": history_data
     })
 
+
 @app.route('/api/user/water-detection-history')
 def get_water_detection_history():
     period = request.args.get('period', 'Weekly')
@@ -541,9 +542,9 @@ def get_water_detection_history():
             rows = cur.fetchall()
             
             for row in rows:
-                device_id, event_date, event_time, received_at, water_detected, water_raw, battery = row
+                device_id_row, event_date, event_time, received_at, water_detected, water_raw, battery = row
                 history_data.append({
-                    "device_id": device_id,
+                    "device_id": device_id_row,
                     "date": event_date.strftime("%Y-%m-%d"),
                     "time": event_time.strftime("%H:%M:%S"),
                     "status": "Wet" if water_detected else "Dry",
@@ -553,6 +554,7 @@ def get_water_detection_history():
                 })
     
     # Also get state change events to show when devices transition
+    # ⚠️ FIXED: Changed 'receied_at' to 'received_at' in ORDER BY clause
     state_change_query = """
     SELECT 
         device_id,
@@ -562,7 +564,7 @@ def get_water_detection_history():
         received_at
     FROM WATER_DETECTION 
     WHERE received_at >= NOW() - INTERVAL %s
-    ORDER BY device_id, receied_at ASC
+    ORDER BY device_id, received_at ASC
     """
     
     state_changes = []
@@ -576,16 +578,18 @@ def get_water_detection_history():
             device_events = {}
             for row in rows:
                 device_id_val, event_date, event_time, water_detected, received_at = row
-               
-            if device_id_val not in device_events:
+                
+                # ⚠️ FIXED: Proper indentation - this block should be inside the loop
+                if device_id_val not in device_events:
                     device_events[device_id_val] = []
-            device_events[device_id_val].append({
-                        "device_id": device_id_val,
-                        "date": event_date.strftime("%Y-%m-%d"),
-                        "time": event_time.strftime("%H:%M:%S"),
-                        "water-detected": water_detected,
-                        "received_at": received_at
-                    })
+                device_events[device_id_val].append({
+                    "device_id": device_id_val,
+                    "date": event_date.strftime("%Y-%m-%d"),
+                    "time": event_time.strftime("%H:%M:%S"),
+                    # ⚠️ FIXED: Changed 'water-detected' to 'water_detected' (underscore not hyphen)
+                    "water_detected": water_detected,
+                    "received_at": received_at
+                })
             
             # Find state changes for each device
             for device, events in device_events.items():
