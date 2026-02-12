@@ -88,6 +88,7 @@ body {
   background: #0f172a;
   border-radius: 12px;
   border: 1px solid #334155;
+  margin-top: 2rem;
 }
 
 .section-header {
@@ -325,7 +326,7 @@ body {
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(8px);
+/* backdrop-filter: blur(5px); */
   z-index: 2000;
   display: flex;
   align-items: center;
@@ -469,6 +470,7 @@ body {
 .devices-table {
   width: 100%;
   border-collapse: collapse;
+  width: 100%;
 }
 
 .devices-table th, .devices-table td {
@@ -546,7 +548,7 @@ body {
   right: 0;
   bottom: 0;
   background: rgba(15, 23, 42, 0.8);
-  backdrop-filter: blur(5px);
+  /* backdrop-filter: blur(5px); */
   z-index: 3000;
   display: flex;
   align-items: center;
@@ -619,12 +621,13 @@ body {
   font-family: inherit;
   font-size: 0.9rem;
   color: #f8fafc;
+  margin-left: 10px;
 }
 
 /* Header Styles */
 .header {
   background: rgba(15, 23, 42, 0.95);
-  backdrop-filter: blur(20px);
+  /* backdrop-filter: blur(20px); */
   border-bottom: 1px solid rgba(51, 65, 85, 0.6);
   padding: 0 2rem;
   height: 70px;
@@ -654,9 +657,8 @@ body {
 .logo i {
   font-size: 2rem;
   background: linear-gradient(135deg, #16a34a, #22c55e);
-  background-clip: text;
-  -webkit-background-clip: text;  /* For Safari */
-  -webkit-text-fill-color: transparent;  /* For Safari */
+  /* background-clip: text; */
+  -webkit-text-fill-color: transparent;
   color: transparent; /* Fallback for browsers that support standard 'background-clip' */
 }
 
@@ -807,6 +809,9 @@ body {
   background: #181212;
   border-radius: 8px;
 }
+.charts-section {
+  margin-top: 2rem;
+}
 
 .temperature-charts-wrapper {
   display: flex;
@@ -914,7 +919,7 @@ body {
   border-bottom: 2px solid #334155;
   margin-bottom: 1.5rem;
   overflow-x: auto;
-  scrollbar-width: none;
+  /* scrollbar-width: none; */
   -ms-overflow-style: none;
 }
 
@@ -936,7 +941,7 @@ body {
   align-items: center;
   gap: 0.5rem;
   white-space: nowrap;
-  min-width: fit-content;
+  /* min-width: fit-content; */
 }
 
 .tab-btn:hover {
@@ -1103,4 +1108,930 @@ body {
   .overview-value {
     font-size: 1.4rem;
   }
+}
+
+.history-table-container {
+    background: #0f172a;
+    border-radius: 8px;
+    border: 1px solid #334155;
+    padding: 10px;
+    margin-top: 20px; 
+    max-height: 300px; 
+    overflow-y: auto;
+}
+
+.history-table-container table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.history-table-container th {
+    background: #1e293b;
+    padding: 10px;
+    margin-top: 100%;
+    text-align: left;
+    font-weight: 600;
+    color: #94a3b8;
+    border-bottom: 2px solid #334155;
+    position: sticky;
+    top: 0;
+}
+
+.history-table-container td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #334155;
+    color: #e2e8f0;
+}
+
+.history-table-container tr:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+  /* Temperature Tabs */
+  .temperature-tabs {
+    display: flex;
+    border-bottom: 2px solid #334155;
+    margin: 1.5rem 0;
+    gap: 1px;
+}
+
+.temp-tab-btn {
+    background: #1e293b;
+    border: none;
+    color: #94a3b8;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-bottom: 2px solid transparent;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+    flex: 1;
+    justify-content: center;
+}
+
+.temp-tab-btn:hover {
+    background: #334155;
+    color: #e2e8f0;
+}
+
+.temp-tab-btn.active {
+    color: #22c55e;
+    border-bottom-color: #22c55e;
+    background: rgba(34, 197, 94, 0.1);
+}
+
+.temp-tab-content {
+    display: none;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.temp-tab-content.active {
+    display: block;
+}
+
+/* Temperature Subtabs */
+.temperature-subtabs {
+    display: flex;
+    border-bottom: 2px solid #334155;
+    margin-bottom: 1.5rem;
+    gap: 1px;
+}
+
+.temp-subtab-btn {
+    background: #1e293b;
+    border: none;
+    color: #94a3b8;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-bottom: 2px solid transparent;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+    flex: 1;
+    justify-content: center;
+}
+
+.temp-subtab-btn:hover {
+    background: #334155;
+    color: #e2e8f0;
+}
+
+.temp-subtab-btn.active {
+    color: #22c55e;
+    border-bottom-color: #22c55e;
+    background: rgba(34, 197, 94, 0.1);
+}
+
+.temp-subtab-content {
+    display: none;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.temp-subtab-content.active {
+    display: block;
+}
+
+/* Card spacing for temperature tab */
+#temperature-tab .main-card {
+    margin-bottom: 1.5rem;
+}
+
+#temperature-tab .main-card:last-child {
+    margin-bottom: 0;
+}
+
+/* Sensor Monitoring Card specific styles */
+.sensor-monitoring-card .sensor-section {
+    margin-top: 0;
+    padding: 1rem 0;
+    background: transparent;
+    border: none;
+}
+
+.sensor-monitoring-card .section-header {
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+
+.sensor-monitoring-card .temp-display {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.sensor-monitoring-card .temp-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #f8fafc;
+}
+
+.sensor-monitoring-card .temp-unit {
+    font-size: 1.2rem;
+    color: #94a3b8;
+}
+
+/* Trends Card specific styles */
+.trends-card .temperature-charts-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.trends-card .chart-card {
+    flex: 1;
+    min-width: 300px;
+    background: #0f172a;
+    border-radius: 8px;
+    padding: 1rem;
+    border: 1px solid #334155;
+}
+
+/* History Chart Card specific styles */
+.history-chart-card .chart-container {
+    height: 350px;
+    width: 100%;
+    position: relative;
+    margin-top: 1rem;
+}
+
+/* History Table Card specific styles */
+.history-table-card .history-table-container {
+    max-height: 400px;
+    overflow-y: auto;
+    margin-top: 1rem;
+}
+
+.sensor-monitoring-card .section-header {
+    display: none;
+}
+
+/* Make temperature trends charts larger */
+.trends-card .temperature-charts-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.trends-card .chart-card {
+    flex: 1 1 450px; /* Increased from 300px to 450px */
+    min-width: 400px; /* Increased from 300px to 400px */
+    background: #0f172a;
+    border-radius: 12px;
+    padding: 1.5rem; /* Increased from 1rem to 1.5rem */
+    border: 1px solid #334155;
+    margin-bottom: 0.5rem;
+}
+
+.trends-card .chart-card .chart-container {
+    height: 350px; /* Increased from 250px to 350px */
+    width: 100%;
+    position: relative;
+    margin-top: 1rem;
+}
+
+.trends-card .chart-card .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #334155;
+}
+
+.trends-card .chart-card .chart-header h4 {
+    font-size: 1.1rem; /* Increased from 1rem to 1.1rem */
+    font-weight: 600;
+    color: #f8fafc;
+}
+
+.trends-card .chart-card .chart-stats {
+    display: flex;
+    gap: 1.25rem;
+    font-size: 0.95rem; /* Increased from 0.85rem to 0.95rem */
+}
+
+.trends-card .chart-card .chart-stats span {
+    color: #94a3b8;
+    white-space: nowrap;
+}
+
+/* Make the chart canvas itself use all available space */
+.trends-card .chart-card canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+/* Make Temperature History Chart Card larger */
+.history-chart-card {
+    padding: 1.75rem; /* Increased from default */
+    margin-bottom: 2rem;
+}
+
+.history-chart-card .card-header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #334155;
+}
+
+.history-chart-card .card-header h3 {
+    font-size: 1.35rem; /* Increased from 1.25rem */
+}
+
+.history-chart-card .card-container {
+    height: 450px; /* Increased from 350px */
+    width: 100%;
+    position: relative;
+    margin-top: 1.25rem;
+}
+
+.history-chart-card .analytics-controls {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.history-chart-card .period-selector {
+    padding: 0.6rem 1.25rem; /* Larger padding */
+    font-size: 0.95rem; /* Larger font */
+    border-radius: 8px;
+}
+
+/* Make Temperature History Table Card larger */
+.history-table-card {
+    padding: 1.75rem; /* Increased from default */
+    margin-top: 1.5rem;
+}
+
+.history-table-card .card-header {
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #334155;
+}
+
+.history-table-card .card-header h3 {
+    font-size: 1.35rem; /* Increased from 1.25rem */
+}
+
+.history-table-card .history-table-container {
+    max-height: 500px; /* Increased from 400px */
+    overflow-y: auto;
+    margin-top: 1.25rem;
+    border-radius: 12px;
+    border: 1px solid #334155;
+    background: #0f172a;
+}
+
+/* Make the table more readable */
+.history-table-container table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.history-table-container th {
+    background: #1e293b;
+    padding: 1rem 1.25rem; /* Increased padding */
+    text-align: left;
+    font-weight: 600;
+    color: #f8fafc;
+    font-size: 0.95rem; /* Larger font */
+    border-bottom: 2px solid #334155;
+    position: sticky;
+    top: 0;
+    white-space: nowrap;
+}
+
+.history-table-container td {
+    padding: 1rem 1.25rem; /* Increased from 8px 10px */
+    border-bottom: 1px solid #334155;
+    color: #e2e8f0;
+    font-size: 0.95rem; /* Larger font */
+}
+
+.history-table-container tr:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* Make the chart itself larger and more readable */
+.history-chart-card canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Improve legend readability */
+.history-chart-card .chart-legend {
+    font-size: 0.95rem;
+    padding: 0.75rem 0;
+}
+
+/* Responsive adjustments for mobile */
+@media (max-width: 768px) {
+    .history-chart-card {
+        padding: 1.25rem;
+    }
+    
+    .history-chart-card .card-container {
+        height: 350px;
+    }
+    
+    .history-chart-card .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .history-chart-card .analytics-controls {
+        width: 100%;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .history-chart-card .period-selector {
+        width: 100%;
+        margin-left: 0;
+    }
+    
+    .history-table-card {
+        padding: 1.25rem;
+    }
+    
+    .history-table-container th,
+    .history-table-container td {
+        padding: 0.75rem 1rem;
+        font-size: 0.85rem;
+    }
+}
+
+/* Door Status Card */
+.door-status-card {
+    margin-bottom: 1.5rem;
+}
+
+.door-status-card .sensor-section {
+    margin-top: 0;
+    background: #0f172a;
+}
+
+/* Door History Card */
+.door-history-card {
+    padding: 1.75rem;
+    margin-top: 1.5rem;
+}
+
+.door-history-card .card-header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #334155;
+}
+
+.door-history-card .card-header h3 {
+    font-size: 1.35rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.door-history-card .analytics-controls {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* Door Timeline */
+.door-timeline {
+    background: #0f172a;
+    border-radius: 12px;
+    border: 1px solid #334155;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.door-timeline .timeline-header {
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #334155;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.door-timeline .timeline-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #f8fafc;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.door-timeline .timeline-title i {
+    color: #8b5cf6;
+}
+
+.door-timeline .timeline-subtitle {
+    font-size: 0.9rem;
+    color: #94a3b8;
+}
+
+/* Timeline Events */
+.door-timeline .timeline-events {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    max-height: 350px;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+
+.door-timeline .timeline-event {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    background: #1e293b;
+    border-radius: 8px;
+    border-left: 4px solid;
+    transition: all 0.2s ease;
+}
+
+.door-timeline .timeline-event:hover {
+    transform: translateX(4px);
+    background: #2d3a4f;
+}
+
+/* UPDATED: Green for Open, Red for Closed */
+.door-timeline .timeline-event.open {
+    border-left-color: #22c55e; /* Green for Open */
+    background: linear-gradient(90deg, rgba(34, 197, 94, 0.1), #1e293b);
+}
+
+.door-timeline .timeline-event.closed {
+    border-left-color: #ef4444; /* Red for Closed */
+    background: linear-gradient(90deg, rgba(239, 68, 68, 0.1), #1e293b);
+}
+
+.door-timeline .timeline-event-time {
+    min-width: 110px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9rem;
+    color: #94a3b8;
+}
+
+.door-timeline .timeline-event-device {
+    min-width: 130px;
+    font-weight: 600;
+    color: #f8fafc;
+    font-family: monospace;
+    margin-left: 1rem;
+}
+
+.door-timeline .timeline-event-icon {
+    margin: 0 1rem;
+    font-size: 1.1rem;
+}
+
+/* UPDATED: Green for Open, Red for Closed */
+.door-timeline .timeline-event-icon.open {
+    color: #22c55e; /* Green for Open */
+}
+
+.door-timeline .timeline-event-icon.closed {
+    color: #ef4444; /* Red for Closed */
+}
+
+.door-timeline .timeline-event-change {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #e2e8f0;
+}
+
+.door-timeline .change-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+/* UPDATED: Green for Open, Red for Closed */
+.door-timeline .change-badge.open {
+    background: rgba(34, 197, 94, 0.2); /* Green with opacity */
+    color: #22c55e; /* Green */
+}
+
+.door-timeline .change-badge.closed {
+    background: rgba(239, 68, 68, 0.2); /* Red with opacity */
+    color: #ef4444; /* Red */
+}
+
+.door-timeline .change-arrow {
+    color: #64748b;
+    margin: 0 0.5rem;
+}
+
+/* Door History Table */
+.door-history-table {
+    max-height: 450px;
+    overflow-y: auto;
+    margin-top: 1.25rem;
+    border-radius: 12px;
+    border: 1px solid #334155;
+    background: #0f172a;
+}
+
+.door-history-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.door-history-table th {
+    background: #1e293b;
+    padding: 1rem 1.25rem;
+    text-align: left;
+    font-weight: 600;
+    color: #f8fafc;
+    font-size: 0.95rem;
+    border-bottom: 2px solid #334155;
+    position: sticky;
+    top: 0;
+    white-space: nowrap;
+}
+
+.door-history-table th i {
+    margin-right: 0.5rem;
+    color: #94a3b8;
+}
+
+.door-history-table td {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #334155;
+    color: #e2e8f0;
+    font-size: 0.95rem;
+}
+
+.door-history-table .device-id{
+  font-family:monospace;
+  font-weight:600;
+  color:#f8fafc;
+}
+.door-history-table tr:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* Door Status Badge - UPDATED: Green for Open, Red for Closed */
+.door-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.door-status-badge.open {
+    background: rgba(34, 197, 94, 0.15); /* Green with opacity */
+    color: #22c55e; /* Green */
+}
+
+.door-status-badge.closed {
+    background: rgba(239, 68, 68, 0.15); /* Red with opacity */
+    color: #ef4444; /* Red */
+}
+
+.door-status-badge i {
+    font-size: 0.85rem;
+}
+
+/* Current Door Status Indicators - UPDATED */
+#door-sensors-grid .mini-sensor-status.normal {
+    background: #22c55e; /* Green for Open */
+}
+
+#door-sensors-grid .mini-sensor-status.alert {
+    background: #ef4444; /* Red for Closed */
+}
+
+/* No Data State */
+.door-timeline .no-data,
+.door-history-table .no-data {
+    text-align: center;
+    padding: 2rem;
+    color: #94a3b8;
+    font-size: 0.95rem;
+}
+
+/* System Status Indicator - UPDATED */
+#door-system-status.active {
+    background: #22c55e; /* Green - all doors closed */
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+}
+
+#door-system-status.alert {
+    background: #ef4444; /* Red - at least one door open */
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+    animation: pulse 1.5s infinite;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .door-history-card {
+        padding: 1.25rem;
+    }
+    
+    .door-history-card .analytics-controls {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .door-history-card .period-selector {
+        width: 100%;
+        margin-left: 0;
+    }
+    
+    .door-timeline .timeline-event {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+    
+    .door-timeline .timeline-event-time,
+    .door-timeline .timeline-event-device {
+        min-width: auto;
+    }
+    
+    .door-history-table th,
+    .door-history-table td {
+        padding: 0.75rem;
+        font-size: 0.8rem;
+    }
+}
+
+/* Water Detection History Styles */
+.water-status-card {
+    margin-bottom: 1.5rem;
+}
+
+.water-history-card {
+    padding: 1.75rem;
+}
+
+.water-history-card .card-header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #334155;
+}
+
+.water-history-card .analytics-controls {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* Timeline Styles */
+.timeline-container {
+    background: #0f172a;
+    border-radius: 12px;
+    border: 1px solid #334155;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.timeline-header {
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #334155;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.timeline-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #f8fafc;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.timeline-title i {
+    color: #22c55e;
+}
+
+.timeline-subtitle {
+    font-size: 0.9rem;
+    color: #94a3b8;
+}
+
+.timeline-events {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    max-height: 300px;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+
+.timeline-event {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    background: #1e293b;
+    border-radius: 8px;
+    border-left: 4px solid;
+    transition: all 0.2s ease;
+}
+
+.timeline-event:hover {
+    transform: translateX(4px);
+    background: #2d3a4f;
+}
+
+.timeline-event.wet {
+    border-left-color: #06b6d4;
+    background: linear-gradient(90deg, rgba(6, 182, 212, 0.1), #1e293b);
+}
+
+.timeline-event.dry {
+    border-left-color: #94a3b8;
+    background: linear-gradient(90deg, rgba(148, 163, 184, 0.1), #1e293b);
+}
+
+.timeline-event-time {
+    min-width: 100px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9rem;
+    color: #94a3b8;
+}
+
+.timeline-event-device {
+    min-width: 120px;
+    font-weight: 600;
+    color: #f8fafc;
+    font-family: monospace;
+    margin-left: 1rem;
+}
+
+.timeline-event-icon {
+    margin: 0 1rem;
+    font-size: 1.1rem;
+}
+
+.timeline-event-icon.wet {
+    color: #06b6d4;
+}
+
+.timeline-event-icon.dry {
+    color: #94a3b8;
+}
+
+.timeline-event-change {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #e2e8f0;
+}
+
+.change-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.change-badge.wet {
+    background: rgba(6, 182, 212, 0.2);
+    color: #06b6d4;
+}
+
+.change-badge.dry {
+    background: rgba(148, 163, 184, 0.2);
+    color: #94a3b8;
+}
+
+.change-arrow {
+    color: #64748b;
+    margin: 0 0.5rem;
+}
+
+/* Water History Table */
+#water-history-table {
+    width: 100%;
+}
+
+#water-history-table th {
+    background: #1e293b;
+    padding: 1rem 1.25rem;
+    font-size: 0.9rem;
+}
+
+#water-history-table td {
+    padding: 0.9rem 1.25rem;
+    font-size: 0.9rem;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.status-badge.wet {
+    background: rgba(6, 182, 212, 0.15);
+    color: #06b6d4;
+}
+
+.status-badge.dry {
+    background: rgba(148, 163, 184, 0.15);
+    color: #94a3b8;
+}
+
+.status-badge i {
+    font-size: 0.8rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .water-history-card .analytics-controls {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .water-history-card .period-selector {
+        width: 100%;
+        margin-left: 0;
+    }
+    
+    .timeline-event {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .timeline-event-time,
+    .timeline-event-device {
+        min-width: auto;
+    }
+    
+    #water-history-table th,
+    #water-history-table td {
+        padding: 0.75rem;
+        font-size: 0.8rem;
+    }
 }

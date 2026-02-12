@@ -414,6 +414,218 @@ def get_water_usage():
         "values": values
     })
 
+    # Add this new route to app.py in the Data API section
+@app.route('/api/user/temperature-history')
+def get_temperature_history():
+    period = request.args.get('period', 'Weekly')
+    device_id = request.args.get('device_id')  # Optional: filter by specific device
+
+    period_map = {
+        'Daily': "1 day",
+        'Weekly': "7 days",
+        'Monthly': "30 days",
+        'All': "365 days"
+    }
+
+    interval = period_map.get(period, "7 days")
+    
+    # Build the query based on whether device_id is provided
+    if device_id:
+        query = """
+        SELECT
+            device_id,
+            DATE(received_at) AS day,
+            DATE_TRUNC('hour', received_at) AS hour,
+            AVG(temp_celsius) AS avg_temp,
+            MAX(temp_celsius) AS max_temp,
+            MIN(temp_celsius) AS min_temp
+        FROM PWR_TEMP
+        WHERE received_at >= NOW() - INTERVAL %s
+            AND device_id = %s
+        GROUP BY device_id, day, DATE_TRUNC('hour', received_at)
+        ORDER BY hour;
+        """
+        params = (interval, device_id)
+    else:
+        query = """
+        SELECT
+            device_id,
+            DATE(received_at) AS day,
+            DATE_TRUNC('hour', received_at) AS hour,
+            AVG(temp_celsius) AS avg_temp,
+            MAX(temp_celsius) AS max_temp,
+            MIN(temp_celsius) AS min_temp
+        FROM PWR_TEMP
+        WHERE received_at >= NOW() - INTERVAL %s
+        GROUP BY device_id, day, DATE_TRUNC('hour', received_at)
+        ORDER BY hour;
+        """
+        params = (interval,)
+
+    history_data = []
+
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(query, params)
+            rows = cur.fetchall()
+
+            for row in rows:
+                device_id, day, hour, avg_temp, max_temp, min_temp = row
+                history_data.append({
+                    "device_id": device_id,
+                    "day": day.strftime("%Y-%m-%d"),
+                    "hour": hour.strftime("%H:%M"),
+                    "avg_temp": round(avg_temp, 1),
+                    "max_temp": round(max_temp, 1),
+                    "min_temp": round(min_temp, 1)
+                })
+
+    return jsonify({
+        "period": period,
+        "device_id": device_id,
+        "data": history_data
+    })
+
+@app.route('/api/user/water-detection-history')
+def get_water_detection_history():
+    period = request.args.get('period', 'Weekly')
+    device_id = request.args.get('device_id', 'all')
+    
+    period_map = {
+        'Daily': "1 day",
+        'Weekly': "7 days",
+        'Monthly': "30 days",
+        'All': "365 days"
+    }
+    
+    interval = period_map.get(period, "7 days")
+    
+    # Base query
+    if device_id != 'all':
+        query = """
+        SELECT 
+            device_id,
+            DATE(received_at) as event_date,
+            TIME(received_at) as event_time,
+            received_at,
+            water_detected,
+            water_raw_value,
+            battery_volts
+        FROM WATER_DETECTION 
+        WHERE received_at >= NOW() - INTERVAL %s
+            AND device_id = %s
+        ORDER BY received_at DESC
+        """
+        params = (interval, device_id)
+    else:
+        query = """
+        SELECT 
+            device_id,
+            DATE(received_at) as event_date,
+            TIME(received_at) as event_time,
+            received_at,
+            water_detected,
+            water_raw_value,
+            battery_volts
+        FROM WATER_DETECTION 
+        WHERE received_at >= NOW() - INTERVAL %s
+        ORDER BY received_at DESC
+        """
+        params = (interval,)
+    
+    history_data = []
+    
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(query, params)
+            rows = cur.fetchall()
+            
+            for row in rows:
+                device_id, event_date, event_time, received_at, water_detected, water_raw, battery = row
+                history_data.append({
+                    "device_id": device_id,
+                    "date": event_date.strftime("%Y-%m-%d"),
+                    "time": event_time.strftime("%H:%M:%S"),
+                    "status": "Wet" if water_detected else "Dry",
+                    "raw_value": water_raw,
+                    "battery": round(float(battery), 2) if battery else None,
+                    "timestamp": received_at.isoformat()
+                })
+    
+    # Also get state change events to show when devices transition
+    state_change_query = """
+    SELECT 
+        device_id,
+        DATE(received_at) as event_date,
+        TIME(received_at) as event_time,
+        water_detected,
+        received_at
+    FROM WATER_DETECTION 
+    WHERE received_at >= NOW() - INTERVAL %s
+    ORDER BY device_id, receied_at ASC
+    """
+    
+    state_changes = []
+
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(state_change_query, (interval,))
+            rows = cur.fetchall()
+            
+            # Group by device_id and find state changes
+            device_events = {}
+            for row in rows:
+                device_id_val, event_date, event_time, water_detected, received_at = row
+               
+            if device_id_val not in device_events:
+                    device_events[device_id_val] = []
+            device_events[device_id_val].append({
+                        "device_id": device_id_val,
+                        "date": event_date.strftime("%Y-%m-%d"),
+                        "time": event_time.strftime("%H:%M:%S"),
+                        "water-detected": water_detected,
+                        "received_at": received_at
+                    })
+            
+            # Find state changes for each device
+            for device, events in device_events.items():
+                # Sort events by timestamp
+                events.sort(key=lambda x: x['received_at'])
+                
+                previous_state = None
+                
+                for event in events:
+                    current_state = event['water_detected']
+                    
+                    if previous_state is not None and current_state != previous_state:
+                        state_changes.append({
+                            "device_id": event['device_id'],
+                            "date": event['date'],
+                            "time": event['time'],
+                            "changed_to": "Wet" if current_state else "Dry",
+                            "changed_from": "Wet" if previous_state else "Dry"
+                        })
+                    
+                    previous_state = current_state
+    
+    # Filter by device_id if needed
+    if device_id != 'all':
+        state_changes = [change for change in state_changes if change['device_id'] == device_id]
+    
+    # Sort state changes by date/time (most recent first)
+    state_changes.sort(key=lambda x: (x['date'], x['time']), reverse=True)
+    
+    return jsonify({
+        "period": period,
+        "device_id": device_id,
+        "history": history_data,
+        "state_changes": state_changes
+    })
+
+
+
+
+
 
 
 # ----------------------------

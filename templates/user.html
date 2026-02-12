@@ -127,7 +127,7 @@
           <div class="status-indicator active"></div>
         </div>
         
-        /* Add tab styles */
+        
         <style>
         .dashboard-grid {
           grid-template-columns: 1fr !important;
@@ -344,36 +344,104 @@
           </div>
 
           <!-- Temperature Tab -->
-          <div class="tab-pane" id="temperature-tab">
-            <div class="sensor-section">
-              <div class="section-header">
-                <h4><i class="fas fa-thermometer-half"></i> Temperature Monitoring</h4>
-                <div class="temp-display">
-                  <span class="temp-value" id="avg-temp">--</span>
-                  <span class="temp-unit">°C</span>
-                </div>
-              </div>
+        <div class="tab-pane" id="temperature-tab">
+          <!-- Temperature Subtabs -->
+           <div class = "temperature-subtabs">
+            <button class = "temp-subtab-btn active" onclick="showTempSubTab('current')">
+              <i class="fas fa-thermometer-half"></i> Current Temperature
+            </button>
+            <button class = "temp-subtab-btn" onclick="showTempSubTab('historical')">
+                <i class="fas fa-history"></i> Temperature History
+            </button>
+    </div>
+
+      <!-- Current Temperature Subtabs -->
+       <div id = "current-temp-subtab" class = "temp-subtab-content active">
+
+        <!-- Sensor Monitoring Card -->
+    <div class="main-card sensor-monitoring-card">
+        <div class="card-header">
+          <h3><i class="fas fa-broadcast-tower"></i> Live Temperature Monitoring</h3>
+            </div>
+            <div class ="sensor-section">
+              <div class = "section-header">
+                <div class = "temp-display">
+                  <span class = "temp-value" id = "avg-temp">--</span>
+                  <span class = "temp-unit">°C</span>
+                  </div>
+                  </div>
               <div class="sensors-grid" id="temp-sensors-grid">
                 <!-- Temperature sensors populated here -->
               </div>
             </div>
-            
-            <!-- Temperature Charts Section -->
-            <div class="charts-section" style="margin-top: 2rem;">
-              <div class="card-header">
-                <h3>Temperature Analytics</h3>
-                <div class="analytics-controls">
+          </div>
+
+
+    <!-- Temperature Trends Card -->
+    <div class="main-card trends-card">
+        <div class="card-header">
+            <h3><i class="fas fa-chart-line"></i> Temperature Trends</h3>
+            <div class="analytics-controls">
                   <select id="temp-period-select" class="period-selector">
                     <option value="Daily">Daily</option>
                     <option value="Weekly" selected>Weekly</option>
                     <option value="Monthly">Monthly</option>
                     <option value="All">All Time</option>
-                  </select>
-                </div>
+                </select>
               </div>
-              <div id="temperature-charts-container" class="temperature-charts-wrapper"></div>
+        </div>
+        <div id="temperature-charts-container" class="temperature-charts-wrapper"></div>
+                </div>
+                    </div>
+                    <!--Historical Temperature Subtabs-->
+                    <div id = "historical-temp-subtab" class = "temp-subtab-content">
+                      <!-- Temperature History Chart Card -->
+                       <div class="main-card history-chart-card">
+                        <div class = "card-header">
+                          <h3><i class="fas fa-chart-area"></i> Temperature History</h3>
+                          <div class="analytics-controls">
+                            <select id="temp-history-period" class="period-selector">
+                              <option value="Daily">Daily</option>
+                              <option value="Weekly" selected>Weekly</option>
+                              <option value="Monthly">Monthly</option>
+                              <option value="All">All Time</option>
+                            </select>
+                            <select id="temp-history-device" class="period-selector">
+                              <option value="all">All Devices</option>
+                              <!-- Device options populated by JavaScript -->
+                            </select>
             </div>
-          </div>
+        </div>
+        <div class="card-container">
+          <canvas id = "temperature-history-chart"></canvas>
+        </div>
+        </div>
+
+        <!-- Temperature History Table Card -->
+        <div class="main-card history-table-card">
+        <div class="card-header">
+            <h3><i class="fas fa-table"></i> Temperature History Data</h3>
+        </div>
+        <div class="history-table-container">
+            <table class="devices-table" >
+                <thead>
+                    <tr>
+                        <th>Device ID</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Avg Temp</th>
+                        <th>Max Temp</th>
+                        <th>Min Temp</th>
+                    </tr>
+                </thead>
+                <tbody id="temperature-history-table">
+                    <!-- History data will be populated here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    </div>
+  </div>
 
           <!-- Water Flow Tab -->
           <div class="tab-pane" id="water-flow-tab">
@@ -394,7 +462,7 @@
             </div>
             
             <!-- Water Usage Charts Section -->
-            <div class="charts-section" style="margin-top: 2rem;">
+            <div class="charts-section" >
               <div class="card-header">
                 <h3>Water Usage Analytics</h3>
                 <div class="analytics-controls">
@@ -423,34 +491,94 @@
               </div>
               
               <div class="chart-wrapper">
-                <canvas id="usageChart"></canvas>
+                <canvas id="water-usage-chart"></canvas>
               </div>
             </div>
           </div>
 
           <!-- Water Detection Tab -->
           <div class="tab-pane" id="water-detection-tab">
-            <div class="sensor-section">
-              <div class="section-header">
-                <h4><i class="fas fa-tint"></i> Water Detection Status</h4>
+            <!--Current Status Card-->
+            <div class = "main-card water-status-card">
+              <div class = "card-header">
+                <h3><i class="fas fa-tint"></i> Current Water Detection Status</h3>
+                <div class = "status-indicator" id="water-system-status"></div>
               </div>
-              <div class="detection-group">
-                <h5>Water Detection Sensors</h5>
-                <div class="sensors-mini-grid" id="water-sensors-grid">
-                  <!-- Water sensors populated here -->
+              <div class = "sensor-section">
+                <div class = "detection-group">
+                  <h5><i class="fas fa-sensor"></i>Water Detection Sensors</h5>
+                  <div class="sensors-mini-grid" id="water-sensors-grid">
+                    <!-- Water sensors populated here -->
+                  </div>
                 </div>
-              </div>
+                </div>
+                </div>
+
+  <!-- Water Detection History Card-->
+  <div class="main-card water-history-card">
+    <div class="card-header">
+      <h3><i class="fas fa-history"></i> Water Detection History</h3>
+      <div class = "analytics-controls">
+      <select id="water-history-period" class="period-selector">
+        <option value="Daily">Daily</option>
+        <option value="Weekly" selected>Weekly</option>
+        <option value="Monthly">Monthly</option>
+        <option value="All">All Time</option>
+      </select>
+    <select id = "water-history-device" class="period-selector">
+      <option value="all">All Devices</option>
+      <!--Device options populated by JavaScript -->
+    </select>
+      <button id="refresh-water-history" class="refresh-btn">
+        <i class = "fas fa-sync-alt"></i>
+        </button>
+        </div>
+        </div>
+
+                  
+        <!-- State Change Timeline -->
+        <div class="timeline-container" id="water-timeline-container">
+            <div class="timeline-header">
+                <span class="timeline-title">State Change Timeline</span>
+                <span class="timeline-subtitle">When devices detected water or became dry</span>
             </div>
-          </div>
+            <div id="water-state-changes" class="timeline-events">
+                <!-- State changes will be populated here -->
+            </div>
+        </div>
+        
+        <!-- Detailed History Table -->
+        <div class="history-table-container">
+            <table class="devices-table" id="water-history-table">
+                <thead>
+                    <tr>
+                        <th><i class="fas fa-microchip"></i> Device ID</th>
+                        <th><i class="fas fa-calendar"></i> Date</th>
+                        <th><i class="fas fa-clock"></i> Time</th>
+                        <th><i class="fas fa-water"></i> Status</th>
+                        <th><i class="fas fa-chart-line"></i> Raw Value</th>
+                        <th><i class="fas fa-battery"></i> Battery</th>
+                    </tr>
+                </thead>
+                <tbody id="water-history-table-body">
+                    <!-- History data will be populated here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
           <!-- Door Status Tab -->
           <div class="tab-pane" id="door-status-tab">
-            <div class="sensor-section">
-              <div class="section-header">
-                <h4><i class="fas fa-door-closed"></i> Door Status Monitoring</h4>
+            <!-- Current Door Status Card-->
+            <div class="main-card door-status-card">
+              <div class="card-header">
+                <h3><i class="fas fa-door-closed"></i> Current Door Status </h3>
+                <div class = "status-indicator" id="door-system-status"></div>
               </div>
+              <div class = "sensor-section">
               <div class="detection-group">
-                <h5>Magnetic Door Sensors</h5>
+                <h5><i class="fas fa-sensor"></i>Magnetic Door Sensors</h5>
                 <div class="sensors-mini-grid" id="door-sensors-grid">
                   <!-- Door sensors populated here -->
                 </div>
@@ -458,7 +586,57 @@
             </div>
           </div>
 
+          <!--Door History Card-->
+          <div class="main-card door-history-card">
+            <div class="card-header">
+              <h3><i class="fas fa-history"></i> Door Status History</h3>
+              <div class="analytics-controls">
+                <select id="door-history-period" class="period-selector">
+                  <option value="Daily">Daily</option>
+                  <option value="Weekly" selected>Weekly</option>
+                  <option value="Monthly">Monthly</option>
+                  <option value="All">All Time</option>
+                </select>
+              <select id = "door-history-device" class="period-selector">
+                <option value="all">All Doors</option>
+                <!--Device options populated by JavaScript -->
+              </select>
+                <button id="refresh-door-history" class="refresh-btn">
+                  <i class="fas fa-sync-alt"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- State Change Timeline-->
+             <div class = "timeline-container door-history-timeline">
+              <div class = "timeline-header">
+                <span class = "timeline-title">
+                  <i class = "fas fa-exchange-alt"></i> Door State Changes
+                </span>
+                </div>
+                <div id = "door-state-changes" class = "timeline-events">
+                  <!-- State changes will be populated here -->
+                   <div class = "no-data">No door state changes recorded in this period</div> 
+                   </div>
         </div>
+
+        <!--Detailed History Table-->
+        <div class = "history-table-container door-history-table">
+          <table class = "devices-table" id = "door-history-table">
+            <thead>
+              <tr>
+                <th><i class = "fas fa-microchip">Device ID</i></th>
+                <th><i class = "fas fa-calender"></i> Date</th>
+                <th><i class = "fas fa-clock">Time</i></th>
+                <th><i class = "fas fa-door-closed"></i>Status</th>
+                <th><i class = "fas fa-battery"></i>Battery</th>
+              </tr>
+            </thead>
+            <tbody id = "door-history-table-body">
+              <!-- Door history data will be populated here -->
+               </tbody>
+            </table>
+            </div>
         
         <!-- Tab functionality script -->
         <script>
@@ -473,23 +651,155 @@
           
           // Handle chart loading based on selected tab
           if (tabName === 'temperature') {
+            
+            // Populate device dropdown 
+            populateDeviceDropdown();
+
+            // Set up temperature history isteners
+            setupTemperatureHistoryListeners();
+
             // Load temperature charts when temperature tab is selected
             setTimeout(() => {
-              if (typeof loadTemperatureCharts === 'function') {
-                loadTemperatureCharts();
-              }
-            }, 100);
-          } else if (tabName === 'water-flow') {
+              // Check if we need to show current or historical data 
+              const currentSubtabBtn = document.querySelector('.temp-subtab-btn.active');
+              if (currentSubtabBtn){
+                const subTabName = currentSubtabBtn.textContent.includes('Current') ? 'current' : 'historical';
+                if (subTabName === 'current'){
+                  if (typeof loadTemperatureCharts === 'function') {
+                    const currentPeriod = document.getElementById('temp-period-select')?.value || 'Weekly';
+                    loadTemperatureCharts(currentPeriod);
+                  }
+                }else if (subTabName === 'historical'&& typeof loadTemperatureHistory === 'function'){
+                  loadTemperatureHistory();
+                }
+                  }
+                }, 100);
+              } else if (tabName === 'water-flow') {
             // Load water usage data when water flow tab is selected  
             setTimeout(() => {
-              if (typeof loadWaterUsageData === 'function') {
-                loadWaterUsageData();
+              const period = document.getElementById('period-select')?.value || 'Weekly';
+              loadWaterUsageData(period);
+              fetchSensorData();
+            }, 100);
+
+          } else if (tabName === 'water-detection') {
+            setTimeout(() => {
+              // Populate water device dropdown
+              populateWaterDeviceDropdown();
+
+              // Load water detection history
+              const periodSelect = document.getElementById('water-history-period');
+              const deviceSelect = document.getElementById('water-history-device');
+              const period = periodSelect ? periodSelect.value : 'Weekly';
+              const deviceId = deviceSelect ? deviceSelect.value : 'all';
+
+              if (typeof loadWaterDetectionHistory === 'function') {
+              loadWaterDetectionHistory(period, deviceId);
               }
+            }, 100);
+
+          }else if (tabName === 'door-status') {
+            // Fetch fresh door sensor data
+            setTimeout(() => { 
+              fetchSensorData();
+              // Make sure dropdown is populated
+              populateDoorDeviceDropdown();
+              // Load history
+              const periodSelect = document.getElementById('door-history-period');
+              const deviceSelect = document.getElementById('door-history-device'); 
+              const period = periodSelect ? periodSelect.value : 'Weekly';
+              const deviceId = deviceSelect ? deviceSelect.value : 'all';
+              loadDoorHistory(period, deviceId);
             }, 100);
           }
           
           console.log('Switched to tab:', tabName);
         }
+
+    // Temperature subtab switching function
+    function showTempSubTab(tabName) {
+      console.log('Switching to subtab:', tabName);
+
+      // Remove active class from all temp subtab buttons and contents
+      document.querySelectorAll('.temp-subtab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.temp-subtab-content').forEach(content => content.classList.remove('active'));
+
+      // Add active class to clicked tab button 
+      event.target.closest('.temp-subtab-btn').classList.add('active');
+
+      // Show corresponding content
+      if (tabName === 'current'){
+        document.getElementById('current-temp-subtab').classList.add('active');
+        // Load temperature charts when switching to current tab
+        setTimeout (() => {
+          if (typeof loadTemperatureCharts === 'function') {
+            const currentPeriod = document.getElementById('temp-period-select')?.value || 'Weekly';
+            loadTemperatureCharts(currentPeriod);
+          }
+        }, 100);
+      } else if (tabName === 'historical'){
+        document.getElementById('historical-temp-subtab').classList.add('active');
+        // Load history when switching to historical tab
+        if (typeof loadTemperatureHistory === 'function') {
+        loadTemperatureHistory();
+        }
+      }
+    }
+
+      // Improved device dropdown population
+function populateDeviceDropdown() {
+    const deviceSelect = document.getElementById('temp-history-device');
+    
+    // Clear existing options except "All Devices"
+    deviceSelect.innerHTML = '<option value="all">All Devices</option>';
+    
+    // Get all temperature sensor devices
+    const tempSensors = assignedDevices.filter(d => d.sensor_type === 'decode_PowerTemp');
+    
+    // Also check live data from dashboardData
+    const liveTempSensors = dashboardData.temperature_sensors || [];
+    
+    // Combine both sources and remove duplicates
+    const allDevices = new Set();
+    
+    // Add from assigned devices
+    tempSensors.forEach(device => {
+        if (device.device_id) allDevices.add(device.device_id);
+    });
+    
+    // Add from live data
+    liveTempSensors.forEach(sensor => {
+        if (sensor.device_id) allDevices.add(sensor.device_id);
+    });
+    
+    // Add each device to dropdown
+    allDevices.forEach(deviceId => {
+        const option = document.createElement('option');
+        option.value = deviceId;
+        option.textContent = deviceId;
+        deviceSelect.appendChild(option);
+    });
+    
+    console.log('Device dropdown populated with', allDevices.size, 'devices');
+}
+
+// Update event listeners for the temperature history filters
+function setupTemperatureHistoryListeners() {
+    // Period selector change
+    document.getElementById('temp-history-period').addEventListener('change', loadTemperatureHistory);
+    
+    // Device selector change
+    document.getElementById('temp-history-device').addEventListener('change', loadTemperatureHistory);
+    
+    // Populate device dropdown when temperature tab is shown
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        if (btn.textContent.includes('Temperature')) {
+            btn.addEventListener('click', () => {
+                setTimeout(populateDeviceDropdown, 100);
+            });
+        }
+    });
+}
         </script>
         
     </div>
@@ -513,7 +823,7 @@
     let autoRefreshInterval;
     
     // Update overview cards with sensor data
-    function updateOverviewCards(data) {
+    function updateOverviewCards(data) {history
       console.log('📊 Updating overview cards with data:', data);
       
       // Temperature overview
@@ -574,7 +884,18 @@
       setupEventListeners();
       fetchAssignedDevices();
       fetchSensorData();
-      loadTemperatureCharts();
+
+      // Load initial data for all tabs
+      loadTemperatureCharts('Weekly');
+      loadWaterUsageData('Weekly');
+
+      // Initialize water detection
+      setupWaterHistoryListeners();
+      loadWaterDetectionHistory('Weekly','all');
+
+      // Initialize door history
+      setupDoorHistoryListeners();
+      loadDoorHistory('Weekly','all');
       
       // Set up periodic updates (10 seconds)
       autoRefreshInterval = setInterval(fetchSensorData, 10000);
@@ -594,7 +915,10 @@
       document.getElementById('devices-btn').addEventListener('click', () => {
         togglePopup('devices-popup');
       });
-      
+
+      document.getElementById('temp-history-period').addEventListener('change', loadTemperatureHistory);
+      document.getElementById('temp-history-device').addEventListener('change', loadTemperatureHistory);
+
       // Close popup buttons
       document.querySelectorAll('.close-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -617,15 +941,31 @@
       // Refresh devices
       document.getElementById('refresh-devices').addEventListener('click', fetchAssignedDevices);
       
-      // Chart period selector
-      document.getElementById('period-select').addEventListener('change', function(e) {
-        updateUsageChart(e.target.value);
+      // Water usage chart period selector
+      const periodSelect = document.getElementById('period-select');
+      if (periodSelect){
+        periodSelect.addEventListener('change', function(e) {
+        loadWaterUsageData(e.target.value);
       });
-          // Add this for temperature period selector
-      document.getElementById('temp-period-select').addEventListener('change', function(e) {
+      }
+          // Temperature period selector
+      const tempPeriodSelect = document.getElementById('temp-period-select');
+      if (tempPeriodSelect){
+        tempPeriodSelect.addEventListener('change', function(e) {
           loadTemperatureCharts(e.target.value);
       });
       
+      }
+
+      // Water detection period selector
+      const waterPeriodSelect = document.getElementById('water-period');
+      if (waterPeriodSelect){
+        waterPeriodSelect.addEventListener('change', function(e) {
+          if (typeof loadWaterHistory === 'function'){
+            loadWaterHistory(e.target.value);
+          }
+      });
+      }
       // Logout button
       document.getElementById('logout-btn').addEventListener('click', function() {
         if (confirm('Are you sure you want to logout?')) {
@@ -668,12 +1008,23 @@
         
         // Show/hide water usage chart based on pulse meters
         const hasPulseMeters = assignedDevices.some(d => d.sensor_type === 'decode_pulsemeter');
-        document.getElementById('water-usage-section').style.display = hasPulseMeters ? 'block' : 'none';
-
+        const waterUsageSection = document.getElementById('water-usage-section');
+        if(waterUsageSection){
+          waterUsageSection.style.display = hasPulseMeters ? 'block' : 'none';
+        }
         
         if (hasPulseMeters) {
           updateUsageChart();
           setInterval(() => updateUsageChart(), 30000);
+        }
+
+        // Populate door dropdown after devices load
+        populateDoorDeviceDropdown();
+
+        // If door tab is active, load history
+        const activeTab = document.querySelector('.tab-pane.active')?.id;
+        if (activeTab === 'door-status-tab'){
+          loadDoorHistory('Weekly','all');
         }
         
       } catch (error) {
@@ -694,10 +1045,10 @@
           const sensorItem = document.createElement('div');
           sensorItem.className = 'sensor-item';
           
-          // Extract temperature value from last_value (format: "23.5Â°C")
+          // Extract temperature value from last_value (format: "23.5°C")
           let tempValue = '--';
           if (device.last_value) {
-            tempValue = parseFloat(device.last_value.replace('Â°C', '')).toFixed(1);
+            tempValue = parseFloat(device.last_value.replace('°C', '')).toFixed(1);
           }
           
           const status = tempValue > 30 ? 'warning' : 'normal';
@@ -706,7 +1057,7 @@
             <div class="sensor-status ${status}"></div>
             <div class="sensor-info">
               <span class="sensor-id">${device.device_id}</span>
-              <span class="sensor-value">${tempValue}Â°C</span>
+              <span class="sensor-value">${tempValue}°C</span>
             </div>
           `;
           tempGrid.appendChild(sensorItem);
@@ -715,7 +1066,7 @@
         // Calculate average temperature
         const avgTemp = tempDevices.reduce((sum, device) => {
           if (device.last_value) {
-            return sum + parseFloat(device.last_value.replace('Â°C', ''));
+            return sum + parseFloat(device.last_value.replace('°C', ''));
           }
           return sum;
         }, 0) / tempDevices.length;
@@ -848,7 +1199,7 @@
             <div class="sensor-status ${status}"></div>
             <div class="sensor-info">
               <span class="sensor-id">${sensor.device_id}</span>
-              <span class="sensor-value">${temp}Â°C</span>
+              <span class="sensor-value">${temp}°C</span>
             </div>
           `;
           tempGrid.appendChild(sensorItem);
@@ -976,6 +1327,7 @@
     }
 
     async function updateUsageChart(period = 'Weekly') {
+      console.log('Loading water usage data for period:', period);
       try {
         const response = await fetch(`/api/user/usage?period=${period}`);
         
@@ -986,23 +1338,34 @@
         const chartData = await response.json();
         
         if (!chartData.labels || !chartData.values) {
+          console.warn('No water usage data available');
+          return;
+        }
+
+        const litersData = chartData.values.map(pulses => pulses / pulseToLiterRatio);
+
+        //Destroy existing chart
+        if (usageChart){
+          usageChart.destroy();
+        }
+
+        // Get the canvas element 
+
+        const canvas = document.getElementById('water-usage-chart');
+        if (!canvas) {
+          console.error('Canvas element for water usage chart not found');
           return;
         }
         
-        const litersData = chartData.values.map(pulses => pulses / pulseToLiterRatio);
         const totalUsage = litersData.reduce((sum, val) => sum + (val || 0), 0);
         const totalCost = totalUsage * waterPricePerLiter;
         
         document.getElementById('total-usage').textContent = totalUsage.toFixed(2);
         document.getElementById('water-cost').textContent = 'R' + totalCost.toFixed(2);
         
-        // Destroy existing chart
-        if (usageChart) {
-          usageChart.destroy();
-        }
         
         // Create new line chart
-        const ctx = document.getElementById('water-usage-chart').getContext('2d');
+        const ctx = canvas.getContext('2d');
         usageChart = new Chart(ctx, {
           type: 'line',
           data: {
@@ -1037,7 +1400,7 @@
                   color: 'rgba(255,255,255,0.1)'
                 },
                 ticks: {
-                  color: '#666',
+                  color: '#e2e8f0',
                   font: {
                     size: 12
                   }
@@ -1048,7 +1411,7 @@
                   color: 'rgba(255,255,255,0.1)'
                 },
                 ticks: {
-                  color: '#666',
+                  color: '#e2e8f0',
                   font: {
                     size: 12
                   }
@@ -1061,11 +1424,13 @@
             }
           }
         });
-        
+
       } catch (error) {
-        console.error('Error updating usage chart:', error);
+        console.error('Error updating usage data:', error);
       }
     }
+        
+
 
     // Helper functions
     function getSensorTypeName(sensorType) {
@@ -1090,7 +1455,7 @@
    function calculateAlerts(data) {
   let alerts = 0;
   
-  // Temperature alerts (over 30Â°C)
+  // Temperature alerts (over 30°C)
   if (data.temperature_sensors) {
     alerts += data.temperature_sensors.filter(sensor => parseFloat(sensor.temp_celsius) > 30).length;
   }
@@ -1167,9 +1532,9 @@
                 <div class="chart-header">
                     <h4>Device ${deviceId}</h4>
                     <div class="chart-stats">
-                        // <span>Avg: ${chartData.avg}Â°C</span>
-                        // <span>Max: ${chartData.max}Â°C</span>
-                        // <span>Min: ${chartData.min}Â°C</span>
+                         <span>Avg: ${chartData.avg}°C</span>
+                        | <span>Max: ${chartData.max}°C</span>
+                        | <span>Min: ${chartData.min}°C</span>
                     </div>
                 </div>
                 <div class="chart-container">
@@ -1178,7 +1543,7 @@
             `;
             chartsContainer.appendChild(chartCard);
             
-            renderTemperatureChart(`chart-${deviceId}`, chartData);
+            renderTemperatureChart(`chart-${deviceId}`, chartData, period);
         }
     } catch (error) {
         console.error('Failed to load temperature data:', error);
@@ -1186,39 +1551,140 @@
     }
 }
 
-function renderTemperatureChart(canvasId, chartData) {
-    const ctx = document.getElementById(canvasId).getContext('2d');
-    new Chart(ctx, {
+    // Add this function to handle temperature history
+let temperatureHistoryChart = null;
+
+async function loadTemperatureHistory() {
+    try {
+        const period = document.getElementById('temp-history-period').value;
+        const deviceId = document.getElementById('temp-history-device').value;
+
+        // Build the URL correctly 
+        let url = `/api/user/temperature-history?period=${period}`;
+        if (deviceId && deviceId !== 'all') {
+            url += `&device_id=${deviceId}`;
+        }
+        
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+        const data = await response.json();
+        
+        // Update the table
+        const tableBody = document.getElementById('temperature-history-table');
+        tableBody.innerHTML = '';
+        
+        if (data.data && data.data.length > 0) {
+            data.data.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.device_id}</td>
+                    <td>${item.day}</td>
+                    <td>${item.hour}</td>
+                    <td>${item.avg_temp}°C</td>
+                    <td>${item.max_temp}°C</td>
+                    <td>${item.min_temp}°C</td>
+                `;
+                tableBody.appendChild(row);
+            });
+            
+            // Update the chart
+            updateTemperatureHistoryChart(data.data);
+        } else {
+            tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #94a3b8;">No temperature history data available</td></tr>';
+            if (temperatureHistoryChart) {
+                temperatureHistoryChart.destroy();
+                temperatureHistoryChart = null;
+            }
+        }
+    } catch (error) {
+        console.error('Error loading temperature history:', error);
+        showError('Failed to load temperature history');
+    }
+}
+
+function updateTemperatureHistoryChart(historyData) {
+    const ctx = document.getElementById('temperature-history-chart').getContext('2d');
+
+    if (!historyData || historyData.length === 0) {
+        if (temperatureHistoryChart) {
+            temperatureHistoryChart.destroy();
+            temperatureHistoryChart = null;
+        }
+        return;
+    } 
+    
+    // Group data by timestamp for charting
+    const sortedData = historyData.sort((a, b) => {
+        const dateA = new Date(`${a.date || a.day} ${a.hour}:00`);
+        const dateB = new Date(`${b.date || b.day} ${b.hour}:00`);
+        return dateA - dateB;
+    });
+
+    const labels = [];
+    const avgTemps = [];
+    const maxTemps = [];
+    const minTemps = [];
+    
+    // Process data for chart
+    sortedData.forEach(item => {
+      // Create appropriate label based on data 
+        let timeLabel ;
+        if (item.item && item.item !== '--') {
+            timeLabel = `${item.date || item.day} ${item.time}`;
+        } else if (item.hour && item.hour!== '--') {
+            timeLabel = `${item.date || item.day} ${item.hour}`;
+        } else {
+            timeLabel = item.date || item.day || '--';
+        }
+        labels.push(timeLabel);
+        avgTemps.push(parseFloat(item.avg_temp) || 0);
+        maxTemps.push(parseFloat(item.max_temp) || 0);
+        minTemps.push(parseFloat(item.min_temp) || 0);
+    });
+    historyData.forEach(item => {
+        const timeLabel = `${item.day} ${item.hour}`;
+        labels.push(timeLabel);
+        avgTemps.push(parseFloat(item.avg_temp) || 0);
+        maxTemps.push(parseFloat(item.max_temp) || 0);
+        minTemps.push(parseFloat(item.min_temp) || 0);
+    });
+    
+    // Destroy existing chart if it exists
+    if (temperatureHistoryChart) {
+        temperatureHistoryChart.destroy();
+    }
+    
+    // Create new chart
+    temperatureHistoryChart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: chartData.labels,
+            labels: labels,
             datasets: [
                 {
-                    label: 'Average Temp',
-                    data: chartData.avg_temperatures,
+                    label: 'Average Temperature',
+                    data: avgTemps,
                     borderColor: '#4ade80',
-                    backgroundColor: 'rgba(74, 222, 128, 0.1)',
-                    borderWidth: 2,
-                    tension: 0.1,
-                    fill: true
+                    backgroundColor: 'rgba(74,222,128,.15)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.3
                 },
                 {
-                    label: 'Max Temp',
-                    data: chartData.max_temperatures,
+                    label: 'Maximum Temperature',
+                    data: maxTemps,
                     borderColor: '#f97316',
-                    backgroundColor: 'rgba(249, 115, 22, 0.1)',
-                    borderWidth: 1,
                     borderDash: [5, 5],
-                    tension: 0.1
+                    borderWidth: 2,
+                    tension: 0.3
                 },
                 {
-                    label: 'Min Temp',
-                    data: chartData.min_temperatures,
+                    label: 'Minimum Temperature',
+                    data: minTemps,
                     borderColor: '#60a5fa',
-                    backgroundColor: 'rgba(96, 165, 250, 0.1)',
-                    borderWidth: 1,
                     borderDash: [5, 5],
-                    tension: 0.1
+                    borderWidth: 2,
+                    tension: 0.3
                 }
             ]
         },
@@ -1231,33 +1697,151 @@ function renderTemperatureChart(canvasId, chartData) {
                     labels: {
                         color: '#e2e8f0'
                     }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.dataset.label}: ${context.parsed.y}°C`;
+                        }
+                    }
                 }
             },
             scales: {
                 y: {
                     beginAtZero: false,
-                    grid: {
-                        color: 'rgba(255, 255, 255, 0.1)'
-                    },
-                    ticks: {
-                        color: '#e2e8f0'
-                    },
                     title: {
                         display: true,
-                        text: 'Temperature (Â°C)',
+                        text: 'Temperature (°C)',
+                        color: '#e2e8f0'
+                    },
+                    grid: {
+                        color: 'rgba(255,255,255,0.1)'
+                    },
+                    ticks: {
                         color: '#e2e8f0'
                     }
                 },
                 x: {
-                    grid: {
-                        color: 'rgba(255, 255, 255, 0.1)'
-                    },
-                    ticks: {
-                        color: '#e2e8f0'
-                    },
                     title: {
                         display: true,
                         text: 'Time',
+                        color: '#e2e8f0'
+                    },
+                    grid: {
+                        color: 'rgba(255,255,255,0.1)'
+                    },
+                    ticks: {
+                        color: '#e2e8f0',
+                        maxTicksLimit: 10 // Show only 10 labels for readability
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Update device dropdown when temperature tab is shown
+function populateDeviceDropdown() {
+    const deviceSelect = document.getElementById('temp-history-device');
+    const tempSensors = assignedDevices.filter(d => d.sensor_type === 'decode_PowerTemp');
+    
+    // Clear existing options except "All Devices"
+    deviceSelect.innerHTML = '<option value="all">All Devices</option>';
+    
+    tempSensors.forEach(device => {
+        const option = document.createElement('option');
+        option.value = device.device_id;
+        option.textContent = device.device_id;
+        deviceSelect.appendChild(option);
+    });
+}
+ 
+      function renderTemperatureChart(canvasId, chartData, period = 'Weekly') {
+    const ctx = document.getElementById(canvasId).getContext('2d');
+    
+    let xAxisLabel = 'Time';
+    if (period === 'Weekly') xAxisLabel = 'Days';
+    if (period === 'Monthly') xAxisLabel = 'Weeks';
+    if (period === 'Daily') xAxisLabel = 'Hours';
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: chartData.labels,
+            datasets: [
+                // Avg Temp
+                {
+                    label: 'Avg Temperature',
+                    data: chartData.avg_temperatures,
+                    borderColor: '#4ade80',
+                    backgroundColor: 'rgba(74,222,128,.15)',
+                    tension: 0.3,
+                    fill: true,
+                    borderWidth: 3
+                },
+                // Max Temp
+                {
+                    label: 'Max Temperature',
+                    data: chartData.max_temperatures,
+                    borderColor: '#f97316',
+                    borderDash: [5, 5],
+                    tension: 0.3,
+                    borderWidth: 2
+                },
+                // Min Temp
+                {
+                    label: 'Min Temperature',
+                    data: chartData.min_temperatures,
+                    borderColor: '#60a5fa',
+                    borderDash: [5, 5],
+                    tension: 0.3,
+                    borderWidth: 2
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        color: '#e2e8f0'
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.dataset.label}: ${context.parsed.y}°C`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    title: {
+                        display: true,
+                        text: 'Temperature (°C)',
+                        color: '#e2e8f0'
+                    },
+                    grid: {
+                        color: 'rgba(255,255,255,0.1)'
+                    },
+                    ticks: {
+                        color: '#e2e8f0'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: xAxisLabel,
+                        color: '#e2e8f0'
+                    },
+                    grid: {
+                        color: 'rgba(255,255,255,0.1)'
+                    },
+                    ticks: {
                         color: '#e2e8f0'
                     }
                 }
@@ -1265,63 +1849,541 @@ function renderTemperatureChart(canvasId, chartData) {
         }
     });
 }
-    function renderTemperatureChart(containerId, chartData) {
-        const ctx = document.getElementById(containerId).getContext('2d');
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: chartData.labels,
-                datasets: [
-                    {
-                        label: 'Average Temp',
-                        data: chartData.avg_temperatures,
-                        borderColor: '#4ade80',
-                        backgroundColor: 'rgba(74, 222, 128, 0.1)',
-                        tension: 0.1,
-                        fill: true
-                    },
-                    {
-                        label: 'Max Temp',
-                        data: chartData.max_temperatures,
-                        borderColor: '#f97316',
-                        backgroundColor: 'rgba(249, 115, 22, 0.1)',
-                        borderDash: [5, 5],
-                        tension: 0.1
-                    },
-                    {
-                        label: 'Min Temp',
-                        data: chartData.min_temperatures,
-                        borderColor: '#60a5fa',
-                        backgroundColor: 'rgba(96, 165, 250, 0.1)',
-                        borderDash: [5, 5],
-                        tension: 0.1
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: false,
-                        title: {
-                            display: true,
-                            text: 'Temperature (Â°C)'
-                        }
-                    },
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Time'
-                        }
-                    }
-                }
-            }
-        });
-    }
+
 
     // Call this when the page loads
     document.addEventListener('DOMContentLoaded', loadTemperatureCharts);
   </script>
+
+  <script>
+/* ===============================
+   WATER DETECTION HISTORY MODULE
+================================ */
+
+let waterDevicesList = [];
+
+// Load water detection history
+async function loadWaterDetectionHistory(period = 'Weekly', deviceId = 'all') {
+  try {
+    showLoading();
+
+    const response = await fetch(`/api/user/water-detection-history?period=${period}&device_id=${deviceId}`);
+    if (!response.ok)throw new Error(`HTTP error! status: ${response.status}`);
+    
+    const data = await response.json();
+
+     // Update device dropdown if needed
+            populateWaterDeviceDropdown();
+      
+        
+        // Update state changes timeline
+        updateWaterStateTimeline(data.state_changes);
+        
+        // Update history table
+        updateWaterHistoryTable(data.history);
+        
+        // Update summary stats
+        updateWaterDetectionStats(data.history);
+        
+    } catch (error) {
+        console.error('Error loading water detection history:', error);
+        showError('Failed to load water detection history');
+    } finally {
+        hideLoading();
+    }
+}
+
+// Populate water device dropdown
+function populateWaterDeviceDropdown() {
+    const deviceSelect = document.getElementById('water-history-device');
+    if (!deviceSelect) return;
+
+    // Clear and add options
+    deviceSelect.innerHTML = '<option value="all">All Devices</option>';
+
+    // Get water sensors from assigned devices
+    const waterDevices = assignedDevices.filter(d => d.sensor_type === 'decode_water_sensor');
+
+    if(waterDevices.length > 0) {
+        waterDevices.forEach(device => {
+            const option = document.createElement('option');
+            option.value = device.device_id;
+            option.textContent = device.device_id;
+            deviceSelect.appendChild(option);
+        });
+
+    waterDevicesList = waterDevices.map(d => d.device_id);
+    console.log('Water devices available for history:', waterDevicesList);
+      } else {
+        console.warn('No water sensor devices found in assigned devices');
+
+          // Also try to get from dashboard data
+          if (dashboardData.water_sensors && dashboardData.water_sensors.length > 0) {
+              dashboardData.water_sensors.forEach(sensor => {
+                  const option = document.createElement('option');
+                  option.value = sensor.device_id;
+                  option.textContent = sensor.device_id;
+                  deviceSelect.appendChild(option);
+              });
+
+              waterDevicesList = dashboardData.water_sensors.map(d => d.device_id);
+              console.log('Water devices from dashboard data:', waterDevicesList);
+            }
+          }
+        
+    
+    
+
+    
+    Array.from(devices).sort().forEach(deviceId => {
+        const option = document.createElement('option');
+        option.value = deviceId;
+        option.textContent = deviceId;
+        deviceSelect.appendChild(option);
+    });
+    
+    waterDevicesList = Array.from(devices);
+}
+
+// Update state changes timeline
+function updateWaterStateTimeline(stateChanges) {
+    const container = document.getElementById('water-state-changes');
+    if (!container) return;
+    
+    if (!stateChanges || stateChanges.length === 0) {
+        container.innerHTML = '<div class="no-data">No state changes recorded in this period</div>';
+        return;
+    }
+    
+    container.innerHTML = '';
+    
+    // Show only the most recent 20 state changes 
+
+    const recentChanges = stateChanges.slice(0, 20);
+
+    recentChanges.forEach(change => {
+        const eventDiv = document.createElement('div');
+        eventDiv.className = `timeline-event ${change.changed_to.toLowerCase()}`;
+        
+        const isWet = change.changed_to.toLowerCase() === 'wet';
+        
+        eventDiv.innerHTML = `
+            <span class="timeline-event-time">${change.date} ${change.time}</span>
+            <span class="timeline-event-device">${change.device_id}</span>
+            <span class="timeline-event-icon ${change.changed_to.toLowerCase()}">
+                <i class="fas ${isWet ? 'fa-tint' : 'fa-check-circle'}"></i>
+            </span>
+            <div class="timeline-event-change">
+                <span class="change-badge ${change.changed_from.toLowerCase()}">${change.changed_from}</span>
+                <span class="change-arrow"><i class="fas fa-arrow-right"></i></span>
+                <span class="change-badge ${change.changed_to.toLowerCase()}">${change.changed_to}</span>
+            </div>
+        `;
+        
+        container.appendChild(eventDiv);
+    });
+}
+
+// Update water history table
+function updateWaterHistoryTable(historyData) {
+    const tableBody = document.getElementById('water-history-table-body');
+    if (!tableBody) return;
+    
+    tableBody.innerHTML = '';
+    
+    if (!historyData || historyData.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="6" class="no-data">No water detection history available</td></tr>';
+        return;
+    }
+    
+    // Show only the most recent 50 entries to keep table manageable
+    const recentData = historyData.slice(0, 50);
+    
+    recentData.forEach(item => {
+        const row = document.createElement('tr');
+        const isWet = item.status.toLowerCase() === 'wet';
+        
+        row.innerHTML = `
+            <td class="device-id">${item.device_id}</td>
+            <td>${item.date}</td>
+            <td>${item.time}</td>
+            <td>
+                <span class="status-badge ${item.status.toLowerCase()}">
+                    <i class="fas ${isWet ? 'fa-tint' : 'fa-check'}"></i>
+                    ${item.status}
+                </span>
+            </td>
+            <td>${item.raw_value || '--'}</td>
+            <td>${item.battery ? item.battery + 'V' : '--'}</td>
+        `;
+        
+        tableBody.appendChild(row);
+    });
+}
+
+// Update water detection statistics
+function updateWaterDetectionStats(historyData) {
+    if (!historyData || historyData.length === 0) return;
+    
+    // Calculate stats
+    const totalEvents = historyData.length;
+    const wetEvents = historyData.filter(item => item.status.toLowerCase() === 'wet').length;
+    const dryEvents = totalEvents - wetEvents;
+    const wetPercentage = ((wetEvents / totalEvents) * 100).toFixed(1);
+    
+    // Update system status indicator
+    const statusIndicator = document.getElementById('water-system-status');
+    if (statusIndicator) {
+        const currentStatus = historyData[0]?.status.toLowerCase() === 'wet' ? 'alert' : 'active';
+        statusIndicator.className = `status-indicator ${currentStatus}`;
+    }
+    
+    // You can add additional stats display here if desired
+    console.log(`Water detection stats - Wet: ${wetPercentage}%, Dry: ${100 - wetPercentage}%`);
+}
+
+// Initialize water detection history listeners
+function setupWaterHistoryListeners() {
+    // Period selector
+    const periodSelect = document.getElementById('water-history-period');
+    if (periodSelect) {
+        periodSelect.addEventListener('change', function(e) {
+            const deviceSelect = document.getElementById('water-history-device');
+            const deviceId = deviceSelect ? deviceSelect.value : 'all';
+            loadWaterDetectionHistory(e.target.value, deviceId);
+        });
+    }
+    
+    // Device selector
+    const deviceSelect = document.getElementById('water-history-device');
+    if (deviceSelect) {
+        deviceSelect.addEventListener('change', function(e) {
+            const periodSelect = document.getElementById('water-history-period');
+            const period = periodSelect ? periodSelect.value : 'Weekly';
+            loadWaterDetectionHistory(period, e.target.value);
+        });
+    }
+    
+    // Refresh button
+    const refreshBtn = document.getElementById('refresh-water-history');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', function() {
+            const periodSelect = document.getElementById('water-history-period');
+            const deviceSelect = document.getElementById('water-history-device');
+            const period = periodSelect ? periodSelect.value : 'Weekly';
+            const deviceId = deviceSelect ? deviceSelect.value : 'all';
+            loadWaterDetectionHistory(period, deviceId);
+            
+            // Add rotation animation
+            this.classList.add('rotating');
+            setTimeout(() => this.classList.remove('rotating'), 500);
+        });
+    }
+}
+
+// Load water history (Legacy function)
+async function loadWaterHistory(period = 'Weekly') {
+    await loadWaterDetectionHistory(period, 'all');
+}
+
+
+// Override fetchSensorData to update water history
+const originalFetchSensorData = window.fetchSensorData;
+if (originalFetchSensorDataForWater){
+window.fetchSensorData = async function() {
+    await originalFetchSensorData.apply(this, arguments);
+}
+
+    
+    // If we're on the water detection tab, refresh the history
+    const activeTab = document.querySelector('.tab-pane.active')?.id;
+    if (activeTab === 'water-detection-tab') {
+        const periodSelect = document.getElementById('water-history-period');
+        const deviceSelect = document.getElementById('water-history-device');
+        const period = periodSelect ? periodSelect.value : 'Weekly';
+        const deviceId = deviceSelect ? deviceSelect.value : 'all';
+        loadWaterDetectionHistory(period, deviceId);
+    }
+};
+
+   
+</script>
+
+<script>
+/* ===============================
+   DOOR OPEN / CLOSE ALERT MODULE
+================================ */
+
+let lastDoorStates = {};
+
+// Poll every 5 seconds
+setInterval(checkDoorStatusAlerts, 5000);
+
+async function checkDoorStatusAlerts() {
+  try {
+    const res = await fetch('/api/user/data');
+    const data = await res.json();
+
+    if (!data.door_sensors) return;
+
+    data.door_sensors.forEach(sensor => {
+      const currentState = sensor.status; // 'open' or 'closed'
+      const previousState = lastDoorStates[sensor.device_id];
+
+      // First time seeing this door → just store state
+      if (previousState === undefined) {
+        lastDoorStates[sensor.device_id] = currentState;
+        return;
+      }
+
+      // State changed → show alert
+      if (currentState !== previousState) {
+        showDoorToast(sensor.device_id, currentState);
+        lastDoorStates[sensor.device_id] = currentState;
+      }
+    });
+
+  } catch (err) {
+    console.error('Door alert error:', err);
+  }
+}
+
+function showDoorToast(deviceId, state) {
+  const toast = document.createElement('div');
+  toast.className = `toast ${state === 'open' ? 'error' : 'success'}`;
+  toast.innerHTML = `
+    <i class="fas ${state === 'open' ? 'fa-door-open' : 'fa-lock'}"></i>
+    <span>
+      Door ${deviceId} ${state === 'open' ? 'opened' : 'closed'}
+    </span>
+  `;
+
+  document.body.appendChild(toast);
+
+  setTimeout(() => toast.classList.add('show'), 50);
+
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 300);
+  }, 5000);
+}
+
+let doorDevicesList = [];
+
+// Load door history
+async function loadDoorHistory(period = 'Weekly', deviceId = 'all') {
+    try {
+        showLoading();
+        
+        const response = await fetch(`/api/user/door-history?period=${period}&device_id=${deviceId}`);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        
+        const data = await response.json();
+        
+        // Update device dropdown
+        populateDoorDeviceDropdown();
+        
+        // Update state changes timeline
+        updateDoorStateTimeline(data.state_changes);
+        
+        // Update history table
+        updateDoorHistoryTable(data.history);
+        
+        // Update system status
+        updateDoorSystemStatus(data.history);
+        
+    } catch (error) {
+        console.error('Error loading door history:', error);
+        showError('Failed to load door history');
+
+        // Still try to populate device dropdown even if history fails, so user can attempt to load again
+        populateDoorDeviceDropdown();
+    } finally {
+        hideLoading();
+    }
+}
+
+// Populate door device dropdown
+function populateDoorDeviceDropdown() {
+    const deviceSelect = document.getElementById('door-history-device');
+    if (!deviceSelect) return;
+
+    // Clear existing options
+    deviceSelect.innerHTML = '<option value="all">All Doors</option>';
+
+     // Get door devices from assignedDevices
+    const doorDevices = assignedDevices.filter(d => d.sensor_type === 'decode_magnetic_sensor');
+    
+    if (doorDevices.length > 0) {
+        doorDevices.forEach(device => {
+            const option = document.createElement('option');
+            option.value = device.device_id;
+            option.textContent = device.device_id;
+            deviceSelect.appendChild(option);
+        });
+        
+        doorDevicesList = doorDevices.map(d => d.device_id);
+        console.log('Door devices populated:', doorDevicesList);
+    } else {
+        console.warn('No door devices found in assignedDevices');
+    }
+}
+
+// Update door state changes timeline
+function updateDoorStateTimeline(stateChanges) {
+    const container = document.getElementById('door-state-changes');
+    if (!container) return;
+    
+    if (!stateChanges || stateChanges.length === 0) {
+        container.innerHTML = '<div class="no-data">No door state changes recorded in this period</div>';
+        return;
+    }
+    
+    container.innerHTML = '';
+    
+    // Show only the most recent 20 state changes
+    const recentChanges = stateChanges.slice(0, 20);
+    
+    recentChanges.forEach(change => {
+        const eventDiv = document.createElement('div');
+        eventDiv.className = `timeline-event ${change.changed_to.toLowerCase()}`;
+        
+        const isOpen = change.changed_to.toLowerCase() === 'open';
+        
+        eventDiv.innerHTML = `
+            <span class="timeline-event-time">${change.date} ${change.time}</span>
+            <span class="timeline-event-device">${change.device_id}</span>
+            <span class="timeline-event-icon ${change.changed_to.toLowerCase()}">
+                <i class="fas ${isOpen ? 'fa-door-open' : 'fa-door-closed'}"></i>
+            </span>
+            <div class="timeline-event-change">
+                <span class="change-badge ${change.changed_from.toLowerCase()}">${change.changed_from}</span>
+                <span class="change-arrow"><i class="fas fa-arrow-right"></i></span>
+                <span class="change-badge ${change.changed_to.toLowerCase()}">${change.changed_to}</span>
+            </div>
+        `;
+        
+        container.appendChild(eventDiv);
+    });
+}
+
+// Update door history table
+function updateDoorHistoryTable(historyData) {
+    const tableBody = document.getElementById('door-history-table-body');
+    if (!tableBody) return;
+    
+    tableBody.innerHTML = '';
+    
+    if (!historyData || historyData.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="5" class="no-data">No door history available</td></tr>';
+        return;
+    }
+    
+    // Show most recent 30 entries
+    const recentData = historyData.slice(0, 30);
+    
+    recentData.forEach(item => {
+        const row = document.createElement('tr');
+        const isOpen = item.status.toLowerCase() === 'open';
+        
+        row.innerHTML = `
+            <td class="device-id">${item.device_id}</td>
+            <td>${item.date}</td>
+            <td>${item.time}</td>
+            <td>
+                <span class="door-status-badge ${item.status.toLowerCase()}">
+                    <i class="fas ${isOpen ? 'fa-door-open' : 'fa-door-closed'}"></i>
+                    ${item.status}
+                </span>
+            </td>
+            <td>${item.battery ? item.battery + 'V' : '--'}</td>
+        `;
+        
+        tableBody.appendChild(row);
+    });
+}
+
+// Update door system status indicator
+function updateDoorSystemStatus(historyData) {
+    const statusIndicator = document.getElementById('door-system-status');
+    if (!statusIndicator) return;
+    
+    if (!historyData || historyData.length === 0) {
+        statusIndicator.className = 'status-indicator active';
+        return;
+    }
+    
+    // Check if any door is currently open (most recent status per device)
+    const deviceStatus = {};
+    historyData.forEach(item => {
+        if (!deviceStatus[item.device_id]) {
+            deviceStatus[item.device_id] = item;
+        }
+    });
+    
+    const anyOpen = Object.values(deviceStatus).some(item => item.status.toLowerCase() === 'open');
+    statusIndicator.className = `status-indicator ${anyOpen ? 'alert' : 'active'}`;
+}
+
+// Setup door history listeners
+function setupDoorHistoryListeners() {
+    // Period selector
+    const periodSelect = document.getElementById('door-history-period');
+    if (periodSelect) {
+        periodSelect.addEventListener('change', function(e) {
+            const deviceSelect = document.getElementById('door-history-device');
+            const deviceId = deviceSelect ? deviceSelect.value : 'all';
+            loadDoorHistory(e.target.value, deviceId);
+        });
+    }
+    
+    // Device selector
+    const deviceSelect = document.getElementById('door-history-device');
+    if (deviceSelect) {
+        deviceSelect.addEventListener('change', function(e) {
+            const periodSelect = document.getElementById('door-history-period');
+            const period = periodSelect ? periodSelect.value : 'Weekly';
+            loadDoorHistory(period, e.target.value);
+        });
+    }
+    
+    // Refresh button
+    const refreshBtn = document.getElementById('refresh-door-history');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', function() {
+            const periodSelect = document.getElementById('door-history-period');
+            const deviceSelect = document.getElementById('door-history-device');
+            const period = periodSelect ? periodSelect.value : 'Weekly';
+            const deviceId = deviceSelect ? deviceSelect.value : 'all';
+            loadDoorHistory(period, deviceId);
+            
+            // Add rotation animation
+            this.classList.add('rotating');
+            setTimeout(() => this.classList.remove('rotating'), 500);
+        });
+    }
+}
+
+// Override the existing door alert module to also update history
+const originalCheckDoorStatusAlerts = window.checkDoorStatusAlerts || function() {};
+window.checkDoorStatusAlerts = async function() {
+    if (typeof originalCheckDoorStatusAlerts === 'function') {
+        await originalCheckDoorStatusAlerts.apply(this, arguments);
+    }
+    
+    // If we're on the door status tab, refresh the history
+    const activeTab = document.querySelector('.tab-pane.active')?.id;
+    if (activeTab === 'door-status-tab') {
+        const periodSelect = document.getElementById('door-history-period');
+        const deviceSelect = document.getElementById('door-history-device');
+        const period = periodSelect ? periodSelect.value : 'Weekly';
+        const deviceId = deviceSelect ? deviceSelect.value : 'all';
+        loadDoorHistory(period, deviceId);
+    }
+};
+
+</script>
+
+
 </body>
 </html>
