@@ -297,9 +297,12 @@
           <button class="tab-btn" onclick="showTab('door-status')">
             <i class="fas fa-door-closed"></i> Door Status
           </button>
+          <button class ="tab-btn" onclick="showTab('tank-level')">
+            <i class="fas fa-water"></i> Tank Level
+          </button>
         </div>
 
-        <!-- Tab Content Container -->
+                <!-- Tab Content Container -->
         <div class="tab-content">
           
           <!-- Overview Tab -->
@@ -340,304 +343,443 @@
                 <div class="overview-value" id="overview-door">--</div>
                 <div class="overview-status" id="overview-door-status">--</div>
               </div>
+          
+          <div class ="overview-card" style="background: linear-gradient(135deg, #0f172a, #1e293b);">
+            <div class="overview-header">
+              <i class = "fas fa-water" style="color:#3b82f6"></i>
+              <h5>Tank Level</h5>
             </div>
+            <div class="overview-value" id="overview-tank">--%</div>
+            <div class="overview-status" id="overview-tank-status">--</div>
+          </div>
+          </div>
           </div>
 
           <!-- Temperature Tab -->
-        <div class="tab-pane" id="temperature-tab">
-          <!-- Temperature Subtabs -->
-           <div class = "temperature-subtabs">
-            <button class = "temp-subtab-btn active" onclick="showTempSubTab('current')">
-              <i class="fas fa-thermometer-half"></i> Current Temperature
-            </button>
-            <button class = "temp-subtab-btn" onclick="showTempSubTab('historical')">
+          <div class="tab-pane" id="temperature-tab">
+            <!-- Temperature Subtabs -->
+            <div class="temperature-subtabs">
+              <button class="temp-subtab-btn active" onclick="showTempSubTab('current')">
+                <i class="fas fa-thermometer-half"></i> Current Temperature
+              </button>
+              <button class="temp-subtab-btn" onclick="showTempSubTab('historical')">
                 <i class="fas fa-history"></i> Temperature History
-            </button>
-    </div>
-
-      <!-- Current Temperature Subtabs -->
-       <div id = "current-temp-subtab" class = "temp-subtab-content active">
-
-        <!-- Sensor Monitoring Card -->
-    <div class="main-card sensor-monitoring-card">
-        <div class="card-header">
-          <h3><i class="fas fa-broadcast-tower"></i> Live Temperature Monitoring</h3>
+              </button>
             </div>
-            <div class ="sensor-section">
-              <div class = "section-header">
-                <div class = "temp-display">
-                  <span class = "temp-value" id = "avg-temp">--</span>
-                  <span class = "temp-unit">°C</span>
-                  </div>
-                  </div>
-              <div class="sensors-grid" id="temp-sensors-grid">
-                <!-- Temperature sensors populated here -->
-              </div>
-            </div>
-          </div>
 
-
-    <!-- Temperature Trends Card -->
-    <div class="main-card trends-card">
-        <div class="card-header">
-            <h3><i class="fas fa-chart-line"></i> Temperature Trends</h3>
-            <div class="analytics-controls">
-                  <select id="temp-period-select" class="period-selector">
-                    <option value="Daily">Daily</option>
-                    <option value="Weekly" selected>Weekly</option>
-                    <option value="Monthly">Monthly</option>
-                    <option value="All">All Time</option>
-                </select>
-              </div>
-        </div>
-        <div id="temperature-charts-container" class="temperature-charts-wrapper"></div>
+            <!-- Current Temperature Subtabs -->
+            <div id="current-temp-subtab" class="temp-subtab-content active">
+              <!-- Sensor Monitoring Card -->
+              <div class="main-card sensor-monitoring-card">
+                <div class="card-header">
+                  <h3><i class="fas fa-broadcast-tower"></i> Live Temperature Monitoring</h3>
                 </div>
+                <div class="sensor-section">
+                  <div class="section-header">
+                    <div class="temp-display">
+                      <span class="temp-value" id="avg-temp">--</span>
+                      <span class="temp-unit">°C</span>
                     </div>
-                    <!--Historical Temperature Subtabs-->
-                    <div id = "historical-temp-subtab" class = "temp-subtab-content">
-                      <!-- Temperature History Chart Card -->
-                       <div class="main-card history-chart-card">
-                        <div class = "card-header">
-                          <h3><i class="fas fa-chart-area"></i> Temperature History</h3>
-                          <div class="analytics-controls">
-                            <select id="temp-history-period" class="period-selector">
-                              <option value="Daily">Daily</option>
-                              <option value="Weekly" selected>Weekly</option>
-                              <option value="Monthly">Monthly</option>
-                              <option value="All">All Time</option>
-                            </select>
-                            <select id="temp-history-device" class="period-selector">
-                              <option value="all">All Devices</option>
-                              <!-- Device options populated by JavaScript -->
-                            </select>
-            </div>
-        </div>
-        <div class="card-container">
-          <canvas id = "temperature-history-chart"></canvas>
-        </div>
-        </div>
+                  </div>
+                  <div class="sensors-grid" id="temp-sensors-grid">
+                    <!-- Temperature sensors populated here -->
+                  </div>
+                </div>
+              </div>
 
-        <!-- Temperature History Table Card -->
-        <div class="main-card history-table-card">
-        <div class="card-header">
-            <h3><i class="fas fa-table"></i> Temperature History Data</h3>
-        </div>
-        <div class="history-table-container">
-            <table class="devices-table" >
-                <thead>
-                    <tr>
+              <!-- Temperature Trends Card -->
+              <div class="main-card trends-card">
+                <div class="card-header">
+                  <h3><i class="fas fa-chart-line"></i> Temperature Trends</h3>
+                  <div class="analytics-controls">
+                    <select id="temp-period-select" class="period-selector">
+                      <option value="Daily">Daily</option>
+                      <option value="Weekly" selected>Weekly</option>
+                      <option value="Monthly">Monthly</option>
+                      <option value="All">All Time</option>
+                    </select>
+                    <!-- All devices dropdown-->
+                     <select id = "temp-trends-device" class = "period-selector">
+                      <option value = "all">All Devices</option>
+                      <!--Device options populated by JavaScript-->
+                     </select>
+                  </div>
+                </div>
+                <div id="temperature-charts-container" class="temperature-charts-wrapper"></div>
+              </div>
+            </div>
+
+            <!-- Historical Temperature Subtabs -->
+            <div id="historical-temp-subtab" class="temp-subtab-content">
+              <!-- Temperature History Chart Card -->
+              <div class="main-card history-chart-card">
+                <div class="card-header">
+                  <h3><i class="fas fa-chart-area"></i> Temperature History</h3>
+                  <div class="analytics-controls">
+                    <select id="temp-history-period" class="period-selector">
+                      <option value="Daily">Daily</option>
+                      <option value="Weekly" selected>Weekly</option>
+                      <option value="Monthly">Monthly</option>
+                      <option value="All">All Time</option>
+                    </select>
+                    <select id="temp-history-device" class="period-selector">
+                      <option value="all">All Devices</option>
+                      <!-- Device options populated by JavaScript -->
+                    </select>
+                  </div>
+                </div>
+                <div class="card-container">
+                  <canvas id="temperature-history-chart"></canvas>
+                </div>
+              </div>
+
+              <!-- Temperature History Table Card -->
+              <div class="main-card history-table-card">
+                <div class="card-header">
+                  <h3><i class="fas fa-table"></i> Temperature History Data</h3>
+                </div>
+                <div class="history-table-container">
+                  <table class="devices-table">
+                    <thead>
+                      <tr>
                         <th>Device ID</th>
                         <th>Date</th>
                         <th>Time</th>
                         <th>Avg Temp</th>
                         <th>Max Temp</th>
                         <th>Min Temp</th>
-                    </tr>
-                </thead>
-                <tbody id="temperature-history-table">
-                    <!-- History data will be populated here -->
-                </tbody>
-            </table>
-        </div>
-    </div>
-    </div>
-  </div>
+                      </tr>
+                    </thead>
+                    <tbody id="temperature-history-table">
+                      <!-- History data will be populated here -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
 
-          <!-- Water Flow Tab -->
-          <div class="tab-pane" id="water-flow-tab">
-            <div class="sensor-section">
-              <div class="section-header">
+         <!-- Water Flow Tab -->
+<div class="tab-pane" id="water-flow-tab">
+    <!-- Water Flow Subtabs -->
+    <div class="water-subtabs">
+        <button class="water-subtab-btn active" onclick="showWaterFlowSubTab('current')">
+            <i class="fas fa-wave-square"></i> Current Flow
+        </button>
+        <button class="water-subtab-btn" onclick="showWaterFlowSubTab('historical')">
+            <i class="fas fa-history"></i> Flow History
+        </button>
+    </div>
+
+    <!-- Current Flow Subtab -->
+    <div id="current-flow-subtab" class="water-subtab-content active">
+        <div class="sensor-section">
+            <div class="section-header">
                 <h4><i class="fas fa-wave-square"></i> Water Flow Monitoring</h4>
                 <div class="flow-metrics">
-                  <div class="mini-metric">
-                    <span id="pulse-count">--</span>
-                    <small>Pulses</small>
+                    <div class="mini-metric">
+                        <span id="pulse-count">--</span>
+                        <small>Pulses</small>
+                    </div>
+                </div>
+            </div>
+            <div class="leak-status">
+                <div class="leak-indicator" id="leak-indicator"></div>
+                <span id="leak-text">No Data</span>
+            </div>
+        </div>
+        
+        <!-- Water Usage Charts Section -->
+        <div class="charts-section">
+            <div class="card-header">
+                <h3>Water Usage Analytics</h3>
+                <div class="analytics-controls">
+                    <select id="period-select" class="period-selector">
+                        <option value="Daily">Daily</option>
+                        <option value="Weekly" selected>Weekly</option>
+                        <option value="Monthly">Monthly</option>
+                        <option value="All">All Time</option>
+                    </select>
+                    <select id="water-device-select" class="period-selector">
+                      <option value ="all">All Devices</option>
+                      <!--Device options populated by JavaScript-->
+                    </select>
+                </div>
+            </div>
+            
+            <div class="usage-summary">
+                <div class="usage-metric">
+                    <div class="usage-value" id="total-usage">--</div>
+                    <div class="usage-label">Total Usage (L)</div>
+                </div>
+                <div class="usage-metric cost">
+                    <div class="usage-value" id="water-cost">--</div>
+                    <div class="usage-label">Estimated Cost</div>
+                </div>
+                <div class="usage-metric efficiency">
+                    <div class="usage-value" id="efficiency">--</div>
+                    <div class="usage-label">Efficiency</div>
+                </div>
+            </div>
+            
+            <div class="chart-wrapper">
+                <canvas id="water-usage-chart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Historical Flow Subtab -->
+    <div id="historical-flow-subtab" class="water-subtab-content">
+        <!-- Water Flow History Card -->
+        <div class="main-card water-history-card">
+            <div class="card-header">
+                <h3><i class="fas fa-history"></i> Water Flow History</h3>
+                <div class="analytics-controls">
+                    <select id="flow-history-period" class="period-selector">
+                        <option value="Daily">Daily</option>
+                        <option value="Weekly" selected>Weekly</option>
+                        <option value="Monthly">Monthly</option>
+                        <option value="All">All Time</option>
+                    </select>
+                    <select id="flow-history-device" class="period-selector">
+                        <option value="all">All Devices</option>
+                        <!-- Device options populated by JavaScript -->
+                    </select>
+                    <button id="refresh-flow-history" class="refresh-btn">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Detailed History Table -->
+            <div class="history-table-container">
+                <table class="devices-table" id="flow-history-table">
+                    <thead>
+                        <tr>
+                            <th>Device ID</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Pulse Count</th>
+                            <th>Water Used (L)</th>
+                            <th>Leak Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="flow-history-table-body">
+                        <!-- History data will be populated here -->
+                        <tr><td colspan="6" class="no-data">No flow history available</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+          <!-- Water Detection Tab -->
+          <div class="tab-pane" id="water-detection-tab">
+             <!-- Water Detection Subtabs -->
+    <div class="water-subtabs">
+        <button class="water-subtab-btn active" onclick="showWaterSubTab('current')">
+            <i class="fas fa-tint"></i> Current Status
+        </button>
+        <button class="water-subtab-btn" onclick="showWaterSubTab('historical')">
+            <i class="fas fa-history"></i> History
+        </button>
+    </div>
+
+        <!--Current Water Status Subtab-->
+        <div id = "current-water-subtab" class = "water-subtab-content active">
+            <!--Current Status Card-->
+            <div class="main-card water-status-card">
+              <div class="card-header">
+                <h3><i class="fas fa-tint"></i> Current Water Detection Status</h3>
+                <div class="status-indicator" id="water-system-status"></div>
+              </div>
+              <div class="sensor-section">
+                <div class="detection-group">
+                  <h5><i class="fas fa-sensor"></i> Water Detection Sensors</h5>
+                  <div class="sensors-mini-grid" id="water-sensors-grid">
+                    <!-- Water sensors populated here -->
                   </div>
                 </div>
               </div>
-              <div class="leak-status">
-                <div class="leak-indicator" id="leak-indicator"></div>
-                <span id="leak-text">No Data</span>
-              </div>
             </div>
-            
-            <!-- Water Usage Charts Section -->
-            <div class="charts-section" >
+            </div>
+
+            <!--Historical Water Status Subtab-->
+            <div id="historical-water-subtab" class="water-subtab-content">
+
+            <!-- Water Detection History Card-->
+            <div class="main-card water-history-card">
               <div class="card-header">
-                <h3>Water Usage Analytics</h3>
+                <h3><i class="fas fa-history"></i> Water Detection History</h3>
                 <div class="analytics-controls">
-                  <select id="period-select" class="period-selector">
+                  <select id="water-history-period" class="period-selector">
                     <option value="Daily">Daily</option>
                     <option value="Weekly" selected>Weekly</option>
                     <option value="Monthly">Monthly</option>
                     <option value="All">All Time</option>
                   </select>
+                  <select id="water-history-device" class="period-selector">
+                    <option value="all">All Devices</option>
+                    <!-- Device options populated by JavaScript -->
+                  </select>
+                  <button id="refresh-water-history" class="refresh-btn">
+                    <i class="fas fa-sync-alt"></i>
+                  </button>
                 </div>
               </div>
               
-              <div class="usage-summary">
-                <div class="usage-metric">
-                  <div class="usage-value" id="total-usage">--</div>
-                  <div class="usage-label">Total Usage (L)</div>
-                </div>
-                <div class="usage-metric cost">
-                  <div class="usage-value" id="water-cost">--</div>
-                  <div class="usage-label">Estimated Cost</div>
-                </div>
-                <div class="usage-metric efficiency">
-                  <div class="usage-value" id="efficiency">--</div>
-                  <div class="usage-label">Efficiency</div>
-                </div>
-              </div>
-              
-              <div class="chart-wrapper">
-                <canvas id="water-usage-chart"></canvas>
+              <!-- Detailed History Table -->
+              <div class="history-table-container">
+                <table class="devices-table" id="water-history-table">
+                  <thead>
+                    <tr>
+                      <th>Device ID</th>
+                      <th>Date</th>
+                      <th>Time</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="water-history-table-body">
+                    <!-- History data will be populated here -->
+                    <tr><td colspan="4" class="no-data">No water detection history available</td></tr>
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
+          </div>
 
-          <!-- Water Detection Tab -->
-          <div class="tab-pane" id="water-detection-tab">
-            <!--Current Status Card-->
-            <div class = "main-card water-status-card">
-              <div class = "card-header">
-                <h3><i class="fas fa-tint"></i> Current Water Detection Status</h3>
-                <div class = "status-indicator" id="water-system-status"></div>
-              </div>
-              <div class = "sensor-section">
-                <div class = "detection-group">
-                  <h5><i class="fas fa-sensor"></i>Water Detection Sensors</h5>
-                  <div class="sensors-mini-grid" id="water-sensors-grid">
-                    <!-- Water sensors populated here -->
+          <!-- Door Status Tab -->
+          <div class="tab-pane" id="door-status-tab">
+            <!-- Door Subtabs -->
+            <div class="door-subtabs">
+              <button class="door-subtab-btn active" onclick="showDoorSubTab('current')">
+                <i class="fas fa-door-closed"></i> Current Status
+              </button>
+              <button class="door-subtab-btn" onclick="showDoorSubTab('historical')">
+                <i class="fas fa-history"></i> History
+              </button>
+            </div>
+
+            <!-- Current Door Status Subtab -->
+            <div id="current-door-subtab" class="door-subtab-content active">
+              <!-- Current Door Status Card-->
+              <div class="main-card door-status-card">
+                <div class="card-header">
+                  <h3><i class="fas fa-door-closed"></i> Door Status Monitoring</h3>
+                  <div class="status-indicator" id="door-system-status"></div>
+                </div>
+
+                <!-- Current Door Sensors -->
+                <div class="sensor-section">
+                  <div class="section-header">
+                    <h4><i class="fas fa-sensor"></i> Current Door Status</h4>
+                    <div class="last-updated-badge" id="door-last-updated">
+                      <i class="fas fa-clock"></i> <span>Just now</span>
+                    </div>
+                  </div>
+                  <div class="sensors-mini-grid" id="door-sensors-grid">
+                    <!-- Door sensors populated here -->
                   </div>
                 </div>
-                </div>
+              </div>
+            </div>
+
+            <!-- Historical Door Status Subtab -->
+            <div id="historical-door-subtab" class="door-subtab-content">
+              <!-- Door History Card -->
+              <div class="main-card door-history-card">
+                <div class="card-header">
+                  <h3><i class="fas fa-history"></i> Door History</h3>
+                  <div class="analytics-controls">
+                    <select id="door-history-period" class="period-selector">
+                      <option value="Daily">Daily</option>
+                      <option value="Weekly" selected>Weekly</option>
+                      <option value="Monthly">Monthly</option>
+                      <option value="All">All Time</option>
+                    </select>
+                    <select id="door-history-device" class="period-selector">
+                      <option value="all">All Doors</option>
+                      <!-- Device options populated by JavaScript -->
+                    </select>
+                    <button id="refresh-door-history" class="refresh-btn">
+                      <i class="fas fa-sync-alt"></i>
+                    </button>
+                  </div>
                 </div>
 
-  <!-- Water Detection History Card-->
-  <div class="main-card water-history-card">
-    <div class="card-header">
-      <h3><i class="fas fa-history"></i> Water Detection History</h3>
-      <div class = "analytics-controls">
-      <select id="water-history-period" class="period-selector">
-        <option value="Daily">Daily</option>
-        <option value="Weekly" selected>Weekly</option>
-        <option value="Monthly">Monthly</option>
-        <option value="All">All Time</option>
-      </select>
-    <select id = "water-history-device" class="period-selector">
-      <option value="all">All Devices</option>
-      <!--Device options populated by JavaScript -->
-    </select>
-      <button id="refresh-water-history" class="refresh-btn">
-        <i class = "fas fa-sync-alt"></i>
-        </button>
-        </div>
-        </div>
-
-                  
-        <!-- State Change Timeline -->
-        <div class="timeline-container" id="water-timeline-container">
-            <div class="timeline-header">
-                <span class="timeline-title">State Change Timeline</span>
-                <span class="timeline-subtitle">When devices detected water or became dry</span>
-            </div>
-            <div id="water-state-changes" class="timeline-events">
-                <!-- State changes will be populated here -->
-            </div>
+                <!-- Detailed History Table -->
+                <div class="history-table-container">
+                  <table class="devices-table" id="door-history-table">
+                    <thead>
+                      <tr>
+                        <th>Device ID</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody id="door-history-table-body">
+                      <!-- History data will be populated here -->
+                      <tr><td colspan="4" class="no-data">No door history available</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+    
+        <!-- Tank Level Tab -->
+<div class="tab-pane" id="tank-level-tab">
+    <!-- Current Tank Level Card -->
+    <div class="main-card tank-level-card">
+        <div class="card-header">
+            <h3><i class="fas fa-water"></i> Tank Level Monitoring</h3>
+            <div class="status-indicator" id="tank-system-status"></div>
         </div>
         
-        <!-- Detailed History Table -->
+        <div class="tank-level-grid" id="tank-sensors-grid">
+            <!-- Tank sensors populated here -->
+        </div>
+    </div>
+
+    <!-- Tank Level History Card -->
+    <div class="main-card">
+        <div class="card-header">
+            <h3><i class="fas fa-history"></i> Tank Level History</h3>
+            <div class="analytics-controls">
+                <select id="tank-history-period" class="period-selector">
+                    <option value="Daily">Daily</option>
+                    <option value="Weekly" selected>Weekly</option>
+                    <option value="Monthly">Monthly</option>
+                    <option value="All">All Time</option>
+                </select>
+                <select id="tank-history-device" class="period-selector">
+                    <option value="all">All Tanks</option>
+                    <!-- Device options populated by JavaScript -->
+                </select>
+            </div>
+        </div>
+
+        <!-- History Table -->
         <div class="history-table-container">
-            <table class="devices-table" id="water-history-table">
+            <table class="devices-table">
                 <thead>
                     <tr>
-                        <th><i class="fas fa-microchip"></i> Device ID</th>
-                        <th><i class="fas fa-calendar"></i> Date</th>
-                        <th><i class="fas fa-clock"></i> Time</th>
-                        <th><i class="fas fa-water"></i> Status</th>
-                        <th><i class="fas fa-chart-line"></i> Raw Value</th>
-                        <th><i class="fas fa-battery"></i> Battery</th>
+                        <th>Device ID</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Level (%)</th>
+                        <th>Battery (V)</th>
+                        <th>Status</th>
                     </tr>
                 </thead>
-                <tbody id="water-history-table-body">
+                <tbody id="tank-history-table-body">
                     <!-- History data will be populated here -->
+                    <tr><td colspan="6" class="no-data">No tank level history available</td></tr>
                 </tbody>
             </table>
         </div>
     </div>
 </div>
-
-          <!-- Door Status Tab -->
-          <div class="tab-pane" id="door-status-tab">
-            <!-- Current Door Status Card-->
-            <div class="main-card door-status-card">
-              <div class="card-header">
-                <h3><i class="fas fa-door-closed"></i> Current Door Status </h3>
-                <div class = "status-indicator" id="door-system-status"></div>
-              </div>
-              <div class = "sensor-section">
-              <div class="detection-group">
-                <h5><i class="fas fa-sensor"></i>Magnetic Door Sensors</h5>
-                <div class="sensors-mini-grid" id="door-sensors-grid">
-                  <!-- Door sensors populated here -->
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!--Door History Card-->
-          <div class="main-card door-history-card">
-            <div class="card-header">
-              <h3><i class="fas fa-history"></i> Door Status History</h3>
-              <div class="analytics-controls">
-                <select id="door-history-period" class="period-selector">
-                  <option value="Daily">Daily</option>
-                  <option value="Weekly" selected>Weekly</option>
-                  <option value="Monthly">Monthly</option>
-                  <option value="All">All Time</option>
-                </select>
-              <select id = "door-history-device" class="period-selector">
-                <option value="all">All Doors</option>
-                <!--Device options populated by JavaScript -->
-              </select>
-                <button id="refresh-door-history" class="refresh-btn">
-                  <i class="fas fa-sync-alt"></i>
-                </button>
-              </div>
-            </div>
-
-            <!-- State Change Timeline-->
-             <div class = "timeline-container door-history-timeline">
-              <div class = "timeline-header">
-                <span class = "timeline-title">
-                  <i class = "fas fa-exchange-alt"></i> Door State Changes
-                </span>
-                </div>
-                <div id = "door-state-changes" class = "timeline-events">
-                  <!-- State changes will be populated here -->
-                   <div class = "no-data">No door state changes recorded in this period</div> 
-                   </div>
-        </div>
-
-        <!--Detailed History Table-->
-        <div class = "history-table-container door-history-table">
-          <table class = "devices-table" id = "door-history-table">
-            <thead>
-              <tr>
-                <th><i class = "fas fa-microchip">Device ID</i></th>
-                <th><i class = "fas fa-calender"></i> Date</th>
-                <th><i class = "fas fa-clock">Time</i></th>
-                <th><i class = "fas fa-door-closed"></i>Status</th>
-                <th><i class = "fas fa-battery"></i>Battery</th>
-              </tr>
-            </thead>
-            <tbody id = "door-history-table-body">
-              <!-- Door history data will be populated here -->
-               </tbody>
-            </table>
-            </div>
-        
         <!-- Tab functionality script -->
         <script>
         function showTab(tabName) {
@@ -654,6 +796,7 @@
             
             // Populate device dropdown 
             populateDeviceDropdown();
+            populateTrendsDeviceDropdown();
 
             // Set up temperature history isteners
             setupTemperatureHistoryListeners();
@@ -687,6 +830,12 @@
               // Populate water device dropdown
               populateWaterDeviceDropdown();
 
+              // Check which subtab is active
+        const activeSubtabBtn = document.querySelector('#water-detection-tab .water-subtab-btn.active');
+        if (activeSubtabBtn) {
+            const subTabName = activeSubtabBtn.textContent.includes('Current') ? 'current' : 'historical';
+            if (subTabName === 'historical') {
+
               // Load water detection history
               const periodSelect = document.getElementById('water-history-period');
               const deviceSelect = document.getElementById('water-history-device');
@@ -696,25 +845,42 @@
               if (typeof loadWaterDetectionHistory === 'function') {
               loadWaterDetectionHistory(period, deviceId);
               }
-            }, 100);
-
-          }else if (tabName === 'door-status') {
-            // Fetch fresh door sensor data
-            setTimeout(() => { 
-              fetchSensorData();
-              // Make sure dropdown is populated
-              populateDoorDeviceDropdown();
-              // Load history
-              const periodSelect = document.getElementById('door-history-period');
-              const deviceSelect = document.getElementById('door-history-device'); 
-              const period = periodSelect ? periodSelect.value : 'Weekly';
-              const deviceId = deviceSelect ? deviceSelect.value : 'all';
-              loadDoorHistory(period, deviceId);
-            }, 100);
+            }
           }
-          
-          console.log('Switched to tab:', tabName);
-        }
+            }, 100);
+            // In the showTab function, update the door-status section:
+          }else if (tabName === 'door-status') {
+                // Fetch fresh door sensor data
+                setTimeout(() => { 
+                    fetchSensorData();
+                    // Make sure dropdown is populated
+                    if (typeof populateDoorDeviceDropdown === 'function') {
+                        populateDoorDeviceDropdown();
+                    }
+                    
+                    // Check which subtab is active
+                    const activeSubtabBtn = document.querySelector('#door-status-tab .door-subtab-btn.active');
+                    if (activeSubtabBtn) {
+                        const subTabName = activeSubtabBtn.textContent.includes('Current') ? 'current' : 'historical';
+                        if (subTabName === 'historical') {
+                            // Load history if historical tab is active
+                            const periodSelect = document.getElementById('door-history-period');
+                            const deviceSelect = document.getElementById('door-history-device');
+                            const period = periodSelect ? periodSelect.value : 'Weekly';
+                            const deviceId = deviceSelect ? deviceSelect.value : 'all';
+                            
+                            if (typeof loadDoorHistory === 'function') {
+                                loadDoorHistory(period, deviceId);
+                            }
+                        }
+                    }
+                }, 100);
+              }
+            }
+
+            
+
+        
 
     // Temperature subtab switching function
     function showTempSubTab(tabName) {
@@ -732,6 +898,7 @@
         document.getElementById('current-temp-subtab').classList.add('active');
         // Load temperature charts when switching to current tab
         setTimeout (() => {
+          populateTrendsDeviceDropdown();
           if (typeof loadTemperatureCharts === 'function') {
             const currentPeriod = document.getElementById('temp-period-select')?.value || 'Weekly';
             loadTemperatureCharts(currentPeriod);
@@ -800,6 +967,114 @@ function setupTemperatureHistoryListeners() {
         }
     });
 }
+
+// Door subtab switching function - completely independent from temperature
+function showDoorSubTab(tabName) {
+    console.log('Switching to door subtab:', tabName);
+
+    // Get all door subtab elements
+    const doorSubtabBtns = document.querySelectorAll('#door-status-tab .door-subtab-btn');
+    const doorSubtabContents = document.querySelectorAll('#door-status-tab .door-subtab-content');
+
+    // Remove active class from all door subtab buttons and contents
+    doorSubtabBtns.forEach(btn => btn.classList.remove('active'));
+    doorSubtabContents.forEach(content => content.classList.remove('active'));
+
+    // Add active class to clicked tab button
+    event.target.closest('.door-subtab-btn').classList.add('active');
+
+    // Show corresponding content
+    if (tabName === 'current') {
+        document.getElementById('current-door-subtab').classList.add('active');
+        // Refresh current door status
+        fetchSensorData();
+    } else if (tabName === 'historical') {
+        document.getElementById('historical-door-subtab').classList.add('active');
+        // Load door history when switching to historical tab
+        setTimeout(() => {
+            const periodSelect = document.getElementById('door-history-period');
+            const deviceSelect = document.getElementById('door-history-device');
+            const period = periodSelect ? periodSelect.value : 'Weekly';
+            const deviceId = deviceSelect ? deviceSelect.value : 'all';
+            
+            if (typeof loadDoorHistory === 'function') {
+                loadDoorHistory(period, deviceId);
+            }
+        }, 100);
+    }
+}
+
+// Water Detection subtab switching function
+function showWaterSubTab(tabName) {
+    console.log('Switching to water subtab:', tabName);
+
+    // Get all water subtab elements
+    const waterSubtabBtns = document.querySelectorAll('#water-detection-tab .water-subtab-btn');
+    const waterSubtabContents = document.querySelectorAll('#water-detection-tab .water-subtab-content');
+
+    // Remove active class from all water subtab buttons and contents
+    waterSubtabBtns.forEach(btn => btn.classList.remove('active'));
+    waterSubtabContents.forEach(content => content.classList.remove('active'));
+
+    // Add active class to clicked tab button
+    event.target.closest('.water-subtab-btn').classList.add('active');
+
+    // Show corresponding content
+    if (tabName === 'current') {
+        document.getElementById('current-water-subtab').classList.add('active');
+        // Refresh current water status
+        fetchSensorData();
+    } else if (tabName === 'historical') {
+        document.getElementById('historical-water-subtab').classList.add('active');
+        // Load water history when switching to historical tab
+        setTimeout(() => {
+            const periodSelect = document.getElementById('water-history-period');
+            const deviceSelect = document.getElementById('water-history-device');
+            const period = periodSelect ? periodSelect.value : 'Weekly';
+            const deviceId = deviceSelect ? deviceSelect.value : 'all';
+            
+            if (typeof loadWaterDetectionHistory === 'function') {
+                loadWaterDetectionHistory(period, deviceId);
+            }
+        }, 100);
+    }
+}
+
+// Water Flow subtab switching function
+function showWaterFlowSubTab(tabName) {
+    console.log('Switching to water flow subtab:', tabName);
+
+    // Get all water flow subtab elements
+    const flowSubtabBtns = document.querySelectorAll('#water-flow-tab .water-subtab-btn');
+    const flowSubtabContents = document.querySelectorAll('#water-flow-tab .water-subtab-content');
+
+    // Remove active class from all buttons and contents
+    flowSubtabBtns.forEach(btn => btn.classList.remove('active'));
+    flowSubtabContents.forEach(content => content.classList.remove('active'));
+
+    // Add active class to clicked tab button
+    event.target.closest('.water-subtab-btn').classList.add('active');
+
+    // Show corresponding content
+    if (tabName === 'current') {
+        document.getElementById('current-flow-subtab').classList.add('active');
+        // Refresh current flow data
+        fetchSensorData();
+    } else if (tabName === 'historical') {
+        document.getElementById('historical-flow-subtab').classList.add('active');
+        // Load flow history when switching to historical tab
+        setTimeout(() => {
+            const periodSelect = document.getElementById('flow-history-period');
+            const deviceSelect = document.getElementById('flow-history-device');
+            const period = periodSelect ? periodSelect.value : 'Weekly';
+            const deviceId = deviceSelect ? deviceSelect.value : 'all';
+            
+            if (typeof loadFlowHistory === 'function') {
+                loadFlowHistory(period, deviceId);
+            }
+        }, 100);
+    }
+}
         </script>
         
     </div>
@@ -821,6 +1096,13 @@ function setupTemperatureHistoryListeners() {
     const waterPricePerLiter = 0.015;
     let pulseToLiterRatio = 100;
     let autoRefreshInterval;
+
+    // Compatibility wrapper: some parts of the UI call loadWaterUsageData(period)
+    // The actual implementation lives in updateUsageChart(period).
+    function loadWaterUsageData(period = 'Weekly') {
+      return updateUsageChart(period);
+    }
+
     
     // Update overview cards with sensor data
     function updateOverviewCards(data) {history
@@ -878,6 +1160,22 @@ function setupTemperatureHistoryListeners() {
       }
     }
     
+     // Tank level overview
+    if (data.tank_levels && data.tank_levels.length > 0) {
+        const avgLevel = data.tank_levels.reduce((sum, tank) => sum + tank.level_percentage, 0) / data.tank_levels.length;
+        const lowCount = data.tank_levels.filter(tank => tank.level_percentage < 20).length;
+        const tankElement = document.getElementById('overview-tank');
+        const tankStatusElement = document.getElementById('overview-tank-status');
+        
+        if (tankElement) {
+            tankElement.textContent = avgLevel.toFixed(1) + '%';
+            tankElement.className = lowCount > 0 ? 'overview-value alert' : 'overview-value';
+        }
+        if (tankStatusElement) {
+            tankStatusElement.textContent = lowCount > 0 ? `${lowCount} low` : `${data.tank_levels.length} tanks`;
+        }
+    }
+
     // Initialize dashboard
     document.addEventListener('DOMContentLoaded', function() {
       initializeDashboard();
@@ -957,6 +1255,16 @@ function setupTemperatureHistoryListeners() {
       
       }
 
+      // Temperature trends device selector
+const trendsDeviceSelect = document.getElementById('temp-trends-device');
+if (trendsDeviceSelect) {
+    trendsDeviceSelect.addEventListener('change', function() {
+        const periodSelect = document.getElementById('temp-period-select');
+        const period = periodSelect ? periodSelect.value : 'Weekly';
+        loadTemperatureCharts(period);
+    });
+}
+
       // Water detection period selector
       const waterPeriodSelect = document.getElementById('water-period');
       if (waterPeriodSelect){
@@ -1002,10 +1310,15 @@ function setupTemperatureHistoryListeners() {
         }
         
         assignedDevices = await response.json();
+        console.log('🔍 ASSIGNED DEVICES:', assignedDevices); // ADD THIS LINE
+    console.log('Number of devices:', assignedDevices.length); // ADD THIS LINE
         updateDevicesTable();
         updateDashboardFromDevices(); // Update dashboard with device data
         document.getElementById('device-count').textContent = assignedDevices.length;
         
+        // Populate trends dropdown
+        populateTrendsDeviceDropdown();
+
         // Show/hide water usage chart based on pulse meters
         const hasPulseMeters = assignedDevices.some(d => d.sensor_type === 'decode_pulsemeter');
         const waterUsageSection = document.getElementById('water-usage-section');
@@ -1117,7 +1430,7 @@ function setupTemperatureHistoryListeners() {
         doorDevices.forEach(device => {
           const sensorItem = document.createElement('div');
           sensorItem.className = 'mini-sensor-item';
-          const isOpen = device.last_value === 'open';
+          const isOpen = device.last_value && device.last_value.toString().toLowerCase() === 'open';
           
           sensorItem.innerHTML = `
             <div class="mini-sensor-status ${isOpen ? 'alert' : 'normal'}"></div>
@@ -1159,11 +1472,6 @@ function setupTemperatureHistoryListeners() {
         const response = await fetch('/api/user/data');
         
         if (!response.ok) {
-          if (response.status === 403) {
-            showError('Session expired. Please login again.');
-            setTimeout(() => window.location.href = '/', 3000);
-            return;
-          }
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         
@@ -1177,6 +1485,7 @@ function setupTemperatureHistoryListeners() {
         
         // Update overview cards
         updateOverviewCards(data);
+      
         
       } catch (error) {
         console.error('Error fetching sensor data:', error);
@@ -1283,28 +1592,11 @@ function setupTemperatureHistoryListeners() {
       doorGrid.appendChild(sensorItem);
     });
   } else {
-    // Fallback: If no door sensors in live data, check assignedDevices but refresh their data
-    const doorDevices = assignedDevices.filter(d => d.sensor_type === 'decode_magnetic_sensor');
-    if (doorDevices.length > 0) {
-      console.warn('No live door sensor data found, using device cache (may be stale)');
-      const doorGrid = document.getElementById('door-sensors-grid');
-      doorGrid.innerHTML = '';
-      
-      doorDevices.forEach(device => {
-        const sensorItem = document.createElement('div');
-        sensorItem.className = 'mini-sensor-item';
-        const isOpen = device.last_value === 'open';
-        
-        sensorItem.innerHTML = `
-          <div class="mini-sensor-status ${isOpen ? 'alert' : 'normal'}"></div>
-          <div class="mini-sensor-info">
-            <span>${device.device_id}</span>
-            <small>${isOpen ? 'Open' : 'Closed'} (cached)</small>
-          </div>
-        `;
-        doorGrid.appendChild(sensorItem);
-      });
-    }
+    // If no door sensors in live data, show empty state
+    const doorGrid = document.getElementById('door-sensors-grid');
+    if (doorGrid){
+      doorGrid.innerHTML = '<div class="no-data">No door sensors assigned</div>';
+    }  
   }
 }
 
@@ -1505,11 +1797,19 @@ function setupTemperatureHistoryListeners() {
       }, 5000);
     }
 
-   // Temparture Sensor
-    //  Press tab twice
-      async function loadTemperatureCharts(period = 'Weekly') {
+  // Temperature Sensor Charts
+async function loadTemperatureCharts(period = 'Weekly') {
     try {
-        const response = await fetch(`/api/user/temperature?period=${period}`);
+        const deviceSelect = document.getElementById('temp-trends-device');
+        const deviceId = deviceSelect ? deviceSelect.value : "all";
+
+        // Build URL with device filter if needed
+        let url = `/api/user/temperature?period=${period}`;
+        if (deviceId && deviceId !== 'all') {
+            url += `&device_id=${deviceId}`;
+        }
+        
+        const response = await fetch(url);
         const data = await response.json();
         
         if (data.error) {
@@ -1525,25 +1825,52 @@ function setupTemperatureHistoryListeners() {
             return;
         }
         
-        for (const [deviceId, chartData] of Object.entries(data.charts)) {
-            const chartCard = document.createElement('div');
-            chartCard.className = 'chart-card';
-            chartCard.innerHTML = `
-                <div class="chart-header">
-                    <h4>Device ${deviceId}</h4>
-                    <div class="chart-stats">
-                         <span>Avg: ${chartData.avg}°C</span>
-                        | <span>Max: ${chartData.max}°C</span>
-                        | <span>Min: ${chartData.min}°C</span>
+        // If we have a specific device selected, only show that chart
+        if (deviceId !== 'all') {
+            // Check if the selected device exists in the data
+            if (data.charts[deviceId]) {
+                const chartData = data.charts[deviceId];
+                const chartCard = document.createElement('div');
+                chartCard.className = 'chart-card';
+                chartCard.innerHTML = `
+                    <div class="chart-header">
+                        <h4>Device ${deviceId}</h4>
+                        <div class="chart-stats">
+                             <span>Avg: ${chartData.avg}°C</span>
+                            | <span>Max: ${chartData.max}°C</span>
+                            | <span>Min: ${chartData.min}°C</span>
+                        </div>
                     </div>
-                </div>
-                <div class="chart-container">
-                    <canvas id="chart-${deviceId}"></canvas>
-                </div>
-            `;
-            chartsContainer.appendChild(chartCard);
-            
-            renderTemperatureChart(`chart-${deviceId}`, chartData, period);
+                    <div class="chart-container">
+                        <canvas id="chart-${deviceId.replace(/[^a-zA-Z0-9]/g, '')}"></canvas>
+                    </div>
+                `;
+                chartsContainer.appendChild(chartCard);
+                
+                renderTemperatureChart(`chart-${deviceId.replace(/[^a-zA-Z0-9]/g, '')}`, chartData, period);
+            }
+        } else {
+            // Show all devices
+            for (const [deviceId, chartData] of Object.entries(data.charts)) {
+                const chartCard = document.createElement('div');
+                chartCard.className = 'chart-card';
+                chartCard.innerHTML = `
+                    <div class="chart-header">
+                        <h4>Device ${deviceId}</h4>
+                        <div class="chart-stats">
+                             <span>Avg: ${chartData.avg}°C</span>
+                            | <span>Max: ${chartData.max}°C</span>
+                            | <span>Min: ${chartData.min}°C</span>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="chart-${deviceId.replace(/[^a-zA-Z0-9]/g, '')}"></canvas>
+                    </div>
+                `;
+                chartsContainer.appendChild(chartCard);
+                
+                renderTemperatureChart(`chart-${deviceId.replace(/[^a-zA-Z0-9]/g, '')}`, chartData, period);
+            }
         }
     } catch (error) {
         console.error('Failed to load temperature data:', error);
@@ -1853,260 +2180,500 @@ function populateDeviceDropdown() {
 
     // Call this when the page loads
     document.addEventListener('DOMContentLoaded', loadTemperatureCharts);
+
+    // Populate temperature trends device dropdown
+function populateTrendsDeviceDropdown() {
+    const deviceSelect = document.getElementById('temp-trends-device');
+    if (!deviceSelect) return;
+    
+    // Save current selection
+    const currentValue = deviceSelect.value;
+    
+    // Clear existing options except "All Devices"
+    deviceSelect.innerHTML = '<option value="all">All Devices</option>';
+    
+    // Get all temperature sensor devices
+    const tempSensors = assignedDevices.filter(d => d.sensor_type === 'decode_PowerTemp');
+    
+    // Add each device to dropdown
+    tempSensors.forEach(device => {
+        if (device.device_id) {
+            const option = document.createElement('option');
+            option.value = device.device_id;
+            option.textContent = device.device_id;
+            deviceSelect.appendChild(option);
+        }
+    });
+    
+    // Restore previous selection if it exists
+    if (currentValue && currentValue !== 'all') {
+        const optionExists = Array.from(deviceSelect.options).some(opt => opt.value === currentValue);
+        if (optionExists) {
+            deviceSelect.value = currentValue;
+        }
+    }
+    
+    console.log('Trends dropdown populated with', tempSensors.length, 'devices');
+}
   </script>
 
   <script>
+
 /* ===============================
-   WATER DETECTION HISTORY MODULE
+   SIMPLE WATER DETECTION HISTORY 
 ================================ */
 
-let waterDevicesList = [];
-
-// Load water detection history
+// Load water detection history 
 async function loadWaterDetectionHistory(period = 'Weekly', deviceId = 'all') {
-  try {
-    showLoading();
-
-    const response = await fetch(`/api/user/water-detection-history?period=${period}&device_id=${deviceId}`);
-    if (!response.ok)throw new Error(`HTTP error! status: ${response.status}`);
-    
-    const data = await response.json();
-
-     // Update device dropdown if needed
-            populateWaterDeviceDropdown();
-      
+    try {
+        console.log(`Loading water history: ${period}, ${deviceId}`);
         
-        // Update state changes timeline
-        updateWaterStateTimeline(data.state_changes);
+        const url = `/api/user/water-detection-history?period=${period}&device_id=${deviceId}`;
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         
-        // Update history table
-        updateWaterHistoryTable(data.history);
+        const data = await response.json();
         
-        // Update summary stats
-        updateWaterDetectionStats(data.history);
+        // Update table - ONLY 4 columns: Device ID, Date, Time, Status
+        const tableBody = document.getElementById('water-history-table-body');
+        if (!tableBody) return;
+        
+        tableBody.innerHTML = '';
+        
+        if (data.history && data.history.length > 0) {
+            // Show most recent entries
+            data.history.slice(0, 50).forEach(item => {
+                const row = document.createElement('tr');
+                const isWet = item.status.toLowerCase() === 'wet';
+                
+                row.innerHTML = `
+                    <td class="device-id">${item.device_id}</td>
+                    <td>${item.date}</td>
+                    <td>${item.time}</td>
+                    <td>
+                        <span class="status-badge ${item.status.toLowerCase()}">
+                            <i class="fas ${isWet ? 'fa-tint' : 'fa-check'}"></i>
+                            ${item.status}
+                        </span>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        } else {
+            tableBody.innerHTML = '<tr><td colspan="4" class="no-data">No water detection history available</td></tr>';
+        }
+        
+        // Update system status
+        const statusIndicator = document.getElementById('water-system-status');
+        if (statusIndicator && data.history && data.history.length > 0) {
+            const currentStatus = data.history[0]?.status.toLowerCase() === 'wet' ? 'alert' : 'active';
+            statusIndicator.className = `status-indicator ${currentStatus}`;
+        }
         
     } catch (error) {
-        console.error('Error loading water detection history:', error);
-        showError('Failed to load water detection history');
-    } finally {
-        hideLoading();
+        console.error('Water history error:', error);
     }
 }
+
+// Make function globally available
+window.loadWaterDetectionHistory = loadWaterDetectionHistory;
+</script>
+<script>
 
 // Populate water device dropdown
 function populateWaterDeviceDropdown() {
     const deviceSelect = document.getElementById('water-history-device');
     if (!deviceSelect) return;
-
-    // Clear and add options
+    
+    // Clear and add default option
     deviceSelect.innerHTML = '<option value="all">All Devices</option>';
-
-    // Get water sensors from assigned devices
-    const waterDevices = assignedDevices.filter(d => d.sensor_type === 'decode_water_sensor');
-
-    if(waterDevices.length > 0) {
-        waterDevices.forEach(device => {
-            const option = document.createElement('option');
-            option.value = device.device_id;
-            option.textContent = device.device_id;
-            deviceSelect.appendChild(option);
-        });
-
-    waterDevicesList = waterDevices.map(d => d.device_id);
-    console.log('Water devices available for history:', waterDevicesList);
-      } else {
-        console.warn('No water sensor devices found in assigned devices');
-
-          // Also try to get from dashboard data
-          if (dashboardData.water_sensors && dashboardData.water_sensors.length > 0) {
-              dashboardData.water_sensors.forEach(sensor => {
-                  const option = document.createElement('option');
-                  option.value = sensor.device_id;
-                  option.textContent = sensor.device_id;
-                  deviceSelect.appendChild(option);
-              });
-
-              waterDevicesList = dashboardData.water_sensors.map(d => d.device_id);
-              console.log('Water devices from dashboard data:', waterDevicesList);
-            }
-          }
-        
     
+    // Get device IDs from the water sensors grid
+    const waterSensors = document.querySelectorAll('#water-sensors-grid .mini-sensor-item span:first-child');
     
-
+    // Create a Set to avoid duplicates
+    const deviceIds = new Set();
+    waterSensors.forEach(sensor => {
+        const deviceId = sensor.textContent.trim();
+        if (deviceId) deviceIds.add(deviceId);
+    });
     
-    Array.from(devices).sort().forEach(deviceId => {
+    // Add each device ID to dropdown
+    deviceIds.forEach(deviceId => {
         const option = document.createElement('option');
         option.value = deviceId;
         option.textContent = deviceId;
         deviceSelect.appendChild(option);
     });
     
-    waterDevicesList = Array.from(devices);
+    console.log('Water dropdown populated with:', Array.from(deviceIds));
 }
 
-// Update state changes timeline
-function updateWaterStateTimeline(stateChanges) {
-    const container = document.getElementById('water-state-changes');
-    if (!container) return;
+// Call it when water detection tab is shown and when sensors update
+document.addEventListener('DOMContentLoaded', function() {
+    // Initial population
+    setTimeout(populateWaterDeviceDropdown, 1000);
     
-    if (!stateChanges || stateChanges.length === 0) {
-        container.innerHTML = '<div class="no-data">No state changes recorded in this period</div>';
-        return;
+    // Repopulate when sensor data refreshes
+    const originalFetchSensorData = window.fetchSensorData;
+    window.fetchSensorData = async function() {
+        if (originalFetchSensorData) await originalFetchSensorData.apply(this, arguments);
+        populateWaterDeviceDropdown();
+    };
+});
+
+// Also populate when tab is clicked
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    if (btn.textContent.includes('Water Detection')) {
+        btn.addEventListener('click', function() {
+            setTimeout(populateWaterDeviceDropdown, 200);
+        });
     }
-    
-    container.innerHTML = '';
-    
-    // Show only the most recent 20 state changes 
+});
 
-    const recentChanges = stateChanges.slice(0, 20);
+/* ===============================
+   WATER DETECTION HISTORY DROPDOWNS
+================================ */
 
-    recentChanges.forEach(change => {
-        const eventDiv = document.createElement('div');
-        eventDiv.className = `timeline-event ${change.changed_to.toLowerCase()}`;
-        
-        const isWet = change.changed_to.toLowerCase() === 'wet';
-        
-        eventDiv.innerHTML = `
-            <span class="timeline-event-time">${change.date} ${change.time}</span>
-            <span class="timeline-event-device">${change.device_id}</span>
-            <span class="timeline-event-icon ${change.changed_to.toLowerCase()}">
-                <i class="fas ${isWet ? 'fa-tint' : 'fa-check-circle'}"></i>
-            </span>
-            <div class="timeline-event-change">
-                <span class="change-badge ${change.changed_from.toLowerCase()}">${change.changed_from}</span>
-                <span class="change-arrow"><i class="fas fa-arrow-right"></i></span>
-                <span class="change-badge ${change.changed_to.toLowerCase()}">${change.changed_to}</span>
-            </div>
-        `;
-        
-        container.appendChild(eventDiv);
-    });
-}
-
-// Update water history table
-function updateWaterHistoryTable(historyData) {
-    const tableBody = document.getElementById('water-history-table-body');
-    if (!tableBody) return;
-    
-    tableBody.innerHTML = '';
-    
-    if (!historyData || historyData.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="6" class="no-data">No water detection history available</td></tr>';
-        return;
-    }
-    
-    // Show only the most recent 50 entries to keep table manageable
-    const recentData = historyData.slice(0, 50);
-    
-    recentData.forEach(item => {
-        const row = document.createElement('tr');
-        const isWet = item.status.toLowerCase() === 'wet';
-        
-        row.innerHTML = `
-            <td class="device-id">${item.device_id}</td>
-            <td>${item.date}</td>
-            <td>${item.time}</td>
-            <td>
-                <span class="status-badge ${item.status.toLowerCase()}">
-                    <i class="fas ${isWet ? 'fa-tint' : 'fa-check'}"></i>
-                    ${item.status}
-                </span>
-            </td>
-            <td>${item.raw_value || '--'}</td>
-            <td>${item.battery ? item.battery + 'V' : '--'}</td>
-        `;
-        
-        tableBody.appendChild(row);
-    });
-}
-
-// Update water detection statistics
-function updateWaterDetectionStats(historyData) {
-    if (!historyData || historyData.length === 0) return;
-    
-    // Calculate stats
-    const totalEvents = historyData.length;
-    const wetEvents = historyData.filter(item => item.status.toLowerCase() === 'wet').length;
-    const dryEvents = totalEvents - wetEvents;
-    const wetPercentage = ((wetEvents / totalEvents) * 100).toFixed(1);
-    
-    // Update system status indicator
-    const statusIndicator = document.getElementById('water-system-status');
-    if (statusIndicator) {
-        const currentStatus = historyData[0]?.status.toLowerCase() === 'wet' ? 'alert' : 'active';
-        statusIndicator.className = `status-indicator ${currentStatus}`;
-    }
-    
-    // You can add additional stats display here if desired
-    console.log(`Water detection stats - Wet: ${wetPercentage}%, Dry: ${100 - wetPercentage}%`);
-}
-
-// Initialize water detection history listeners
+// Setup water history listeners
 function setupWaterHistoryListeners() {
+    console.log('Setting up water history listeners');
+    
     // Period selector
     const periodSelect = document.getElementById('water-history-period');
     if (periodSelect) {
-        periodSelect.addEventListener('change', function(e) {
-            const deviceSelect = document.getElementById('water-history-device');
-            const deviceId = deviceSelect ? deviceSelect.value : 'all';
-            loadWaterDetectionHistory(e.target.value, deviceId);
-        });
+        // Remove any existing listeners and add new one
+        periodSelect.removeEventListener('change', handleWaterFilterChange);
+        periodSelect.addEventListener('change', handleWaterFilterChange);
     }
     
     // Device selector
     const deviceSelect = document.getElementById('water-history-device');
     if (deviceSelect) {
-        deviceSelect.addEventListener('change', function(e) {
-            const periodSelect = document.getElementById('water-history-period');
-            const period = periodSelect ? periodSelect.value : 'Weekly';
-            loadWaterDetectionHistory(period, e.target.value);
-        });
+        // Remove any existing listeners and add new one
+        deviceSelect.removeEventListener('change', handleWaterFilterChange);
+        deviceSelect.addEventListener('change', handleWaterFilterChange);
     }
     
     // Refresh button
     const refreshBtn = document.getElementById('refresh-water-history');
     if (refreshBtn) {
-        refreshBtn.addEventListener('click', function() {
-            const periodSelect = document.getElementById('water-history-period');
-            const deviceSelect = document.getElementById('water-history-device');
-            const period = periodSelect ? periodSelect.value : 'Weekly';
-            const deviceId = deviceSelect ? deviceSelect.value : 'all';
-            loadWaterDetectionHistory(period, deviceId);
-            
-            // Add rotation animation
-            this.classList.add('rotating');
-            setTimeout(() => this.classList.remove('rotating'), 500);
-        });
+        refreshBtn.removeEventListener('click', handleWaterRefresh);
+        refreshBtn.addEventListener('click', handleWaterRefresh);
     }
 }
 
-// Load water history (Legacy function)
-async function loadWaterHistory(period = 'Weekly') {
-    await loadWaterDetectionHistory(period, 'all');
-}
-
-
-// Override fetchSensorData to update water history
-const originalFetchSensorData = window.fetchSensorData;
-if (originalFetchSensorDataForWater){
-window.fetchSensorData = async function() {
-    await originalFetchSensorData.apply(this, arguments);
-}
-
+// Handle water filter change
+function handleWaterFilterChange() {
+    const periodSelect = document.getElementById('water-history-period');
+    const deviceSelect = document.getElementById('water-history-device');
+    const period = periodSelect ? periodSelect.value : 'Weekly';
+    const deviceId = deviceSelect ? deviceSelect.value : 'all';
     
-    // If we're on the water detection tab, refresh the history
-    const activeTab = document.querySelector('.tab-pane.active')?.id;
-    if (activeTab === 'water-detection-tab') {
-        const periodSelect = document.getElementById('water-history-period');
-        const deviceSelect = document.getElementById('water-history-device');
-        const period = periodSelect ? periodSelect.value : 'Weekly';
+    console.log(`Water filter changed: ${period}, ${deviceId}`);
+    loadWaterDetectionHistory(period, deviceId);
+}
+
+// Handle water refresh button
+function handleWaterRefresh(e) {
+    const periodSelect = document.getElementById('water-history-period');
+    const deviceSelect = document.getElementById('water-history-device');
+    const period = periodSelect ? periodSelect.value : 'Weekly';
+    const deviceId = deviceSelect ? deviceSelect.value : 'all';
+    
+    // Add rotation animation
+    e.currentTarget.classList.add('rotating');
+    setTimeout(() => e.currentTarget.classList.remove('rotating'), 500);
+    
+    loadWaterDetectionHistory(period, deviceId);
+}
+
+// Improved water device dropdown population
+function populateWaterDeviceDropdown() {
+    const deviceSelect = document.getElementById('water-history-device');
+    if (!deviceSelect) {
+        console.log('Water device dropdown not found');
+        return;
+    }
+    
+    // Save current selection
+    const currentValue = deviceSelect.value;
+    
+    // Clear and add default option
+    deviceSelect.innerHTML = '<option value="all">All Devices</option>';
+    
+    // Get device IDs from water sensors in assignedDevices
+    const waterDevices = assignedDevices.filter(d => d.sensor_type === 'decode_water_sensor');
+    
+    // Create a Set to avoid duplicates
+    const deviceIds = new Set();
+    
+    // Add from assignedDevices
+    waterDevices.forEach(device => {
+        if (device.device_id) {
+            deviceIds.add(device.device_id);
+        }
+    });
+    
+    // Also get from live data if available
+    if (dashboardData.water_sensors && dashboardData.water_sensors.length > 0) {
+        dashboardData.water_sensors.forEach(sensor => {
+            if (sensor.device_id) {
+                deviceIds.add(sensor.device_id);
+            }
+        });
+    }
+    
+    // Add each device ID to dropdown
+    deviceIds.forEach(deviceId => {
+        const option = document.createElement('option');
+        option.value = deviceId;
+        option.textContent = deviceId;
+        deviceSelect.appendChild(option);
+    });
+    
+    // Restore previous selection if it exists
+    if (currentValue && currentValue !== 'all') {
+        const optionExists = Array.from(deviceSelect.options).some(opt => opt.value === currentValue);
+        if (optionExists) {
+            deviceSelect.value = currentValue;
+        }
+    }
+    
+    console.log('Water dropdown populated with', deviceIds.size, 'devices:', Array.from(deviceIds));
+}
+
+// Call setup when document is ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Initial setup
+    setTimeout(() => {
+        setupWaterHistoryListeners();
+        populateWaterDeviceDropdown();
+    }, 1000);
+});
+
+// Also setup when water detection tab is clicked
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    if (btn.textContent.includes('Water Detection')) {
+        btn.addEventListener('click', function() {
+            setTimeout(() => {
+                setupWaterHistoryListeners();
+                populateWaterDeviceDropdown();
+                
+                // Check if historical tab is active
+                const activeSubtab = document.querySelector('#water-detection-tab .water-subtab-btn.active');
+                if (activeSubtab && activeSubtab.textContent.includes('History')) {
+                    const periodSelect = document.getElementById('water-history-period');
+                    const deviceSelect = document.getElementById('water-history-device');
+                    const period = periodSelect ? periodSelect.value : 'Weekly';
+                    const deviceId = deviceSelect ? deviceSelect.value : 'all';
+                    loadWaterDetectionHistory(period, deviceId);
+                }
+            }, 200);
+        });
+    }
+});
+
+// Repopulate when sensor data refreshes
+const originalFetchSensorDataForWater = window.fetchSensorData;
+window.fetchSensorData = async function() {
+    if (originalFetchSensorDataForWater) {
+        await originalFetchSensorDataForWater.apply(this, arguments);
+    }
+    populateWaterDeviceDropdown();
+};
+
+// Populate water device dropdown for usage chart
+function populateWaterUsageDeviceDropdown() {
+    const deviceSelect = document.getElementById('water-device-select');
+    if (!deviceSelect) return;
+    
+    // Save current selection
+    const currentValue = deviceSelect.value;
+    
+    // Clear existing options except "All Devices"
+    deviceSelect.innerHTML = '<option value="all">All Devices</option>';
+    
+    // Get device IDs from pulse meters
+    const pulseDevices = assignedDevices.filter(d => d.sensor_type === 'decode_pulsemeter');
+    
+    // Create a Set to avoid duplicates
+    const deviceIds = new Set();
+    
+    // Add from assignedDevices
+    pulseDevices.forEach(device => {
+        if (device.device_id) {
+            deviceIds.add(device.device_id);
+        }
+    });
+    
+    // Also get from live data if available
+    if (dashboardData.pulse_meters && dashboardData.pulse_meters.length > 0) {
+        dashboardData.pulse_meters.forEach(meter => {
+            if (meter.device_id) {
+                deviceIds.add(meter.device_id);
+            }
+        });
+    }
+    
+    // Add each device ID to dropdown
+    deviceIds.forEach(deviceId => {
+        const option = document.createElement('option');
+        option.value = deviceId;
+        option.textContent = deviceId;
+        deviceSelect.appendChild(option);
+    });
+    
+    // Restore previous selection if it exists
+    if (currentValue && currentValue !== 'all') {
+        const optionExists = Array.from(deviceSelect.options).some(opt => opt.value === currentValue);
+        if (optionExists) {
+            deviceSelect.value = currentValue;
+        }
+    }
+    
+    console.log('Water usage dropdown populated with', deviceIds.size, 'devices');
+}
+
+// Update the updateUsageChart function to use the selected device
+async function updateUsageChart(period = 'Weekly') {
+    try {
+        const deviceSelect = document.getElementById('water-device-select');
         const deviceId = deviceSelect ? deviceSelect.value : 'all';
-        loadWaterDetectionHistory(period, deviceId);
+        
+        console.log('Loading water usage data for period:', period, 'device:', deviceId);
+        
+        // Build URL with device filter
+        let url = `/api/user/usage?period=${period}`;
+        if (deviceId && deviceId !== 'all') {
+            url += `&device_id=${deviceId}`;
+        }
+        
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const chartData = await response.json();
+        
+        if (!chartData.labels || !chartData.values) {
+            console.warn('No water usage data available');
+            return;
+        }
+
+        const litersData = chartData.values.map(pulses => pulses / pulseToLiterRatio);
+
+        // Destroy existing chart
+        if (usageChart) {
+            usageChart.destroy();
+        }
+
+        // Get the canvas element 
+        const canvas = document.getElementById('water-usage-chart');
+        if (!canvas) {
+            console.error('Canvas element for water usage chart not found');
+            return;
+        }
+        
+        const totalUsage = litersData.reduce((sum, val) => sum + (val || 0), 0);
+        const totalCost = totalUsage * waterPricePerLiter;
+        
+        document.getElementById('total-usage').textContent = totalUsage.toFixed(2);
+        document.getElementById('water-cost').textContent = 'R' + totalCost.toFixed(2);
+        
+        // Create new line chart
+        const ctx = canvas.getContext('2d');
+        usageChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: chartData.labels,
+                datasets: [{
+                    label: 'Water Usage (L)',
+                    data: litersData,
+                    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                    borderColor: '#4CAF50',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#4CAF50',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    pointHoverRadius: 7
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(255,255,255,0.1)'
+                        },
+                        ticks: {
+                            color: '#e2e8f0',
+                            font: {
+                                size: 12
+                            }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: 'rgba(255,255,255,0.1)'
+                        },
+                        ticks: {
+                            color: '#e2e8f0',
+                            font: {
+                                size: 12
+                            }
+                        }
+                    }
+                },
+                animation: {
+                    duration: 1000,
+                    easing: 'easeInOutQuart'
+                }
+            }
+        });
+
+    } catch (error) {
+        console.error('Error updating usage data:', error);
+    }
+}
+
+// Add event listener for device selector
+document.addEventListener('DOMContentLoaded', function() {
+    // Add device selector change event
+    const deviceSelect = document.getElementById('water-device-select');
+    if (deviceSelect) {
+        deviceSelect.addEventListener('change', function() {
+            const periodSelect = document.getElementById('period-select');
+            const period = periodSelect ? periodSelect.value : 'Weekly';
+            updateUsageChart(period);
+        });
+    }
+});
+
+// Populate dropdown when devices are loaded
+const originalFetchAssignedDevices = window.fetchAssignedDevices;
+window.fetchAssignedDevices = async function() {
+    if (originalFetchAssignedDevices) {
+        await originalFetchAssignedDevices.apply(this, arguments);
+    }
+    if (typeof populateWaterUsageDeviceDropdown === 'function') {
+        populateWaterUsageDeviceDropdown();
     }
 };
 
-   
+// Make functions globally available
+window.populateWaterUsageDeviceDropdown = populateWaterUsageDeviceDropdown;
 </script>
 
 <script>
@@ -2170,159 +2737,45 @@ function showDoorToast(deviceId, state) {
 
 let doorDevicesList = [];
 
-// Load door history
-async function loadDoorHistory(period = 'Weekly', deviceId = 'all') {
-    try {
-        showLoading();
-        
-        const response = await fetch(`/api/user/door-history?period=${period}&device_id=${deviceId}`);
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        
-        const data = await response.json();
-        
-        // Update device dropdown
-        populateDoorDeviceDropdown();
-        
-        // Update state changes timeline
-        updateDoorStateTimeline(data.state_changes);
-        
-        // Update history table
-        updateDoorHistoryTable(data.history);
-        
-        // Update system status
-        updateDoorSystemStatus(data.history);
-        
-    } catch (error) {
-        console.error('Error loading door history:', error);
-        showError('Failed to load door history');
-
-        // Still try to populate device dropdown even if history fails, so user can attempt to load again
-        populateDoorDeviceDropdown();
-    } finally {
-        hideLoading();
-    }
-}
+/* ===============================
+   DOOR HISTORY DROPDOWN & LISTENERS
+================================ */
 
 // Populate door device dropdown
 function populateDoorDeviceDropdown() {
     const deviceSelect = document.getElementById('door-history-device');
     if (!deviceSelect) return;
-
-    // Clear existing options
+    
+    // Clear and add default option
     deviceSelect.innerHTML = '<option value="all">All Doors</option>';
-
-     // Get door devices from assignedDevices
-    const doorDevices = assignedDevices.filter(d => d.sensor_type === 'decode_magnetic_sensor');
     
-    if (doorDevices.length > 0) {
+    // Get device IDs from the door sensors grid
+    const doorSensors = document.querySelectorAll('#door-sensors-grid .mini-sensor-item span:first-child');
+    
+    // Create a Set to avoid duplicates
+    const deviceIds = new Set();
+    doorSensors.forEach(sensor => {
+        const deviceId = sensor.textContent.trim();
+        if (deviceId) deviceIds.add(deviceId);
+    });
+    
+    // Also add from assignedDevices if available
+    if (window.assignedDevices && window.assignedDevices.length > 0) {
+        const doorDevices = assignedDevices.filter(d => d.sensor_type === 'decode_magnetic_sensor');
         doorDevices.forEach(device => {
-            const option = document.createElement('option');
-            option.value = device.device_id;
-            option.textContent = device.device_id;
-            deviceSelect.appendChild(option);
+            if (device.device_id) deviceIds.add(device.device_id);
         });
-        
-        doorDevicesList = doorDevices.map(d => d.device_id);
-        console.log('Door devices populated:', doorDevicesList);
-    } else {
-        console.warn('No door devices found in assignedDevices');
-    }
-}
-
-// Update door state changes timeline
-function updateDoorStateTimeline(stateChanges) {
-    const container = document.getElementById('door-state-changes');
-    if (!container) return;
-    
-    if (!stateChanges || stateChanges.length === 0) {
-        container.innerHTML = '<div class="no-data">No door state changes recorded in this period</div>';
-        return;
     }
     
-    container.innerHTML = '';
-    
-    // Show only the most recent 20 state changes
-    const recentChanges = stateChanges.slice(0, 20);
-    
-    recentChanges.forEach(change => {
-        const eventDiv = document.createElement('div');
-        eventDiv.className = `timeline-event ${change.changed_to.toLowerCase()}`;
-        
-        const isOpen = change.changed_to.toLowerCase() === 'open';
-        
-        eventDiv.innerHTML = `
-            <span class="timeline-event-time">${change.date} ${change.time}</span>
-            <span class="timeline-event-device">${change.device_id}</span>
-            <span class="timeline-event-icon ${change.changed_to.toLowerCase()}">
-                <i class="fas ${isOpen ? 'fa-door-open' : 'fa-door-closed'}"></i>
-            </span>
-            <div class="timeline-event-change">
-                <span class="change-badge ${change.changed_from.toLowerCase()}">${change.changed_from}</span>
-                <span class="change-arrow"><i class="fas fa-arrow-right"></i></span>
-                <span class="change-badge ${change.changed_to.toLowerCase()}">${change.changed_to}</span>
-            </div>
-        `;
-        
-        container.appendChild(eventDiv);
-    });
-}
-
-// Update door history table
-function updateDoorHistoryTable(historyData) {
-    const tableBody = document.getElementById('door-history-table-body');
-    if (!tableBody) return;
-    
-    tableBody.innerHTML = '';
-    
-    if (!historyData || historyData.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="5" class="no-data">No door history available</td></tr>';
-        return;
-    }
-    
-    // Show most recent 30 entries
-    const recentData = historyData.slice(0, 30);
-    
-    recentData.forEach(item => {
-        const row = document.createElement('tr');
-        const isOpen = item.status.toLowerCase() === 'open';
-        
-        row.innerHTML = `
-            <td class="device-id">${item.device_id}</td>
-            <td>${item.date}</td>
-            <td>${item.time}</td>
-            <td>
-                <span class="door-status-badge ${item.status.toLowerCase()}">
-                    <i class="fas ${isOpen ? 'fa-door-open' : 'fa-door-closed'}"></i>
-                    ${item.status}
-                </span>
-            </td>
-            <td>${item.battery ? item.battery + 'V' : '--'}</td>
-        `;
-        
-        tableBody.appendChild(row);
-    });
-}
-
-// Update door system status indicator
-function updateDoorSystemStatus(historyData) {
-    const statusIndicator = document.getElementById('door-system-status');
-    if (!statusIndicator) return;
-    
-    if (!historyData || historyData.length === 0) {
-        statusIndicator.className = 'status-indicator active';
-        return;
-    }
-    
-    // Check if any door is currently open (most recent status per device)
-    const deviceStatus = {};
-    historyData.forEach(item => {
-        if (!deviceStatus[item.device_id]) {
-            deviceStatus[item.device_id] = item;
-        }
+    // Add each device ID to dropdown
+    deviceIds.forEach(deviceId => {
+        const option = document.createElement('option');
+        option.value = deviceId;
+        option.textContent = deviceId;
+        deviceSelect.appendChild(option);
     });
     
-    const anyOpen = Object.values(deviceStatus).some(item => item.status.toLowerCase() === 'open');
-    statusIndicator.className = `status-indicator ${anyOpen ? 'alert' : 'active'}`;
+    console.log('Door dropdown populated with:', Array.from(deviceIds));
 }
 
 // Setup door history listeners
@@ -2364,24 +2817,510 @@ function setupDoorHistoryListeners() {
     }
 }
 
-// Override the existing door alert module to also update history
-const originalCheckDoorStatusAlerts = window.checkDoorStatusAlerts || function() {};
-window.checkDoorStatusAlerts = async function() {
-    if (typeof originalCheckDoorStatusAlerts === 'function') {
-        await originalCheckDoorStatusAlerts.apply(this, arguments);
+// Load door history - SINGLE VERSION
+async function loadDoorHistory(period = 'Weekly', deviceId = 'all') {
+    try {
+        console.log(`Loading door history: ${period}, ${deviceId}`);
+        
+        const url = `/api/user/door-history?period=${period}&device_id=${deviceId}`;
+        const response = await fetch(url);
+        
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        const data = await response.json();
+        
+        // Update table
+        const tableBody = document.getElementById('door-history-table-body');
+        if(!tableBody) return;
+
+        tableBody.innerHTML = '';
+
+        if (data.history && data.history.length > 0) {
+            // Show most recent entries
+            data.history.slice(0, 50).forEach(item => {
+                const row = document.createElement('tr');
+                const isOpen = item.status.toLowerCase() === 'open';
+
+                row.innerHTML = `
+                    <td class="device-id">${item.device_id}</td>
+                    <td>${item.date}</td>
+                    <td>${item.time}</td>
+                    <td>
+                        <span class="door-status-badge ${item.status.toLowerCase()}">
+                            <i class="fas ${isOpen ? 'fa-door-open' : 'fa-door-closed'}"></i>
+                            ${item.status}
+                        </span>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        } else {
+            tableBody.innerHTML = '<tr><td colspan="4" class="no-data">No door history available</td></tr>';
+        }
+        
+        // Update system status
+        const statusIndicator = document.getElementById('door-system-status');
+        if (statusIndicator && data.history && data.history.length > 0) {
+            const currentStatus = data.history[0]?.status.toLowerCase() === 'open' ? 'alert' : 'active';
+            statusIndicator.className = `status-indicator ${currentStatus}`;
+        }
+        
+    } catch (error) {
+        console.error('Door history error:', error);
+        const tableBody = document.getElementById('door-history-table-body');
+        if (tableBody) {
+            tableBody.innerHTML = '<tr><td colspan="4" class="no-data">Failed to load door history. Please try again.</td></tr>';
+        }
+    }
+}
+
+// Also populate when door tab is clicked
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    if (btn.textContent.includes('Door Status')) {
+        btn.addEventListener('click', function() {
+            setTimeout(() => {
+                populateDoorDeviceDropdown();
+                // Check if historical tab is active
+                const activeSubtab = document.querySelector('#door-status-tab .door-subtab-btn.active');
+                if (activeSubtab && activeSubtab.textContent.includes('History')) {
+                    const periodSelect = document.getElementById('door-history-period');
+                    const deviceSelect = document.getElementById('door-history-device');
+                    const period = periodSelect ? periodSelect.value : 'Weekly';
+                    const deviceId = deviceSelect ? deviceSelect.value : 'all';
+                    loadDoorHistory(period, deviceId);
+                }
+            }, 200);
+        });
+    }
+});
+
+// Make functions globally available
+window.loadDoorHistory = loadDoorHistory;
+window.populateDoorDeviceDropdown = populateDoorDeviceDropdown;
+window.setupDoorHistoryListeners = setupDoorHistoryListeners;
+
+// Call setup when document is ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Initial population
+    setTimeout(populateDoorDeviceDropdown, 1000);
+    setupDoorHistoryListeners();
+});
+
+// Repopulate when sensor data refreshes
+const originalFetchSensorData = window.fetchSensorData;
+window.fetchSensorData = async function() {
+    if (originalFetchSensorData) await originalFetchSensorData.apply(this, arguments);
+    populateDoorDeviceDropdown();
+};
+</script>
+
+<script>
+  // ===============================
+// WATER FLOW HISTORY INITIALIZATION
+// ===============================
+
+// Add to your existing DOMContentLoaded function
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize flow history
+    setTimeout(() => {
+        if (typeof setupFlowHistoryListeners === 'function') {
+            setupFlowHistoryListeners();
+        }
+        if (typeof populateFlowDeviceDropdown === 'function') {
+            populateFlowDeviceDropdown();
+        }
+    }, 1000);
+});
+
+// Also initialize when water flow tab is clicked
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    if (btn.textContent.includes('Water Flow')) {
+        btn.addEventListener('click', function() {
+            setTimeout(() => {
+                if (typeof setupFlowHistoryListeners === 'function') {
+                    setupFlowHistoryListeners();
+                }
+                if (typeof populateFlowDeviceDropdown === 'function') {
+                    populateFlowDeviceDropdown();
+                }
+                
+                // Check if historical tab is active
+                const activeSubtab = document.querySelector('#water-flow-tab .water-subtab-btn.active');
+                if (activeSubtab && activeSubtab.textContent.includes('History')) {
+                    const periodSelect = document.getElementById('flow-history-period');
+                    const deviceSelect = document.getElementById('flow-history-device');
+                    const period = periodSelect ? periodSelect.value : 'Weekly';
+                    const deviceId = deviceSelect ? deviceSelect.value : 'all';
+                    if (typeof loadFlowHistory === 'function') {
+                        loadFlowHistory(period, deviceId);
+                    }
+                }
+            }, 200);
+        });
+    }
+});
+
+// Update populateFlowDeviceDropdown when sensor data refreshes
+const originalFetchSensorDataForFlow = window.fetchSensorData;
+window.fetchSensorData = async function() {
+    if (originalFetchSensorDataForFlow) {
+        await originalFetchSensorDataForFlow.apply(this, arguments);
+    }
+    if (typeof populateFlowDeviceDropdown === 'function') {
+        populateFlowDeviceDropdown();
+    }
+};
+  </script>
+
+<script>
+  // Load water flow history
+async function loadFlowHistory(period = 'Weekly', deviceId = 'all') {
+    try {
+        console.log(`Loading flow history: ${period}, ${deviceId}`);
+        
+        const url = `/api/user/flow-history?period=${period}&device_id=${deviceId}`;
+        const response = await fetch(url);
+        
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        const data = await response.json();
+        
+        // Update table
+        const tableBody = document.getElementById('flow-history-table-body');
+        if (!tableBody) return;
+
+        tableBody.innerHTML = '';
+
+        if (data.history && data.history.length > 0) {
+            // Show most recent entries
+            data.history.slice(0, 50).forEach(item => {
+                const row = document.createElement('tr');
+                const hasLeak = item.leak_detected === true || item.leak_detected === 'True';
+                
+                row.innerHTML = `
+                    <td class="device-id">${item.device_id}</td>
+                    <td>${item.date}</td>
+                    <td>${item.time}</td>
+                    <td>${item.pulse_count}</td>
+                    <td>${item.liters}</td>
+                    <td>
+                        <span class="status-badge ${hasLeak ? 'wet' : 'dry'}">
+                            <i class="fas ${hasLeak ? 'fa-exclamation-triangle' : 'fa-check'}"></i>
+                            ${hasLeak ? 'Leak' : 'Normal'}
+                        </span>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        } else {
+            tableBody.innerHTML = '<tr><td colspan="6" class="no-data">No flow history available</td></tr>';
+        }
+        
+    } catch (error) {
+        console.error('Flow history error:', error);
+        const tableBody = document.getElementById('flow-history-table-body');
+        if (tableBody) {
+            tableBody.innerHTML = '<tr><td colspan="6" class="no-data">Failed to load flow history. Please try again.</td></tr>';
+        }
+    }
+}
+
+// Populate flow device dropdown
+function populateFlowDeviceDropdown() {
+    const deviceSelect = document.getElementById('flow-history-device');
+    if (!deviceSelect) return;
+    
+    // Save current selection
+    const currentValue = deviceSelect.value;
+    
+    // Clear and add default option
+    deviceSelect.innerHTML = '<option value="all">All Devices</option>';
+    
+    // Get device IDs from pulse meters
+    const pulseDevices = assignedDevices.filter(d => d.sensor_type === 'decode_pulsemeter');
+    
+    // Create a Set to avoid duplicates
+    const deviceIds = new Set();
+    
+    // Add from assignedDevices
+    pulseDevices.forEach(device => {
+        if (device.device_id) {
+            deviceIds.add(device.device_id);
+        }
+    });
+    
+    // Also get from live data if available
+    if (dashboardData.pulse_meters && dashboardData.pulse_meters.length > 0) {
+        dashboardData.pulse_meters.forEach(meter => {
+            if (meter.device_id) {
+                deviceIds.add(meter.device_id);
+            }
+        });
     }
     
-    // If we're on the door status tab, refresh the history
-    const activeTab = document.querySelector('.tab-pane.active')?.id;
-    if (activeTab === 'door-status-tab') {
-        const periodSelect = document.getElementById('door-history-period');
-        const deviceSelect = document.getElementById('door-history-device');
-        const period = periodSelect ? periodSelect.value : 'Weekly';
-        const deviceId = deviceSelect ? deviceSelect.value : 'all';
-        loadDoorHistory(period, deviceId);
+    // Add each device ID to dropdown
+    deviceIds.forEach(deviceId => {
+        const option = document.createElement('option');
+        option.value = deviceId;
+        option.textContent = deviceId;
+        deviceSelect.appendChild(option);
+    });
+    
+    // Restore previous selection if it exists
+    if (currentValue && currentValue !== 'all') {
+        const optionExists = Array.from(deviceSelect.options).some(opt => opt.value === currentValue);
+        if (optionExists) {
+            deviceSelect.value = currentValue;
+        }
+    }
+    
+    console.log('Flow dropdown populated with', deviceIds.size, 'devices:', Array.from(deviceIds));
+}
+
+// Setup flow history listeners
+function setupFlowHistoryListeners() {
+    // Period selector
+    const periodSelect = document.getElementById('flow-history-period');
+    if (periodSelect) {
+        periodSelect.addEventListener('change', function(e) {
+            const deviceSelect = document.getElementById('flow-history-device');
+            const deviceId = deviceSelect ? deviceSelect.value : 'all';
+            loadFlowHistory(e.target.value, deviceId);
+        });
+    }
+    
+    // Device selector
+    const deviceSelect = document.getElementById('flow-history-device');
+    if (deviceSelect) {
+        deviceSelect.addEventListener('change', function(e) {
+            const periodSelect = document.getElementById('flow-history-period');
+            const period = periodSelect ? periodSelect.value : 'Weekly';
+            loadFlowHistory(period, e.target.value);
+        });
+    }
+    
+    // Refresh button
+    const refreshBtn = document.getElementById('refresh-flow-history');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', function() {
+            const periodSelect = document.getElementById('flow-history-period');
+            const deviceSelect = document.getElementById('flow-history-device');
+            const period = periodSelect ? periodSelect.value : 'Weekly';
+            const deviceId = deviceSelect ? deviceSelect.value : 'all';
+            
+            // Add rotation animation
+            this.classList.add('rotating');
+            setTimeout(() => this.classList.remove('rotating'), 500);
+            
+            loadFlowHistory(period, deviceId);
+        });
+    }
+}
+
+// Make functions globally available
+window.loadFlowHistory = loadFlowHistory;
+window.populateFlowDeviceDropdown = populateFlowDeviceDropdown;
+window.setupFlowHistoryListeners = setupFlowHistoryListeners;
+window.showWaterFlowSubTab = showWaterFlowSubTab;
+</script>
+
+<script>
+  /* ===============================
+   TANK LEVEL MONITOR (Simple)
+================================ */
+
+// Load current tank level data
+async function loadTankLevelData() {
+    try {
+        const response = await fetch('/api/user/tank-level');
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        const tankData = await response.json();
+        
+        const tankGrid = document.getElementById('tank-sensors-grid');
+        if (!tankGrid) return;
+        
+        tankGrid.innerHTML = '';
+        
+        if (tankData.length === 0) {
+            tankGrid.innerHTML = '<div class="no-data">No tank level sensors available</div>';
+            return;
+        }
+        
+        tankData.forEach(tank => {
+            const level = tank.level_percentage || 0;
+            const isLow = level < 20;
+            const tankItem = document.createElement('div');
+            tankItem.className = 'tank-item';
+            
+            tankItem.innerHTML = `
+                <div class="tank-header">
+                    <span class="tank-id">${tank.device_id}</span>
+                    <i class="fas fa-tint" style="color: #3b82f6;"></i>
+                </div>
+                <div class="tank-level-value">${level}%</div>
+                <div class="tank-progress">
+                    <div class="tank-progress-bar ${isLow ? 'low' : ''}" style="width: ${level}%"></div>
+                </div>
+                <div class="tank-details">
+                    <div class="tank-detail-item">
+                        <span class="tank-detail-label">Battery</span>
+                        <span class="tank-detail-value ${tank.battery_volts < 2.5 ? 'warning' : ''}">
+                            ${tank.battery_volts}V
+                        </span>
+                    </div>
+                    <div class="tank-detail-item">
+                        <span class="tank-detail-label">Status</span>
+                        <span class="tank-detail-value ${isLow ? 'alert' : ''}">
+                            ${isLow ? 'Low' : 'Normal'}
+                        </span>
+                    </div>
+                </div>
+            `;
+            tankGrid.appendChild(tankItem);
+        });
+        
+        // Update system status
+        const hasLowTanks = tankData.some(t => t.level_percentage < 20);
+        const statusIndicator = document.getElementById('tank-system-status');
+        if (statusIndicator) {
+            statusIndicator.className = `status-indicator ${hasLowTanks ? 'alert' : 'active'}`;
+        }
+        
+        // Populate device dropdown for history
+        populateTankDeviceDropdown(tankData);
+        
+    } catch (error) {
+        console.error('Error loading tank data:', error);
+    }
+}
+
+// Load tank history
+async function loadTankHistory(period = 'Weekly', deviceId = 'all') {
+    try {
+        const url = `/api/user/tank-history?period=${period}&device_id=${deviceId}`;
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        const data = await response.json();
+        
+        const tableBody = document.getElementById('tank-history-table-body');
+        if (!tableBody) return;
+        
+        tableBody.innerHTML = '';
+        
+        if (data.history && data.history.length > 0) {
+            data.history.slice(0, 50).forEach(item => {
+                const row = document.createElement('tr');
+                const isLow = item.level < 20;
+                
+                row.innerHTML = `
+                    <td class="device-id">${item.device_id}</td>
+                    <td>${item.date}</td>
+                    <td>${item.time}</td>
+                    <td>${item.level}%</td>
+                    <td>${item.battery}V</td>
+                    <td>
+                        <span style="color: ${isLow ? '#ef4444' : '#22c55e'}; font-weight: 600;">
+                            <i class="fas ${isLow ? 'fa-exclamation-triangle' : 'fa-check'}"></i>
+                            ${isLow ? 'Low' : 'Normal'}
+                        </span>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        } else {
+            tableBody.innerHTML = '<tr><td colspan="6" class="no-data">No tank level history available</td></tr>';
+        }
+        
+    } catch (error) {
+        console.error('Tank history error:', error);
+    }
+}
+
+// Populate device dropdown for history
+function populateTankDeviceDropdown(tankData) {
+    const deviceSelect = document.getElementById('tank-history-device');
+    if (!deviceSelect) return;
+    
+    const currentValue = deviceSelect.value;
+    deviceSelect.innerHTML = '<option value="all">All Tanks</option>';
+    
+    tankData.forEach(tank => {
+        const option = document.createElement('option');
+        option.value = tank.device_id;
+        option.textContent = tank.device_id;
+        deviceSelect.appendChild(option);
+    });
+    
+    if (currentValue && currentValue !== 'all') {
+        const optionExists = Array.from(deviceSelect.options).some(opt => opt.value === currentValue);
+        if (optionExists) deviceSelect.value = currentValue;
+    }
+}
+
+// Setup event listeners for filters only
+function setupTankFilters() {
+    const periodSelect = document.getElementById('tank-history-period');
+    if (periodSelect) {
+        periodSelect.addEventListener('change', function(e) {
+            const deviceSelect = document.getElementById('tank-history-device');
+            const deviceId = deviceSelect ? deviceSelect.value : 'all';
+            loadTankHistory(e.target.value, deviceId);
+        });
+    }
+    
+    const deviceSelect = document.getElementById('tank-history-device');
+    if (deviceSelect) {
+        deviceSelect.addEventListener('change', function(e) {
+            const periodSelect = document.getElementById('tank-history-period');
+            const period = periodSelect ? periodSelect.value : 'Weekly';
+            loadTankHistory(period, e.target.value);
+        });
+    }
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    setupTankFilters();
+});
+
+// Handle tank tab click
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    if (btn.textContent.includes('Tank Level')) {
+        btn.addEventListener('click', function() {
+            setTimeout(() => {
+                loadTankLevelData();
+                const periodSelect = document.getElementById('tank-history-period');
+                const deviceSelect = document.getElementById('tank-history-device');
+                const period = periodSelect ? periodSelect.value : 'Weekly';
+                const deviceId = deviceSelect ? deviceSelect.value : 'all';
+                loadTankHistory(period, deviceId);
+            }, 200);
+        });
+    }
+});
+
+// Update showTab function
+const originalShowTab = window.showTab;
+window.showTab = function(tabName) {
+    if (originalShowTab) originalShowTab(tabName);
+    
+    if (tabName === 'tank-level') {
+        setTimeout(() => {
+            loadTankLevelData();
+            const periodSelect = document.getElementById('tank-history-period');
+            const deviceSelect = document.getElementById('tank-history-device');
+            const period = periodSelect ? periodSelect.value : 'Weekly';
+            const deviceId = deviceSelect ? deviceSelect.value : 'all';
+            loadTankHistory(period, deviceId);
+        }, 100);
     }
 };
 
+// Make functions globally available
+window.loadTankLevelData = loadTankLevelData;
+window.loadTankHistory = loadTankHistory;
 </script>
 
 

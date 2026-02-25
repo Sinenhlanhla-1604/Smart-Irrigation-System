@@ -22,6 +22,7 @@ POWER_TEMP_DEVICES = {"1fc5622", "1fc57ca", "1fc56c3"}
 PULSE_METER_DEVICES = {"1fc74ab","1fa5f9c"}
 WATER_DETECT_DEVICES = {"c6e542", "c53d89", "c6d3a6", "c6da55"}
 MAGNETIC_DEVICES = {"1f7f022","c52fce"}
+TANK_LEVEL_DEVICES = {"1fc74ac","1fc74ad"}
 
 # ----------------------------
 # Home Redirect
@@ -250,7 +251,7 @@ def decode_magnetic_sensor(payload_hex):
         data = bytes.fromhex(payload_hex)
         if len(data) < 2:
             return {'error': 'Invalid magnetic sensor payload length'}
-        status = "Open" if data[1] == 0x00 else "Closed" if data[1] == 0x01 else f"Unknown ({data[1]})"
+        status = "open" if data[1] == 0x00 else "closed" if data[1] == 0x01 else f"Unknown ({data[1]})"
         return {
             "sensor_type": "magnetic",
             "status": status,
@@ -259,6 +260,38 @@ def decode_magnetic_sensor(payload_hex):
     except Exception as e:
         return {'error': f"Magnetic sensor decode failed: {str(e)}"}
 
+def decode_tank_level(payload_hex):
+    """
+    Decodes tank level sensor data
+    Expected payload format: 2 bytes for level percentage, 1 byte for battery
+    """
+    try:
+        data = bytes.fromhex(payload_hex)
+        if len(data) < 3:
+            return {'error': 'Invalid tank level payload length'}
+        
+        level_percentage = data[0]  # First byte is level percentage (0-100)
+        battery_raw = data[1]
+        battery_volts = round(battery_raw * 0.02, 2)
+        status_flags = data[2] if len(data) > 2 else 0
+        
+        alerts = []
+        if level_percentage < 20:
+            alerts.append("Low tank level")
+        if battery_volts < 2.5:
+            alerts.append("Low battery")
+            
+        return {
+            'sensor_type': 'tank_level',
+            'level_percentage': level_percentage,
+            'battery_volts': battery_volts,
+            'status_flags': status_flags,
+            'alerts': alerts,
+            'raw_payload': payload_hex
+        }
+    except Exception as e:
+        return {'error': f'Tank level decode failed: {str(e)}'}
+    
 # ----------------------------
 # Decoder Dispatcher
 # ----------------------------
@@ -273,6 +306,8 @@ def get_decoder_by_device(device_id):
         return decode_water_sensor
     elif device_id in MAGNETIC_DEVICES:
         return decode_magnetic_sensor
+    elif device_id in TANK_LEVEL_DEVICES:
+        return decode_tank_level
     return None
 
 # ----------------------------
@@ -322,6 +357,7 @@ def sigfox_callback():
 @app.route('/api/user/temperature')
 def get_temperature_charts():
     period = request.args.get('period', 'Weekly')
+    device_id = request.args.get('device_id')
 
     period_map = {
         'Daily': "1 day",
@@ -332,24 +368,43 @@ def get_temperature_charts():
 
     interval = period_map.get(period, "7 days")
 
-    query = """
-    SELECT
-        device_id,
-        DATE(received_at) AS day,
-        AVG(temp_celsius) AS avg_temp,
-        MAX(temp_celsius) AS max_temp,
-        MIN(temp_celsius) AS min_temp
-    FROM PWR_TEMP
-    WHERE received_at >= NOW() - INTERVAL %s
-    GROUP BY device_id, day
-    ORDER BY day;
-    """
+    # Modify query based on device_id
+    if device_id:
+        query = """
+        SELECT
+            device_id,
+            DATE(received_at) AS day,
+            AVG(temp_celsius) AS avg_temp,
+            MAX(temp_celsius) AS max_temp,
+            MIN(temp_celsius) AS min_temp
+        FROM PWR_TEMP
+        WHERE received_at >= NOW() - INTERVAL %s
+            AND device_id = %s
+        GROUP BY device_id, day
+        ORDER BY day;
+        """
+        params = (interval, device_id)
+
+    else:
+          query = """
+        SELECT
+            device_id,
+            DATE(received_at) AS day,
+            AVG(temp_celsius) AS avg_temp,
+            MAX(temp_celsius) AS max_temp,
+            MIN(temp_celsius) AS min_temp
+        FROM PWR_TEMP
+        WHERE received_at >= NOW() - INTERVAL %s
+        GROUP BY device_id, day
+        ORDER BY day;
+        """
+    params = (interval,)
 
     charts = {}
 
     with get_db_connection() as conn:
         with conn.cursor() as cur:
-            cur.execute(query, (interval,))
+            cur.execute(query, (params))
             rows = cur.fetchall()
 
             for device_id, day, avg_t, max_t, min_t in rows:
@@ -379,6 +434,7 @@ def get_temperature_charts():
 @app.route('/api/user/usage')
 def get_water_usage():
     period = request.args.get('period', 'Weekly')
+    device_id = request.args.get('device_id', 'all')
 
     period_map = {
         'Daily': '1 day',
@@ -388,23 +444,38 @@ def get_water_usage():
     }
 
     interval = period_map.get(period, '7 days')
-
-    query = """
-    SELECT
-        DATE(received_at) AS day,
-        MAX(pulse_count) - MIN(pulse_count) AS daily_usage
-    FROM PULSE_DETECTOR
-    WHERE received_at >= NOW() - INTERVAL %s
-    GROUP BY day
-    ORDER BY day;
-    """
+    
+    # Modify query based on device_id
+    if device_id != 'all':
+        query = """
+        SELECT
+            DATE(received_at) AS day,
+            MAX(pulse_count) - MIN(pulse_count) AS daily_usage
+        FROM PULSE_DETECTOR
+        WHERE received_at >= NOW() - INTERVAL %s
+            AND device_id = %s
+        GROUP BY day
+        ORDER BY day;
+        """
+        params = (interval, device_id)
+    else:
+        query = """
+        SELECT
+            DATE(received_at) AS day,
+            MAX(pulse_count) - MIN(pulse_count) AS daily_usage
+        FROM PULSE_DETECTOR
+        WHERE received_at >= NOW() - INTERVAL %s
+        GROUP BY day
+        ORDER BY day;
+        """
+        params = (interval,)
 
     labels = []
     values = []
 
     with get_db_connection() as conn:
         with conn.cursor() as cur:
-            cur.execute(query, (interval,))
+            cur.execute(query, params)
             for day, usage in cur.fetchall():
                 labels.append(day.strftime('%a'))
                 values.append(int(usage or 0))
@@ -412,6 +483,88 @@ def get_water_usage():
     return jsonify({
         "labels": labels,
         "values": values
+    })
+
+@app.route('/api/user/flow-history')
+def get_flow_history():
+    period = request.args.get('period', 'Weekly')
+    device_id = request.args.get('device_id', 'all')
+    
+    period_map = {
+        'Daily': "1 day",
+        'Weekly': "7 days",
+        'Monthly': "30 days",
+        'All': "365 days"
+    }
+    
+    interval = period_map.get(period, "7 days")
+    pulse_to_liter_ratio = 100  # Default ratio, adjust as needed
+    
+    if device_id != 'all':
+        query = """
+        SELECT 
+            device_id,
+            received_at,
+            pulse_count,
+            leak_detected
+        FROM PULSE_DETECTOR
+        WHERE received_at >= NOW() - INTERVAL %s
+            AND device_id = %s
+        ORDER BY received_at DESC
+        """
+        params = (interval, device_id)
+    else:
+        query = """
+        SELECT 
+            device_id,
+            received_at,
+            pulse_count,
+            leak_detected
+        FROM PULSE_DETECTOR 
+        WHERE received_at >= NOW() - INTERVAL %s
+        ORDER BY received_at DESC
+        """
+        params = (interval,)
+    
+    history_data = []
+    
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(query, params)
+            rows = cur.fetchall()
+            print(f"Found {len(rows)} flow history records")
+            
+            for row in rows:
+                device_id_row, received_at, pulse_count, leak_detected = row
+                
+                # Format date and time separately
+                date_str = received_at.strftime("%Y-%m-%d")
+                time_str = received_at.strftime("%H:%M:%S")
+                
+                # Calculate liters
+                liters = round(pulse_count / pulse_to_liter_ratio, 2) if pulse_count else 0
+                
+                # Convert leak_detected to boolean
+                leak = False
+                if leak_detected is not None:
+                    if isinstance(leak_detected, bool):
+                        leak = leak_detected
+                    elif isinstance(leak_detected, str):
+                        leak = leak_detected.lower() in ['true', '1', 'yes']
+                
+                history_data.append({
+                    "device_id": device_id_row,
+                    "date": date_str,
+                    "time": time_str,
+                    "pulse_count": pulse_count or 0,
+                    "liters": liters,
+                    "leak_detected": leak
+                })
+    
+    return jsonify({
+        "period": period,
+        "device_id": device_id,
+        "history": history_data
     })
 
     # Add this new route to app.py in the Data API section
@@ -501,18 +654,14 @@ def get_water_detection_history():
     
     interval = period_map.get(period, "7 days")
     
-    # Base query
+    # Simple query - get ALL data
     if device_id != 'all':
         query = """
         SELECT 
             device_id,
-            DATE(received_at) as event_date,
-            TIME(received_at) as event_time,
             received_at,
-            water_detected,
-            water_raw_value,
-            battery_volts
-        FROM WATER_DETECTION 
+            water_detected
+        FROM WATER_DETECTOR 
         WHERE received_at >= NOW() - INTERVAL %s
             AND device_id = %s
         ORDER BY received_at DESC
@@ -522,13 +671,284 @@ def get_water_detection_history():
         query = """
         SELECT 
             device_id,
-            DATE(received_at) as event_date,
-            TIME(received_at) as event_time,
             received_at,
-            water_detected,
-            water_raw_value,
+            water_detected
+        FROM WATER_DETECTOR 
+        WHERE received_at >= NOW() - INTERVAL %s
+        ORDER BY received_at DESC
+        """
+        params = (interval,)
+    
+    history_data = []
+    
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(query, params)
+            rows = cur.fetchall()
+            print(f"Found {len(rows)} water detection records")  # Debug
+            
+            for row in rows:
+                device_id_row, received_at, water_detected = row
+                
+                # Format date and time separately
+                date_str = received_at.strftime("%Y-%m-%d")
+                time_str = received_at.strftime("%H:%M:%S")
+                
+                # Convert database value to readable status
+                water_val = str(water_detected).lower()
+                
+                if water_val in ['true', '1', 'wet']:
+                    status = "Wet"
+                elif water_val in ['false', '0', 'dry']:
+                    status = "Dry"
+                else:
+                    status = water_val
+                
+                history_data.append({
+                    "device_id": device_id_row,
+                    "date": date_str,
+                    "time": time_str,
+                    "status": status
+                })
+    
+    return jsonify({
+        "period": period,
+        "device_id": device_id,
+        "history": history_data
+    })
+
+@app.route('/api/user/devices')
+def get_user_devices():
+    """Get all devices assigned to the current user"""
+    try:
+        # This is a simplified version - you should get the actual user from session
+        # For now, return all devices from your device sets
+        devices = []
+        
+        # Add temperature devices
+        for device_id in POWER_TEMP_DEVICES:
+            with get_db_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute("""
+                        SELECT temp_celsius, received_at 
+                        FROM PWR_TEMP 
+                        WHERE device_id = %s 
+                        ORDER BY received_at DESC 
+                        LIMIT 1
+                    """, (device_id,))
+                    row = cur.fetchone()
+                    
+                    devices.append({
+                        'device_id': device_id,
+                        'sensor_type': 'decode_PowerTemp',
+                        'last_value': f"{row[0]}°C" if row else None,
+                        'last_reading': row[0] if row else None,
+                        'last_updated': row[1].isoformat() if row and row[1] else None
+                    })
+        
+        # Add pulse meter devices
+        for device_id in PULSE_METER_DEVICES:
+            with get_db_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute("""
+                        SELECT pulse_count, received_at 
+                        FROM PULSE_DETECTOR 
+                        WHERE device_id = %s 
+                        ORDER BY received_at DESC 
+                        LIMIT 1
+                    """, (device_id,))
+                    row = cur.fetchone()
+                    
+                    devices.append({
+                        'device_id': device_id,
+                        'sensor_type': 'decode_pulsemeter',
+                        'last_value': str(row[0]) if row else None,
+                        'last_reading': row[0] if row else None,
+                        'last_updated': row[1].isoformat() if row and row[1] else None
+                    })
+        
+        # Add water sensor devices
+        for device_id in WATER_DETECT_DEVICES:
+            with get_db_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute("""
+                        SELECT water_detected, received_at 
+                        FROM WATER_DETECTOR 
+                        WHERE device_id = %s 
+                        ORDER BY received_at DESC 
+                        LIMIT 1
+                    """, (device_id,))
+                    row = cur.fetchone()
+                    
+                    devices.append({
+                        'device_id': device_id,
+                        'sensor_type': 'decode_water_sensor',
+                        'last_value': str(row[0]) if row else None,
+                        'last_reading': row[0] if row else None,
+                        'last_updated': row[1].isoformat() if row and row[1] else None
+                    })
+        
+        # Add magnetic sensor devices
+        for device_id in MAGNETIC_DEVICES:
+            with get_db_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute("""
+                        SELECT status, received_at 
+                        FROM magnetic 
+                        WHERE device_id = %s 
+                        ORDER BY received_at DESC 
+                        LIMIT 1
+                    """, (device_id,))
+                    row = cur.fetchone()
+                    
+                    devices.append({
+                        'device_id': device_id,
+                        'sensor_type': 'decode_magnetic_sensor',
+                        'last_value': row[0] if row else None,
+                        'last_reading': row[0] if row else None,
+                        'last_updated': row[1].isoformat() if row and row[1] else None
+                    })
+        
+        return jsonify(devices)
+        
+    except Exception as e:
+        print(f"Error fetching devices: {e}")
+        return jsonify([]), 500
+    
+@app.route('/api/user/door-history')
+def get_door_history():
+    period = request.args.get('period', 'Weekly')
+    device_id = request.args.get('device_id', 'all')
+    
+    period_map = {
+        'Daily': "1 day",
+        'Weekly': "7 days",
+        'Monthly': "30 days",
+        'All': "365 days"
+    }
+    
+    interval = period_map.get(period, "7 days")
+    
+    # Now get the filtered history
+    if device_id != 'all':
+        query = """
+        SELECT 
+            device_id,
+            received_at,
+            status
+        FROM magnetic
+        WHERE received_at >= NOW() - INTERVAL %s
+            AND device_id = %s
+        ORDER BY received_at DESC
+        """
+        params = (interval, device_id)
+    else:
+        query = """
+        SELECT 
+            device_id,
+            received_at,
+            status
+        FROM magnetic 
+        WHERE received_at >= NOW() - INTERVAL %s
+        ORDER BY received_at DESC
+        """
+        params = (interval,)
+    
+    history_data = []
+    
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(query, params)
+            rows = cur.fetchall()
+            print(f"💰 {len(rows)} door history records")
+            
+            for row in rows:
+                device_id_row, received_at, status = row
+                
+                # Format date and time separately
+                date_str = received_at.strftime("%Y-%m-%d")
+                time_str = received_at.strftime("%H:%M:%S")
+                
+                status_text = status  # Show whatever is there
+                
+                history_data.append({
+                    "device_id": device_id_row,
+                    "date": date_str,
+                    "time": time_str,
+                    "status": status_text
+                })
+    
+    print(f"💰 Returning {len(history_data)} history entries")
+    return jsonify({
+        "period": period,
+        "device_id": device_id,
+        "history": history_data
+    })
+@app.route('/api/user/tank-level')
+def get_tank_level_data():
+    """Get current tank level data"""
+    try:
+        tank_data = []
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                for device_id in TANK_LEVEL_DEVICES:
+                    cur.execute("""
+                        SELECT level_percentage, battery_volts, received_at
+                        FROM TANK_LEVEL
+                        WHERE device_id = %s
+                        ORDER BY received_at DESC
+                        LIMIT 1
+                    """, (device_id,))
+                    row = cur.fetchone()
+                    
+                    if row:
+                        level, battery, timestamp = row
+                        tank_data.append({
+                            'device_id': device_id,
+                            'level_percentage': level,
+                            'battery_volts': battery,
+                            'last_updated': timestamp.isoformat() if timestamp else None,
+                            'alert': level < 20
+                        })
+        return jsonify(tank_data)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/user/tank-history')
+def get_tank_history():
+    period = request.args.get('period', 'Weekly')
+    device_id = request.args.get('device_id', 'all')
+    
+    period_map = {
+        'Daily': "1 day",
+        'Weekly': "7 days",
+        'Monthly': "30 days",
+        'All': "365 days"
+    }
+    
+    interval = period_map.get(period, "7 days")
+    
+    if device_id != 'all':
+        query = """
+        SELECT 
+            device_id,
+            received_at,
+            level_percentage,
             battery_volts
-        FROM WATER_DETECTION 
+        FROM TANK_LEVEL
+        WHERE received_at >= NOW() - INTERVAL %s
+            AND device_id = %s
+        ORDER BY received_at DESC
+        """
+        params = (interval, device_id)
+    else:
+        query = """
+        SELECT 
+            device_id,
+            received_at,
+            level_percentage,
+            battery_volts
+        FROM TANK_LEVEL
         WHERE received_at >= NOW() - INTERVAL %s
         ORDER BY received_at DESC
         """
@@ -542,95 +962,20 @@ def get_water_detection_history():
             rows = cur.fetchall()
             
             for row in rows:
-                device_id_row, event_date, event_time, received_at, water_detected, water_raw, battery = row
+                device_id_row, received_at, level, battery = row
                 history_data.append({
-                    "device_id": device_id_row,
-                    "date": event_date.strftime("%Y-%m-%d"),
-                    "time": event_time.strftime("%H:%M:%S"),
-                    "status": "Wet" if water_detected else "Dry",
-                    "raw_value": water_raw,
-                    "battery": round(float(battery), 2) if battery else None,
-                    "timestamp": received_at.isoformat()
+                    'device_id': device_id_row,
+                    'date': received_at.strftime("%Y-%m-%d"),
+                    'time': received_at.strftime("%H:%M:%S"),
+                    'level': level,
+                    'battery': battery
                 })
-    
-    # Also get state change events to show when devices transition
-    # ⚠️ FIXED: Changed 'receied_at' to 'received_at' in ORDER BY clause
-    state_change_query = """
-    SELECT 
-        device_id,
-        DATE(received_at) as event_date,
-        TIME(received_at) as event_time,
-        water_detected,
-        received_at
-    FROM WATER_DETECTION 
-    WHERE received_at >= NOW() - INTERVAL %s
-    ORDER BY device_id, received_at ASC
-    """
-    
-    state_changes = []
-
-    with get_db_connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute(state_change_query, (interval,))
-            rows = cur.fetchall()
-            
-            # Group by device_id and find state changes
-            device_events = {}
-            for row in rows:
-                device_id_val, event_date, event_time, water_detected, received_at = row
-                
-                # ⚠️ FIXED: Proper indentation - this block should be inside the loop
-                if device_id_val not in device_events:
-                    device_events[device_id_val] = []
-                device_events[device_id_val].append({
-                    "device_id": device_id_val,
-                    "date": event_date.strftime("%Y-%m-%d"),
-                    "time": event_time.strftime("%H:%M:%S"),
-                    # ⚠️ FIXED: Changed 'water-detected' to 'water_detected' (underscore not hyphen)
-                    "water_detected": water_detected,
-                    "received_at": received_at
-                })
-            
-            # Find state changes for each device
-            for device, events in device_events.items():
-                # Sort events by timestamp
-                events.sort(key=lambda x: x['received_at'])
-                
-                previous_state = None
-                
-                for event in events:
-                    current_state = event['water_detected']
-                    
-                    if previous_state is not None and current_state != previous_state:
-                        state_changes.append({
-                            "device_id": event['device_id'],
-                            "date": event['date'],
-                            "time": event['time'],
-                            "changed_to": "Wet" if current_state else "Dry",
-                            "changed_from": "Wet" if previous_state else "Dry"
-                        })
-                    
-                    previous_state = current_state
-    
-    # Filter by device_id if needed
-    if device_id != 'all':
-        state_changes = [change for change in state_changes if change['device_id'] == device_id]
-    
-    # Sort state changes by date/time (most recent first)
-    state_changes.sort(key=lambda x: (x['date'], x['time']), reverse=True)
     
     return jsonify({
-        "period": period,
-        "device_id": device_id,
-        "history": history_data,
-        "state_changes": state_changes
+        'period': period,
+        'device_id': device_id,
+        'history': history_data
     })
-
-
-
-
-
-
 
 # ----------------------------
 # Entry Point

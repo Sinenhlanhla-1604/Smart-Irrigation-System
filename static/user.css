@@ -913,6 +913,111 @@ body {
           }
         }
 
+/* Temperature Device Dropdown Styling */
+.temp-device-selector {
+    padding: 0.5rem 2rem 0.5rem 1rem;
+    border-radius: 8px;
+    border: 1px solid #334155;
+    background: #0f172a;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    color: #f8fafc;
+    cursor: pointer;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 0.7rem center;
+    background-size: 16px;
+    min-width: 180px;
+    transition: all 0.3s ease;
+}
+
+.temp-device-selector:hover {
+    border-color: #4ade80;
+    background-color: #1e293b;
+}
+
+.temp-device-selector:focus {
+    outline: none;
+    border-color: #22c55e;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+}
+
+.temp-device-selector option {
+    background: #1e293b;
+    color: #f8fafc;
+    padding: 0.5rem;
+}
+
+/* Style for both dropdowns in the analytics controls */
+.analytics-controls {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.analytics-controls .period-selector,
+.analytics-controls .temp-device-selector {
+    padding: 0.5rem 2rem 0.5rem 1rem;
+    border-radius: 8px;
+    border: 1px solid #334155;
+    background: #0f172a;
+    color: #f8fafc;
+    font-size: 0.9rem;
+    cursor: pointer;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 0.7rem center;
+    background-size: 16px;
+}
+
+.analytics-controls .period-selector:hover,
+.analytics-controls .temp-device-selector:hover {
+    border-color: #4ade80;
+    background-color: #1e293b;
+}
+
+.analytics-controls .period-selector:focus,
+.analytics-controls .temp-device-selector:focus {
+    outline: none;
+    border-color: #22c55e;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+}
+
+.analytics-controls .period-selector option,
+.analytics-controls .temp-device-selector option {
+    background: #1e293b;
+    color: #f8fafc;
+    padding: 0.5rem;
+}
+
+/* Style for the "All Devices" option */
+.temp-device-selector option[value="all"] {
+    font-weight: 600;
+    color: #4ade80;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .analytics-controls {
+        flex-direction: column;
+        width: 100%;
+        gap: 0.5rem;
+    }
+    
+    .analytics-controls .period-selector,
+    .analytics-controls .temp-device-selector {
+        width: 100%;
+        min-width: unset;
+    }
+}       
+
 /* Sensor Tabs Styles */
 .sensor-tabs {
   display: flex;
@@ -1518,55 +1623,18 @@ body {
 .door-status-card .sensor-section {
     margin-top: 0;
     background: #0f172a;
-}
-
-/* Door History Card */
-.door-history-card {
-    padding: 1.75rem;
-    margin-top: 1.5rem;
-}
-
-.door-history-card .card-header {
-    margin-bottom: 1.5rem;
-    padding-bottom: 0.75rem;
-    border-bottom: 1px solid #334155;
-}
-
-.door-history-card .card-header h3 {
-    font-size: 1.35rem;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.door-history-card .analytics-controls {
-    display: flex;
-    gap: 0.75rem;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-/* Door Timeline */
-.door-timeline {
-    background: #0f172a;
-    border-radius: 12px;
     border: 1px solid #334155;
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
 }
 
-.door-timeline .timeline-header {
-    margin-bottom: 1.25rem;
-    padding-bottom: 0.75rem;
-    border-bottom: 1px solid #334155;
+.door-status-card .section-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap;
+    margin-bottom: 1rem;
 }
 
-.door-timeline .timeline-title {
-    font-size: 1.1rem;
+.door-status-card .section-header h4 {
+    font-size: 1rem;
     font-weight: 600;
     color: #f8fafc;
     display: flex;
@@ -1574,49 +1642,16 @@ body {
     gap: 0.5rem;
 }
 
-.door-timeline .timeline-title i {
-    color: #8b5cf6;
-}
-
-.door-timeline .timeline-subtitle {
-    font-size: 0.9rem;
-    color: #94a3b8;
-}
-
-/* Timeline Events */
-.door-timeline .timeline-events {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    max-height: 350px;
-    overflow-y: auto;
-    padding-right: 0.5rem;
-}
-
-.door-timeline .timeline-event {
-    display: flex;
-    align-items: center;
-    padding: 1rem;
-    background: #1e293b;
-    border-radius: 8px;
-    border-left: 4px solid;
-    transition: all 0.2s ease;
-}
-
-.door-timeline .timeline-event:hover {
-    transform: translateX(4px);
-    background: #2d3a4f;
-}
 
 /* UPDATED: Green for Open, Red for Closed */
 .door-timeline .timeline-event.open {
-    border-left-color: #22c55e; /* Green for Open */
-    background: linear-gradient(90deg, rgba(34, 197, 94, 0.1), #1e293b);
+    border-left-color: #ef4444; /* Red for Open */
+    background: linear-gradient(90deg, rgba(239, 68, 68, 0.1), #1e293b); /* Red gradient for Open */
 }
 
 .door-timeline .timeline-event.closed {
-    border-left-color: #ef4444; /* Red for Closed */
-    background: linear-gradient(90deg, rgba(239, 68, 68, 0.1), #1e293b);
+    border-left-color: #22c55e; /* Green for Closed */
+    background: linear-gradient(#22c55e, rgba(34, 197, 94, 0.1)); /* Green gradient for Closed */
 }
 
 .door-timeline .timeline-event-time {
@@ -1639,13 +1674,14 @@ body {
     font-size: 1.1rem;
 }
 
-/* UPDATED: Green for Open, Red for Closed */
+
 .door-timeline .timeline-event-icon.open {
-    color: #22c55e; /* Green for Open */
+   color: #ef4444; /* Red for Open */
 }
 
 .door-timeline .timeline-event-icon.closed {
-    color: #ef4444; /* Red for Closed */
+   color: #22c55e; /* Green for Closed */
+    
 }
 
 .door-timeline .timeline-event-change {
@@ -1664,13 +1700,13 @@ body {
 
 /* UPDATED: Green for Open, Red for Closed */
 .door-timeline .change-badge.open {
-    background: rgba(34, 197, 94, 0.2); /* Green with opacity */
-    color: #22c55e; /* Green */
+   background: rgba(239, 68, 68, 0.2); /* Red with opacity */
+    color: #ef4444; /* Red */  
 }
 
 .door-timeline .change-badge.closed {
-    background: rgba(239, 68, 68, 0.2); /* Red with opacity */
-    color: #ef4444; /* Red */
+  background: rgba(34, 197, 94, 0.2); /* Green with opacity */
+    color: #22c55e; /* Green */ 
 }
 
 .door-timeline .change-arrow {
@@ -1678,54 +1714,6 @@ body {
     margin: 0 0.5rem;
 }
 
-/* Door History Table */
-.door-history-table {
-    max-height: 450px;
-    overflow-y: auto;
-    margin-top: 1.25rem;
-    border-radius: 12px;
-    border: 1px solid #334155;
-    background: #0f172a;
-}
-
-.door-history-table table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.door-history-table th {
-    background: #1e293b;
-    padding: 1rem 1.25rem;
-    text-align: left;
-    font-weight: 600;
-    color: #f8fafc;
-    font-size: 0.95rem;
-    border-bottom: 2px solid #334155;
-    position: sticky;
-    top: 0;
-    white-space: nowrap;
-}
-
-.door-history-table th i {
-    margin-right: 0.5rem;
-    color: #94a3b8;
-}
-
-.door-history-table td {
-    padding: 1rem 1.25rem;
-    border-bottom: 1px solid #334155;
-    color: #e2e8f0;
-    font-size: 0.95rem;
-}
-
-.door-history-table .device-id{
-  font-family:monospace;
-  font-weight:600;
-  color:#f8fafc;
-}
-.door-history-table tr:hover {
-    background: rgba(255, 255, 255, 0.08);
-}
 
 /* Door Status Badge - UPDATED: Green for Open, Red for Closed */
 .door-status-badge {
@@ -1739,13 +1727,13 @@ body {
 }
 
 .door-status-badge.open {
-    background: rgba(34, 197, 94, 0.15); /* Green with opacity */
-    color: #22c55e; /* Green */
+    background: rgba(239,68,68,0.15); /* Red with opacity */
+    color: #ef4444; /* Red */
 }
 
 .door-status-badge.closed {
-    background: rgba(239, 68, 68, 0.15); /* Red with opacity */
-    color: #ef4444; /* Red */
+    background: rgba(34,197,94,0.15); /* Green with opacity */
+    color: #22c55e; /* Green */
 }
 
 .door-status-badge i {
@@ -1755,10 +1743,13 @@ body {
 /* Current Door Status Indicators - UPDATED */
 #door-sensors-grid .mini-sensor-status.normal {
     background: #22c55e; /* Green for Open */
+   box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);
 }
 
 #door-sensors-grid .mini-sensor-status.alert {
     background: #ef4444; /* Red for Closed */
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+    animation: pulse 1.5s infinite;
 }
 
 /* No Data State */
@@ -2034,4 +2025,319 @@ body {
         padding: 0.75rem;
         font-size: 0.8rem;
     }
+}
+
+/* Door Status Subtabs - Completely separate from temperature styles */
+.door-subtabs {
+    display: flex;
+    border-bottom: 2px solid #334155;
+    margin-bottom: 1.5rem;
+    overflow-x: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.door-subtabs::-webkit-scrollbar {
+    display: none;
+}
+
+.door-subtab-btn {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    padding: 1rem 1.5rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-bottom: 2px solid transparent;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+    flex: 1;
+    justify-content: center;
+}
+
+.door-subtab-btn:hover {
+    color: #e2e8f0;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.door-subtab-btn.active {
+    color: #8b5cf6;
+    border-bottom-color: #8b5cf6;
+    background: rgba(139, 92, 246, 0.1);
+}
+
+.door-subtab-btn i {
+    font-size: 1rem;
+}
+
+.door-subtab-content {
+    display: none;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.door-subtab-content.active {
+    display: block;
+}
+
+/* Door status card specific styles */
+.door-status-card {
+    margin-bottom: 1.5rem;
+}
+
+.door-status-card .sensor-section {
+    margin-top: 0;
+    background: #0f172a;
+}
+
+/* Door history card specific styles */
+.door-history-card {
+    padding: 1.75rem;
+}
+
+.door-history-card .card-header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #334155;
+}
+
+.door-history-card .card-header h3 {
+    font-size: 1.35rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.door-history-card .analytics-controls {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* Door timeline */
+.door-history-timeline {
+    background: #0f172a;
+    border-radius: 12px;
+    border: 1px solid #334155;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Door history table */
+.door-history-table {
+    max-height: 450px;
+    overflow-y: auto;
+    margin-top: 1.25rem;
+    border-radius: 12px;
+    border: 1px solid #334155;
+    background: #0f172a;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .door-subtabs {
+        padding-bottom: 0.5rem;
+    }
+    
+    .door-subtab-btn {
+        padding: 0.75rem 1rem;
+        font-size: 0.8rem;
+    }
+    
+    .door-history-card {
+        padding: 1.25rem;
+    }
+    
+    .door-history-card .analytics-controls {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .door-history-card .period-selector {
+        width: 100%;
+        margin-left: 0;
+    }
+    
+    .door-history-table th,
+    .door-history-table td {
+        padding: 0.75rem;
+        font-size: 0.8rem;
+    }
+}
+
+/* Water Detection Subtabs - Dedicated styling for water */
+.water-subtabs {
+    display: flex;
+    border-bottom: 2px solid #334155;
+    margin-bottom: 1.5rem;
+    overflow-x: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.water-subtabs::-webkit-scrollbar {
+    display: none;
+}
+
+.water-subtab-btn {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    padding: 1rem 1.5rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-bottom: 2px solid transparent;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+    flex: 1;
+    justify-content: center;
+}
+
+.water-subtab-btn:hover {
+    color: #e2e8f0;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.water-subtab-btn.active {
+    color: #06b6d4;
+    border-bottom-color: #06b6d4;
+    background: rgba(6, 182, 212, 0.1);
+}
+
+.water-subtab-btn i {
+    font-size: 1rem;
+}
+
+.water-subtab-content {
+    display: none;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.water-subtab-content.active {
+    display: block;
+}
+
+/* Responsive adjustments for water subtabs */
+@media (max-width: 768px) {
+    .water-subtabs {
+        padding-bottom: 0.5rem;
+    }
+    
+    .water-subtab-btn {
+        padding: 0.75rem 1rem;
+        font-size: 0.8rem;
+    }
+}
+
+/* Tank Level Monitor Styles */
+.tank-level-card {
+    margin-bottom: 1.5rem;
+}
+
+.tank-level-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.tank-item {
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 1.25rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.tank-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #3b82f6, #2563eb);
+}
+
+.tank-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.tank-id {
+    font-family: monospace;
+    font-weight: 600;
+    color: #f8fafc;
+    font-size: 0.9rem;
+}
+
+.tank-level-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #3b82f6;
+    text-align: center;
+    margin: 0.5rem 0;
+}
+
+.tank-progress {
+    height: 10px;
+    background: #1e293b;
+    border-radius: 5px;
+    margin: 1rem 0;
+    overflow: hidden;
+    border: 1px solid #334155;
+}
+
+.tank-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #3b82f6, #2563eb);
+    border-radius: 5px;
+    transition: width 0.3s ease;
+}
+
+.tank-progress-bar.low {
+    background: linear-gradient(90deg, #ef4444, #dc2626);
+}
+
+.tank-details {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid #334155;
+    font-size: 0.85rem;
+}
+
+.tank-detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.tank-detail-label {
+    color: #94a3b8;
+}
+
+.tank-detail-value {
+    font-weight: 600;
+    color: #f8fafc;
+}
+
+.tank-detail-value.warning {
+    color: #f97316;
+}
+
+.tank-detail-value.alert {
+    color: #ef4444;
 }
