@@ -742,67 +742,6 @@
                 </div>
             </div>
 
-            <!-- Tank Level Chart Card -->
-            <div class="main-card">
-                <div class="card-header">
-                    <h3><i class="fas fa-chart-line"></i> Tank Level History Chart</h3>
-                    <div class="analytics-controls">
-                        <select id="tank-chart-period" class="period-selector">
-                            <option value="Daily">Daily</option>
-                            <option value="Weekly" selected>Weekly</option>
-                            <option value="Monthly">Monthly</option>
-                            <option value="All">All Time</option>
-                        </select>
-                        <select id="tank-chart-device" class="period-selector">
-                            <option value="all">All Devices</option>
-                            <!-- Device options populated by JavaScript -->
-                        </select>
-                    </div>
-                </div>
-                <div class="chart-container" style="height: 350px;">
-                    <canvas id="tank-level-chart"></canvas>
-                </div>
-            </div>
-
-            <!-- Tank Level History Card -->
-            <div class="main-card">
-                <div class="card-header">
-                    <h3><i class="fas fa-history"></i> Tank Level History Data</h3>
-                    <div class="analytics-controls">
-                        <select id="tank-history-period" class="period-selector">
-                            <option value="Daily">Daily</option>
-                            <option value="Weekly" selected>Weekly</option>
-                            <option value="Monthly">Monthly</option>
-                            <option value="All">All Time</option>
-                        </select>
-                        <select id="tank-history-device" class="period-selector">
-                            <option value="all">All Tanks</option>
-                            <!-- Device options populated by JavaScript -->
-                        </select>
-                    </div>
-                </div>
-
-                <!-- History Table -->
-                <div class="history-table-container">
-                    <table class="devices-table">
-                        <thead>
-                            <tr>
-                                <th>Device ID</th>
-                                <th>Date</th>
-                                <th>Time</th>
-                                <th>Level (%)</th>
-                                <th>Battery (V)</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tank-history-table-body">
-                            <!-- History data will be populated here -->
-                            <tr><td colspan="6" class="no-data">No tank level history available</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
 
         <!-- Tab functionality script -->
         <script>
@@ -913,15 +852,10 @@
         const period = periodSelect ? periodSelect.value : 'Weekly';
         const deviceId = deviceSelect ? deviceSelect.value : 'all';
         loadTankLevelChart(period, deviceId);
-        
-        const historyPeriodSelect = document.getElementById('tank-history-period');
-        const historyDeviceSelect = document.getElementById('tank-history-device');
-        const historyPeriod = historyPeriodSelect ? historyPeriodSelect.value : 'Weekly';
-        const historyDeviceId = historyDeviceSelect ? historyDeviceSelect.value : 'all';
-        loadTankHistory(historyPeriod, historyDeviceId);
-    }, 100);
+    },100);
+  }
 }
-        }
+
 
           
     // Temperature subtab switching function
@@ -3240,8 +3174,6 @@ async function loadTankLevelData() {
             statusIndicator.className = `status-indicator ${hasLowTanks ? 'alert' : 'active'}`;
         }
         
-        // Populate device dropdown for history
-        populateTankDeviceDropdown(tankData);
         
     } catch (error) {
         console.error('Error loading tank data:', error);
@@ -3251,7 +3183,7 @@ async function loadTankLevelData() {
 // Load tank history
 async function loadTankHistory(period = 'Weekly', deviceId = 'all') {
     try {
-        const url = `/api/user/tank-history?period=${period}&device_id=${deviceId}`;
+        const url = `/api/user/tank-level-history?period=${period}&device_id=${deviceId}`;
         const response = await fetch(url);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         
@@ -3289,84 +3221,9 @@ async function loadTankHistory(period = 'Weekly', deviceId = 'all') {
     } catch (error) {
         console.error('Tank history error:', error);
     }
-}
-
-// Populate device dropdown for history
-function populateTankDeviceDropdown(tankData) {
-    const deviceSelect = document.getElementById('tank-history-device');
-    if (!deviceSelect) return;
-    
-    const currentValue = deviceSelect.value;
-    deviceSelect.innerHTML = '<option value="all">All Tanks</option>';
-    
-    tankData.forEach(tank => {
-        const option = document.createElement('option');
-        option.value = tank.device_id;
-        option.textContent = tank.device_id;
-        deviceSelect.appendChild(option);
-    });
-    
-    if (currentValue && currentValue !== 'all') {
-        const optionExists = Array.from(deviceSelect.options).some(opt => opt.value === currentValue);
-        if (optionExists) deviceSelect.value = currentValue;
-    }
-}
-
-// Setup event listeners for filters only
-function setupTankFilters() {
-    const periodSelect = document.getElementById('tank-history-period');
-    if (periodSelect) {
-        periodSelect.addEventListener('change', function(e) {
-            const deviceSelect = document.getElementById('tank-history-device');
-            const deviceId = deviceSelect ? deviceSelect.value : 'all';
-            loadTankHistory(e.target.value, deviceId);
-        });
-    }
-    
-    const deviceSelect = document.getElementById('tank-history-device');
-    if (deviceSelect) {
-        deviceSelect.addEventListener('change', function(e) {
-            const periodSelect = document.getElementById('tank-history-period');
-            const period = periodSelect ? periodSelect.value : 'Weekly';
-            loadTankHistory(period, e.target.value);
-        });
-    }
-}
-
-// Initialize
-document.addEventListener('DOMContentLoaded', function() {
-    setupTankFilters();
-});
-
-// Handle tank tab click
-document.querySelectorAll('.tab-btn').forEach(btn => {
-    if (btn.textContent.includes('Tank Level')) {
-        btn.addEventListener('click', function() {
-            setTimeout(() => {
-                loadTankLevelData();
-                const periodSelect = document.getElementById('tank-history-period');
-                const deviceSelect = document.getElementById('tank-history-device');
-                const period = periodSelect ? periodSelect.value : 'Weekly';
-                const deviceId = deviceSelect ? deviceSelect.value : 'all';
-                loadTankHistory(period, deviceId);
-
-                // Load history table
-                const historyPeriodSelect = document.getElementById('tank-history-period');
-                const historyDeviceSelect = document.getElementById('tank-history-device');
-                const historyPeriod = historyPeriodSelect ? historyPeriodSelect.value : 'Weekly';
-                const historyDeviceId = historyDeviceSelect ? historyDeviceSelect.value : 'all';
-                loadTankHistory(historyPeriod, historyDeviceId);
+  }
 
 
-            }, 200);
-        });
-    }
-});
-
-
-// Make functions globally available
-window.loadTankLevelData = loadTankLevelData;
-window.loadTankHistory = loadTankHistory;
 </script>
 
 <script>
@@ -3629,12 +3486,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const deviceId = deviceSelect ? deviceSelect.value : 'all';
                 loadTankLevelChart(period, deviceId);
                 
-                // Also load history table
-                const historyPeriodSelect = document.getElementById('tank-history-period');
-                const historyDeviceSelect = document.getElementById('tank-history-device');
-                const historyPeriod = historyPeriodSelect ? historyPeriodSelect.value : 'Weekly';
-                const historyDeviceId = historyDeviceSelect ? historyDeviceSelect.value : 'all';
-                loadTankHistory(historyPeriod, historyDeviceId);
+  
             }, 200);
         });
     }
@@ -3651,11 +3503,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const deviceId = deviceSelect ? deviceSelect.value : 'all';
             loadTankLevelChart(period, deviceId);
             
-            const historyPeriodSelect = document.getElementById('tank-history-period');
-            const historyDeviceSelect = document.getElementById('tank-history-device');
-            const historyPeriod = historyPeriodSelect ? historyPeriodSelect.value : 'Weekly';
-            const historyDeviceId = historyDeviceSelect ? historyDeviceSelect.value : 'all';
-            loadTankHistory(historyPeriod, historyDeviceId);
+          
         }, 100);
     }
 });
