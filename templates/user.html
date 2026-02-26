@@ -903,13 +903,27 @@
                         }
                     }
                 }, 100);
-              }
-            }
-
-            
-
+              } else if (tabName === 'tank-level') {
+    setTimeout(() => {
+        loadTankLevelData();
+        populateTankChartDeviceDropdown();
         
+        const periodSelect = document.getElementById('tank-chart-period');
+        const deviceSelect = document.getElementById('tank-chart-device');
+        const period = periodSelect ? periodSelect.value : 'Weekly';
+        const deviceId = deviceSelect ? deviceSelect.value : 'all';
+        loadTankLevelChart(period, deviceId);
+        
+        const historyPeriodSelect = document.getElementById('tank-history-period');
+        const historyDeviceSelect = document.getElementById('tank-history-device');
+        const historyPeriod = historyPeriodSelect ? historyPeriodSelect.value : 'Weekly';
+        const historyDeviceId = historyDeviceSelect ? historyDeviceSelect.value : 'all';
+        loadTankHistory(historyPeriod, historyDeviceId);
+    }, 100);
+}
+        }
 
+          
     // Temperature subtab switching function
     function showTempSubTab(tabName) {
       console.log('Switching to subtab:', tabName);
@@ -3349,38 +3363,11 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     }
 });
 
-// Update showTab function
-const originalShowTab = window.showTab;
-window.showTab = function(tabName) {
-    if (originalShowTab) originalShowTab(tabName);
-    
-    if (tabName === 'tank-level') {
-        setTimeout(() => {
-            loadTankLevelData();
-            const periodSelect = document.getElementById('tank-history-period');
-            const deviceSelect = document.getElementById('tank-history-device');
-            const period = periodSelect ? periodSelect.value : 'Weekly';
-            const deviceId = deviceSelect ? deviceSelect.value : 'all';
-            loadTankHistory(period, deviceId);
-
-             // Load history table
-            const historyPeriodSelect = document.getElementById('tank-history-period');
-            const historyDeviceSelect = document.getElementById('tank-history-device');
-            const historyPeriod = historyPeriodSelect ? historyPeriodSelect.value : 'Weekly';
-            const historyDeviceId = historyDeviceSelect ? historyDeviceSelect.value : 'all';
-            loadTankHistory(historyPeriod, historyDeviceId);
-
-            
-        }, 100);
-    }
-};
 
 // Make functions globally available
 window.loadTankLevelData = loadTankLevelData;
 window.loadTankHistory = loadTankHistory;
 </script>
-
-
 
 <script>
 // Tank Level Chart
@@ -3571,6 +3558,109 @@ async function loadTankLevelChart(period = 'Weekly', deviceId = 'all') {
         console.error('Error loading tank chart:', error);
     }
 }
+
+// Populate tank chart device dropdown
+function populateTankChartDeviceDropdown() {
+    const deviceSelect = document.getElementById('tank-chart-device');
+    if (!deviceSelect) return;
+    
+    // Save current selection
+    const currentValue = deviceSelect.value;
+    
+    // Clear and add default option
+    deviceSelect.innerHTML = '<option value="all">All Devices</option>';
+    
+    // Get device IDs from assigned devices
+    if (assignedDevices && assignedDevices.length > 0) {
+        const tankDevices = assignedDevices.filter(d => d.sensor_type === 'decode_tank_level');
+        tankDevices.forEach(device => {
+            if (device.device_id) {
+                const option = document.createElement('option');
+                option.value = device.device_id;
+                option.textContent = device.device_id;
+                deviceSelect.appendChild(option);
+            }
+        });
+    }
+    
+    // Restore previous selection if it exists
+    if (currentValue && currentValue !== 'all') {
+        const optionExists = Array.from(deviceSelect.options).some(opt => opt.value === currentValue);
+        if (optionExists) {
+            deviceSelect.value = currentValue;
+        }
+    }
+}
+
+// Setup tank chart listeners
+function setupTankChartListeners() {
+    const periodSelect = document.getElementById('tank-chart-period');
+    const deviceSelect = document.getElementById('tank-chart-device');
+    
+    if (periodSelect) {
+        periodSelect.addEventListener('change', function() {
+            const deviceId = deviceSelect ? deviceSelect.value : 'all';
+            loadTankLevelChart(this.value, deviceId);
+        });
+    }
+    
+    if (deviceSelect) {
+        deviceSelect.addEventListener('change', function() {
+            const periodSelect = document.getElementById('tank-chart-period');
+            const period = periodSelect ? periodSelect.value : 'Weekly';
+            loadTankLevelChart(period, this.value);
+        });
+    }
+}
+
+// Initialize tank chart when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    // Populate chart dropdown and load chart when tank tab is clicked
+    const tankTabBtn = document.querySelector('.tab-btn[onclick="showTab(\'tank-level\')"]');
+    if (tankTabBtn) {
+        tankTabBtn.addEventListener('click', function() {
+            setTimeout(() => {
+                loadTankLevelData();
+                populateTankChartDeviceDropdown();
+                
+                const periodSelect = document.getElementById('tank-chart-period');
+                const deviceSelect = document.getElementById('tank-chart-device');
+                const period = periodSelect ? periodSelect.value : 'Weekly';
+                const deviceId = deviceSelect ? deviceSelect.value : 'all';
+                loadTankLevelChart(period, deviceId);
+                
+                // Also load history table
+                const historyPeriodSelect = document.getElementById('tank-history-period');
+                const historyDeviceSelect = document.getElementById('tank-history-device');
+                const historyPeriod = historyPeriodSelect ? historyPeriodSelect.value : 'Weekly';
+                const historyDeviceId = historyDeviceSelect ? historyDeviceSelect.value : 'all';
+                loadTankHistory(historyPeriod, historyDeviceId);
+            }, 200);
+        });
+    }
+    
+    // Also initialize if tank tab is active on page load
+    if (document.getElementById('tank-level-tab').classList.contains('active')) {
+        setTimeout(() => {
+            loadTankLevelData();
+            populateTankChartDeviceDropdown();
+            
+            const periodSelect = document.getElementById('tank-chart-period');
+            const deviceSelect = document.getElementById('tank-chart-device');
+            const period = periodSelect ? periodSelect.value : 'Weekly';
+            const deviceId = deviceSelect ? deviceSelect.value : 'all';
+            loadTankLevelChart(period, deviceId);
+            
+            const historyPeriodSelect = document.getElementById('tank-history-period');
+            const historyDeviceSelect = document.getElementById('tank-history-device');
+            const historyPeriod = historyPeriodSelect ? historyPeriodSelect.value : 'Weekly';
+            const historyDeviceId = historyDeviceSelect ? historyDeviceSelect.value : 'all';
+            loadTankHistory(historyPeriod, historyDeviceId);
+        }, 100);
+    }
+});
+
+
 </script>
 
 
