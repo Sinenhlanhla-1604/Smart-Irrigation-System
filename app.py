@@ -914,8 +914,8 @@ def get_tank_level_data():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/user/tank-history')
-def get_tank_history():
+@app.route('/api/user/tank-level-history')
+def get_tank_level_history():
     period = request.args.get('period', 'Weekly')
     device_id = request.args.get('device_id', 'all')
     
@@ -938,7 +938,7 @@ def get_tank_history():
         FROM TANK_LEVEL
         WHERE received_at >= NOW() - INTERVAL %s
             AND device_id = %s
-        ORDER BY received_at DESC
+        ORDER BY received_at
         """
         params = (interval, device_id)
     else:
@@ -950,7 +950,7 @@ def get_tank_history():
             battery_volts
         FROM TANK_LEVEL
         WHERE received_at >= NOW() - INTERVAL %s
-        ORDER BY received_at DESC
+        ORDER BY received_at
         """
         params = (interval,)
     
@@ -976,6 +976,120 @@ def get_tank_history():
         'device_id': device_id,
         'history': history_data
     })
+
+@app.route('/api/user/data')
+def get_sensor_data():
+    """Get current sensor data for all devices"""
+    try:
+        data = {
+            'temperature_sensors': [],
+            'pulse_meters': [],
+            'water_sensors': [],
+            'door_sensors': [],
+            'tank_levels': []
+        }
+        
+        # Get temperature data
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                for device_id in POWER_TEMP_DEVICES:
+                    cur.execute("""
+                        SELECT temp_celsius, received_at 
+                        FROM PWR_TEMP 
+                        WHERE device_id = %s 
+                        ORDER BY received_at DESC 
+                        LIMIT 1
+                    """, (device_id,))
+                    row = cur.fetchone()
+                    if row:
+                        data['temperature_sensors'].append({
+                            'device_id': device_id,
+                            'temp_celsius': row[0],
+                            'timestamp': row[1].isoformat() if row[1] else None
+                        })
+        
+        # Get pulse meter data
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                for device_id in PULSE_METER_DEVICES:
+                    cur.execute("""
+                        SELECT pulse_count, leak_detected, received_at 
+                        FROM PULSE_DETECTOR 
+                        WHERE device_id = %s 
+                        ORDER BY received_at DESC 
+                        LIMIT 1
+                    """, (device_id,))
+                    row = cur.fetchone()
+                    if row:
+                        data['pulse_meters'].append({
+                            'device_id': device_id,
+                            'pulse_count': row[0],
+                            'leak_detected': row[1],
+                            'timestamp': row[2].isoformat() if row[2] else None
+                        })
+        
+        # Get water sensor data
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                for device_id in WATER_DETECT_DEVICES:
+                    cur.execute("""
+                        SELECT water_detected, received_at 
+                        FROM WATER_DETECTOR 
+                        WHERE device_id = %s 
+                        ORDER BY received_at DESC 
+                        LIMIT 1
+                    """, (device_id,))
+                    row = cur.fetchone()
+                    if row:
+                        data['water_sensors'].append({
+                            'device_id': device_id,
+                            'water_detected': 'True' if row[0] else 'False',
+                            'timestamp': row[1].isoformat() if row[1] else None
+                        })
+        
+        # Get door sensor data
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                for device_id in MAGNETIC_DEVICES:
+                    cur.execute("""
+                        SELECT status, received_at 
+                        FROM magnetic 
+                        WHERE device_id = %s 
+                        ORDER BY received_at DESC 
+                        LIMIT 1
+                    """, (device_id,))
+                    row = cur.fetchone()
+                    if row:
+                        data['door_sensors'].append({
+                            'device_id': device_id,
+                            'status': row[0],
+                            'timestamp': row[1].isoformat() if row[1] else None
+                        })
+        
+        # Get tank level data
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                for device_id in TANK_LEVEL_DEVICES:
+                    cur.execute("""
+                        SELECT level_percentage, received_at 
+                        FROM TANK_LEVEL 
+                        WHERE device_id = %s 
+                        ORDER BY received_at DESC 
+                        LIMIT 1
+                    """, (device_id,))
+                    row = cur.fetchone()
+                    if row:
+                        data['tank_levels'].append({
+                            'device_id': device_id,
+                            'level_percentage': row[0],
+                            'timestamp': row[1].isoformat() if row[1] else None
+                        })
+        
+        return jsonify(data)
+        
+    except Exception as e:
+        print(f"Error fetching sensor data: {e}")
+        return jsonify({'error': str(e)}), 500
 
 # ----------------------------
 # Entry Point

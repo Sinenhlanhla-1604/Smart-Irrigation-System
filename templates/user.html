@@ -727,59 +727,83 @@
                   </table>
                 </div>
     
-        <!-- Tank Level Tab -->
-<div class="tab-pane" id="tank-level-tab">
-    <!-- Current Tank Level Card -->
-    <div class="main-card tank-level-card">
-        <div class="card-header">
-            <h3><i class="fas fa-water"></i> Tank Level Monitoring</h3>
-            <div class="status-indicator" id="tank-system-status"></div>
-        </div>
-        
-        <div class="tank-level-grid" id="tank-sensors-grid">
-            <!-- Tank sensors populated here -->
-        </div>
-    </div>
+                     <!-- Tank Level Tab -->
+        <div class="tab-pane" id="tank-level-tab">
+            <!-- Current Tank Level Card -->
+            <div class="main-card tank-level-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-water"></i> Current Tank Level</h3>
+                    <div class="status-indicator" id="tank-system-status"></div>
+                </div>
+                
+                <div class="tank-level-grid" id="tank-sensors-grid">
+                    <!-- Tank sensors populated here -->
+                    <div class="no-data">Loading tank data...</div>
+                </div>
+            </div>
 
-    <!-- Tank Level History Card -->
-    <div class="main-card">
-        <div class="card-header">
-            <h3><i class="fas fa-history"></i> Tank Level History</h3>
-            <div class="analytics-controls">
-                <select id="tank-history-period" class="period-selector">
-                    <option value="Daily">Daily</option>
-                    <option value="Weekly" selected>Weekly</option>
-                    <option value="Monthly">Monthly</option>
-                    <option value="All">All Time</option>
-                </select>
-                <select id="tank-history-device" class="period-selector">
-                    <option value="all">All Tanks</option>
-                    <!-- Device options populated by JavaScript -->
-                </select>
+            <!-- Tank Level Chart Card -->
+            <div class="main-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-chart-line"></i> Tank Level History Chart</h3>
+                    <div class="analytics-controls">
+                        <select id="tank-chart-period" class="period-selector">
+                            <option value="Daily">Daily</option>
+                            <option value="Weekly" selected>Weekly</option>
+                            <option value="Monthly">Monthly</option>
+                            <option value="All">All Time</option>
+                        </select>
+                        <select id="tank-chart-device" class="period-selector">
+                            <option value="all">All Devices</option>
+                            <!-- Device options populated by JavaScript -->
+                        </select>
+                    </div>
+                </div>
+                <div class="chart-container" style="height: 350px;">
+                    <canvas id="tank-level-chart"></canvas>
+                </div>
+            </div>
+
+            <!-- Tank Level History Card -->
+            <div class="main-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-history"></i> Tank Level History Data</h3>
+                    <div class="analytics-controls">
+                        <select id="tank-history-period" class="period-selector">
+                            <option value="Daily">Daily</option>
+                            <option value="Weekly" selected>Weekly</option>
+                            <option value="Monthly">Monthly</option>
+                            <option value="All">All Time</option>
+                        </select>
+                        <select id="tank-history-device" class="period-selector">
+                            <option value="all">All Tanks</option>
+                            <!-- Device options populated by JavaScript -->
+                        </select>
+                    </div>
+                </div>
+
+                <!-- History Table -->
+                <div class="history-table-container">
+                    <table class="devices-table">
+                        <thead>
+                            <tr>
+                                <th>Device ID</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Level (%)</th>
+                                <th>Battery (V)</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tank-history-table-body">
+                            <!-- History data will be populated here -->
+                            <tr><td colspan="6" class="no-data">No tank level history available</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
-        <!-- History Table -->
-        <div class="history-table-container">
-            <table class="devices-table">
-                <thead>
-                    <tr>
-                        <th>Device ID</th>
-                        <th>Date</th>
-                        <th>Time</th>
-                        <th>Level (%)</th>
-                        <th>Battery (V)</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody id="tank-history-table-body">
-                    <!-- History data will be populated here -->
-                    <tr><td colspan="6" class="no-data">No tank level history available</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
         <!-- Tab functionality script -->
         <script>
         function showTab(tabName) {
@@ -790,6 +814,10 @@
           // Add active class to clicked tab and corresponding pane
           event.target.closest('.tab-btn').classList.add('active');
           document.getElementById(tabName + '-tab').classList.add('active');
+
+          if (tabName === 'overview') {
+            setTimeout( () => fetchSensorData(), 100);
+          }
           
           // Handle chart loading based on selected tab
           if (tabName === 'temperature') {
@@ -1104,84 +1132,88 @@ function showWaterFlowSubTab(tabName) {
     }
 
     
-    // Update overview cards with sensor data
-    function updateOverviewCards(data) {history
-      console.log('📊 Updating overview cards with data:', data);
-      
-      // Temperature overview
-      if (data.temperature_sensors && data.temperature_sensors.length > 0) {
-        const avgTemp = data.temperature_sensors.reduce((sum, sensor) => sum + sensor.temp_celsius, 0) / data.temperature_sensors.length;
-        const tempElement = document.getElementById('overview-temp');
-        const tempStatusElement = document.getElementById('overview-temp-status');
-        
-        if (tempElement) tempElement.textContent = avgTemp.toFixed(1) + '°C';
-        if (tempStatusElement) tempStatusElement.textContent = `${data.temperature_sensors.length} sensors active`;
-      }
-
-      // Flow overview
-      if (data.pulse_meters && data.pulse_meters.length > 0) {
-        const totalPulses = data.pulse_meters.reduce((sum, meter) => sum + meter.pulse_count, 0);
-        const flowElement = document.getElementById('overview-flow');
-        const flowStatusElement = document.getElementById('overview-flow-status');
-        
-        if (flowElement) flowElement.textContent = totalPulses + ' Pulses';
-        
-        const hasLeaks = data.pulse_meters.some(meter => meter.leak_detected === 'True');
-        if (flowStatusElement) {
-          flowStatusElement.textContent = hasLeaks ? 'Leak Detected' : 'Normal';
-          flowStatusElement.className = hasLeaks ? 'overview-status alert' : 'overview-status';
-        }
-      }
-
-      // Water detection overview
-      if (data.water_sensors && data.water_sensors.length > 0) {
-        const detectedCount = data.water_sensors.filter(sensor => sensor.water_detected === 'True').length;
-        const waterElement = document.getElementById('overview-water');
-        const waterStatusElement = document.getElementById('overview-water-status');
-        
-        if (waterElement) {
-          waterElement.textContent = detectedCount > 0 ? 'Water Detected' : 'No Water';
-          waterElement.className = detectedCount > 0 ? 'overview-value alert' : 'overview-value';
-        }
-        if (waterStatusElement) waterStatusElement.textContent = `${data.water_sensors.length} sensors`;
-      }
-
-      // Door status overview
-      if (data.door_sensors && data.door_sensors.length > 0) {
-        const openCount = data.door_sensors.filter(sensor => sensor.status === 'open').length;
-        const doorElement = document.getElementById('overview-door');
-        const doorStatusElement = document.getElementById('overview-door-status');
-        
-        if (doorElement) {
-          doorElement.textContent = openCount > 0 ? `${openCount} Open` : 'All Closed';
-          doorElement.className = openCount > 0 ? 'overview-value alert' : 'overview-value';
-        }
-        if (doorStatusElement) doorStatusElement.textContent = `${data.door_sensors.length} doors`;
-      }
-    }
+   // Update overview cards with sensor data
+function updateOverviewCards(data) {
+  console.log('📊 Updating overview cards with data:', data);
+  
+  // Temperature overview
+  if (data.temperature_sensors && data.temperature_sensors.length > 0) {
+    const avgTemp = data.temperature_sensors.reduce((sum, sensor) => sum + sensor.temp_celsius, 0) / data.temperature_sensors.length;
+    const tempElement = document.getElementById('overview-temp');
+    const tempStatusElement = document.getElementById('overview-temp-status');
     
-     // Tank level overview
-    if (data.tank_levels && data.tank_levels.length > 0) {
-        const avgLevel = data.tank_levels.reduce((sum, tank) => sum + tank.level_percentage, 0) / data.tank_levels.length;
-        const lowCount = data.tank_levels.filter(tank => tank.level_percentage < 20).length;
-        const tankElement = document.getElementById('overview-tank');
-        const tankStatusElement = document.getElementById('overview-tank-status');
-        
-        if (tankElement) {
-            tankElement.textContent = avgLevel.toFixed(1) + '%';
-            tankElement.className = lowCount > 0 ? 'overview-value alert' : 'overview-value';
-        }
-        if (tankStatusElement) {
-            tankStatusElement.textContent = lowCount > 0 ? `${lowCount} low` : `${data.tank_levels.length} tanks`;
-        }
+    if (tempElement) tempElement.textContent = avgTemp.toFixed(1) + '°C';
+    if (tempStatusElement) tempStatusElement.textContent = `${data.temperature_sensors.length} sensors active`;
+  }
+
+  // Flow overview
+  if (data.pulse_meters && data.pulse_meters.length > 0) {
+    const totalPulses = data.pulse_meters.reduce((sum, meter) => sum + meter.pulse_count, 0);
+    const flowElement = document.getElementById('overview-flow');
+    const flowStatusElement = document.getElementById('overview-flow-status');
+    
+    if (flowElement) flowElement.textContent = totalPulses + ' Pulses';
+    
+    const hasLeaks = data.pulse_meters.some(meter => meter.leak_detected === 'True');
+    if (flowStatusElement) {
+      flowStatusElement.textContent = hasLeaks ? 'Leak Detected' : 'Normal';
+      flowStatusElement.className = hasLeaks ? 'overview-status alert' : 'overview-status';
     }
+  }
+
+  // Water detection overview
+  if (data.water_sensors && data.water_sensors.length > 0) {
+    const detectedCount = data.water_sensors.filter(sensor => sensor.water_detected === 'True').length;
+    const waterElement = document.getElementById('overview-water');
+    const waterStatusElement = document.getElementById('overview-water-status');
+    
+    if (waterElement) {
+      waterElement.textContent = detectedCount > 0 ? 'Water Detected' : 'No Water';
+      waterElement.className = detectedCount > 0 ? 'overview-value alert' : 'overview-value';
+    }
+    if (waterStatusElement) waterStatusElement.textContent = `${data.water_sensors.length} sensors`;
+  }
+
+  // Door status overview
+  if (data.door_sensors && data.door_sensors.length > 0) {
+    const openCount = data.door_sensors.filter(sensor => sensor.status === 'open').length;
+    const doorElement = document.getElementById('overview-door');
+    const doorStatusElement = document.getElementById('overview-door-status');
+    
+    if (doorElement) {
+      doorElement.textContent = openCount > 0 ? `${openCount} Open` : 'All Closed';
+      doorElement.className = openCount > 0 ? 'overview-value alert' : 'overview-value';
+    }
+    if (doorStatusElement) doorStatusElement.textContent = `${data.door_sensors.length} doors`;
+  }
+  
+  // Tank level overview - MOVED INSIDE THE FUNCTION
+  if (data.tank_levels && data.tank_levels.length > 0) {
+    const avgLevel = data.tank_levels.reduce((sum, tank) => sum + tank.level_percentage, 0) / data.tank_levels.length;
+    const lowCount = data.tank_levels.filter(tank => tank.level_percentage < 20).length;
+    const tankElement = document.getElementById('overview-tank');
+    const tankStatusElement = document.getElementById('overview-tank-status');
+    
+    if (tankElement) {
+      tankElement.textContent = avgLevel.toFixed(1) + '%';
+      tankElement.className = lowCount > 0 ? 'overview-value alert' : 'overview-value';
+    }
+    if (tankStatusElement) {
+      tankStatusElement.textContent = lowCount > 0 ? `${lowCount} low` : `${data.tank_levels.length} tanks`;
+    }
+  }
+}
 
     // Initialize dashboard
     document.addEventListener('DOMContentLoaded', function() {
       initializeDashboard();
       setupEventListeners();
       fetchAssignedDevices();
-      fetchSensorData();
+      
+      // Load initial data 
+      fetchSensorData().then( () => {
+        
+     
 
       // Load initial data for all tabs
       loadTemperatureCharts('Weekly');
@@ -1194,6 +1226,7 @@ function showWaterFlowSubTab(tabName) {
       // Initialize door history
       setupDoorHistoryListeners();
       loadDoorHistory('Weekly','all');
+       });
       
       // Set up periodic updates (10 seconds)
       autoRefreshInterval = setInterval(fetchSensorData, 10000);
@@ -1486,6 +1519,12 @@ if (trendsDeviceSelect) {
         // Update overview cards
         updateOverviewCards(data);
       
+        // Force a second update after a tiny delay to ensure DOM is ready
+    setTimeout(() => {
+      if (document.getElementById('overview-tab').classList.contains('active')) {
+        updateOverviewCards(data);
+      }
+    }, 100);
         
       } catch (error) {
         console.error('Error fetching sensor data:', error);
@@ -3296,6 +3335,15 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
                 const period = periodSelect ? periodSelect.value : 'Weekly';
                 const deviceId = deviceSelect ? deviceSelect.value : 'all';
                 loadTankHistory(period, deviceId);
+
+                // Load history table
+                const historyPeriodSelect = document.getElementById('tank-history-period');
+                const historyDeviceSelect = document.getElementById('tank-history-device');
+                const historyPeriod = historyPeriodSelect ? historyPeriodSelect.value : 'Weekly';
+                const historyDeviceId = historyDeviceSelect ? historyDeviceSelect.value : 'all';
+                loadTankHistory(historyPeriod, historyDeviceId);
+
+
             }, 200);
         });
     }
@@ -3314,6 +3362,15 @@ window.showTab = function(tabName) {
             const period = periodSelect ? periodSelect.value : 'Weekly';
             const deviceId = deviceSelect ? deviceSelect.value : 'all';
             loadTankHistory(period, deviceId);
+
+             // Load history table
+            const historyPeriodSelect = document.getElementById('tank-history-period');
+            const historyDeviceSelect = document.getElementById('tank-history-device');
+            const historyPeriod = historyPeriodSelect ? historyPeriodSelect.value : 'Weekly';
+            const historyDeviceId = historyDeviceSelect ? historyDeviceSelect.value : 'all';
+            loadTankHistory(historyPeriod, historyDeviceId);
+
+            
         }, 100);
     }
 };
@@ -3322,6 +3379,200 @@ window.showTab = function(tabName) {
 window.loadTankLevelData = loadTankLevelData;
 window.loadTankHistory = loadTankHistory;
 </script>
+
+
+
+<script>
+// Tank Level Chart
+let tankLevelChart = null;
+
+// Update the loadTankLevelChart function to handle no data better
+async function loadTankLevelChart(period = 'Weekly', deviceId = 'all') {
+    try {
+        console.log(`Loading tank chart: ${period}, ${deviceId}`);
+        const url = `/api/user/tank-level-history?period=${period}&device_id=${deviceId}`;
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        const data = await response.json();
+        console.log('Tank chart data:', data);
+        
+        // Update chart
+        const ctx = document.getElementById('tank-level-chart').getContext('2d');
+        
+        if (tankLevelChart) {
+            tankLevelChart.destroy();
+        }
+        
+        if (!data.history || data.history.length === 0) {
+            // Show empty chart with message
+            tankLevelChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['No Data Available'],
+                    datasets: [{
+                        label: 'Tank Level %',
+                        data: [null],
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        title: {
+                            display: true,
+                            text: 'No tank level data available for this period',
+                            color: '#94a3b8',
+                            font: { size: 14 }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            ticks: { color: '#e2e8f0' }
+                        },
+                        x: {
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            ticks: { color: '#e2e8f0' }
+                        }
+                    }
+                }
+            });
+            return;
+        }
+        
+        // Process data for chart
+        const sortedData = data.history.sort((a, b) => {
+            return new Date(a.date + ' ' + a.time) - new Date(b.date + ' ' + b.time);
+        });
+        
+        const labels = sortedData.map(item => {
+            if (period === 'Daily') return item.time;
+            return item.date;
+        });
+        
+        const levels = sortedData.map(item => item.level);
+        
+        // Group by device if showing all
+        let datasets = [];
+        if (deviceId === 'all') {
+            const deviceMap = {};
+            sortedData.forEach(item => {
+                if (!deviceMap[item.device_id]) {
+                    deviceMap[item.device_id] = [];
+                }
+                deviceMap[item.device_id].push({
+                    label: item.date + ' ' + item.time,
+                    level: item.level
+                });
+            });
+            
+            const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'];
+            let colorIndex = 0;
+            
+            datasets = Object.keys(deviceMap).map(devId => {
+                const deviceData = deviceMap[devId].sort((a, b) => 
+                    new Date(a.label) - new Date(b.label)
+                );
+                
+                return {
+                    label: `Tank ${devId}`,
+                    data: deviceData.map(d => d.level),
+                    borderColor: colors[colorIndex % colors.length],
+                    backgroundColor: colors[colorIndex++ % colors.length] + '20',
+                    tension: 0.3,
+                    fill: false
+                };
+            });
+            
+            // Use first device's timestamps for labels if multiple devices
+            const firstDeviceId = Object.keys(deviceMap)[0];
+            if (firstDeviceId) {
+                const timestamps = deviceMap[firstDeviceId]
+                    .sort((a, b) => new Date(a.label) - new Date(b.label))
+                    .map(d => {
+                        if (period === 'Daily') return d.label.split(' ')[1];
+                        return d.label.split(' ')[0];
+                    });
+                labels.length = 0;
+                labels.push(...timestamps);
+            }
+        } else {
+            datasets = [{
+                label: `Tank Level %`,
+                data: levels,
+                borderColor: '#3b82f6',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                tension: 0.3,
+                fill: true
+            }];
+        }
+        
+        tankLevelChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: { color: '#e2e8f0' }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.dataset.label}: ${context.parsed.y}%`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        title: {
+                            display: true,
+                            text: 'Level (%)',
+                            color: '#e2e8f0'
+                        },
+                        grid: { color: 'rgba(255,255,255,0.1)' },
+                        ticks: { color: '#e2e8f0' }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: period === 'Daily' ? 'Time' : 'Date',
+                            color: '#e2e8f0'
+                        },
+                        grid: { color: 'rgba(255,255,255,0.1)' },
+                        ticks: { 
+                            color: '#e2e8f0',
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
+                    }
+                }
+            }
+        });
+        
+    } catch (error) {
+        console.error('Error loading tank chart:', error);
+    }
+}
+</script>
+
 
 
 </body>
