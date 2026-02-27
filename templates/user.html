@@ -726,22 +726,60 @@
                     </tbody>
                   </table>
                 </div>
-    
-                     <!-- Tank Level Tab -->
-        <div class="tab-pane" id="tank-level-tab">
-            <!-- Current Tank Level Card -->
-            <div class="main-card tank-level-card">
-                <div class="card-header">
-                    <h3><i class="fas fa-water"></i> Current Tank Level</h3>
-                    <div class="status-indicator" id="tank-system-status"></div>
                 </div>
-                
-                <div class="tank-level-grid" id="tank-sensors-grid">
-                    <!-- Tank sensors populated here -->
-                    <div class="no-data">Loading tank data...</div>
+                </div>
+                </div>
+   <!-- Tank Level Tab -->
+<div class="tab-pane" id="tank-level-tab">
+    <!-- Card 1: Current Tank Level (exactly like Water Flow Monitoring card) -->
+    <div class="main-card">
+        <div class="card-header">
+            <h3><i class="fas fa-water"></i> Current Tank Level</h3>
+            <div class="status-indicator" id="tank-system-status"></div>
+        </div>
+        
+        <div class="sensor-section" style="margin-top: 0;">
+            <div class="section-header">
+                <h4><i class="fas fa-water"></i> Tank Level Monitoring</h4>
+                <div class="flow-metrics">
+                    <div class="mini-metric">
+                        <span id="tank-level-value">--</span>
+                        <small>Litres</small>
+                    </div>
                 </div>
             </div>
+            
+            <!-- Simple tank sensors grid -->
+            <div class="sensors-mini-grid" id="tank-sensors-grid">
+                <!-- Tank sensors populated here -->
+                <div class="no-data">Loading tank data...</div>
+            </div>
+        </div>
+    </div>
 
+    <!-- Card 2: Tank Level History Chart -->
+    <div class="main-card">
+        <div class="card-header">
+            <h3><i class="fas fa-chart-line"></i> Tank Level History Chart</h3>
+            <div class="analytics-controls">
+                <select id="tank-chart-period" class="period-selector">
+                    <option value="Daily">Daily</option>
+                    <option value="Weekly" selected>Weekly</option>
+                    <option value="Monthly">Monthly</option>
+                    <option value="All">All Time</option>
+                </select>
+                <select id="tank-chart-device" class="period-selector">
+                    <option value="all">All Devices</option>
+                    <!-- Device options populated by JavaScript -->
+                </select>
+            </div>
+        </div>
+        
+        <div class="chart-container" style="height: 350px;">
+            <canvas id="tank-level-chart"></canvas>
+        </div>
+    </div>
+</div>
 
         <!-- Tab functionality script -->
         <script>
@@ -3117,6 +3155,7 @@ window.showWaterFlowSubTab = showWaterFlowSubTab;
 ================================ */
 
 // Load current tank level data
+// Load current tank level data
 async function loadTankLevelData() {
     try {
         const response = await fetch('/api/user/tank-level');
@@ -3134,8 +3173,13 @@ async function loadTankLevelData() {
             return;
         }
         
+        // Calculate average for litres display
+        let totalLevel = 0;
+        
         tankData.forEach(tank => {
             const level = tank.level_percentage || 0;
+            totalLevel += level;
+            
             const isLow = level < 20;
             const tankItem = document.createElement('div');
             tankItem.className = 'tank-item';
@@ -3150,22 +3194,18 @@ async function loadTankLevelData() {
                     <div class="tank-progress-bar ${isLow ? 'low' : ''}" style="width: ${level}%"></div>
                 </div>
                 <div class="tank-details">
-                    <div class="tank-detail-item">
-                        <span class="tank-detail-label">Battery</span>
-                        <span class="tank-detail-value ${tank.battery_volts < 2.5 ? 'warning' : ''}">
-                            ${tank.battery_volts}V
-                        </span>
-                    </div>
-                    <div class="tank-detail-item">
-                        <span class="tank-detail-label">Status</span>
-                        <span class="tank-detail-value ${isLow ? 'alert' : ''}">
-                            ${isLow ? 'Low' : 'Normal'}
-                        </span>
-                    </div>
+                    <div>Battery: <span>${tank.battery_volts}V</span></div>
+                    <div>Status: <span style="color: ${isLow ? '#ef4444' : '#22c55e'};">${isLow ? 'Low' : 'Normal'}</span></div>
                 </div>
             `;
             tankGrid.appendChild(tankItem);
         });
+        
+        // Update main tank level value (convert percentage to litres)
+        const avgLevel = totalLevel / tankData.length;
+        const litresPerPercent = 10; // Adjust this based on your actual tank capacity
+        const avgLitres = Math.round(avgLevel * litresPerPercent);
+        document.getElementById('tank-level-value').textContent = avgLitres;
         
         // Update system status
         const hasLowTanks = tankData.some(t => t.level_percentage < 20);
@@ -3173,7 +3213,6 @@ async function loadTankLevelData() {
         if (statusIndicator) {
             statusIndicator.className = `status-indicator ${hasLowTanks ? 'alert' : 'active'}`;
         }
-        
         
     } catch (error) {
         console.error('Error loading tank data:', error);
