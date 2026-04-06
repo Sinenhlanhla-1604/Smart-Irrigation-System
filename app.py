@@ -19,10 +19,10 @@ app.register_blueprint(auth)
 # Sensor Group Configuration
 # ----------------------------
 POWER_TEMP_DEVICES = {"1fc5622", "1fc57ca", "1fc56c3"}
-PULSE_METER_DEVICES = {"1fc74ab","1fa5f9c"}
+PULSE_METER_DEVICES = {"1fc74ab","1fa5f9c", "3042451", "304245e"}
 WATER_DETECT_DEVICES = {"c6e542", "c53d89", "c6d3a6", "c6da55"}
 MAGNETIC_DEVICES = {"1f7f022","c52fce"}
-TANK_LEVEL_DEVICES = {"1fc74ac","1fc74ad"}
+# TANK_LEVEL_DEVICES = {"1fc74ac","1fc74ad"}
 
 # ----------------------------
 # Home Redirect
@@ -260,37 +260,7 @@ def decode_magnetic_sensor(payload_hex):
     except Exception as e:
         return {'error': f"Magnetic sensor decode failed: {str(e)}"}
 
-def decode_tank_level(payload_hex):
-    """
-    Decodes tank level sensor data
-    Expected payload format: 2 bytes for level percentage, 1 byte for battery
-    """
-    try:
-        data = bytes.fromhex(payload_hex)
-        if len(data) < 3:
-            return {'error': 'Invalid tank level payload length'}
-        
-        level_percentage = data[0]  # First byte is level percentage (0-100)
-        battery_raw = data[1]
-        battery_volts = round(battery_raw * 0.02, 2)
-        status_flags = data[2] if len(data) > 2 else 0
-        
-        alerts = []
-        if level_percentage < 20:
-            alerts.append("Low tank level")
-        if battery_volts < 2.5:
-            alerts.append("Low battery")
-            
-        return {
-            'sensor_type': 'tank_level',
-            'level_percentage': level_percentage,
-            'battery_volts': battery_volts,
-            'status_flags': status_flags,
-            'alerts': alerts,
-            'raw_payload': payload_hex
-        }
-    except Exception as e:
-        return {'error': f'Tank level decode failed: {str(e)}'}
+
     
 # ----------------------------
 # Decoder Dispatcher
@@ -306,8 +276,6 @@ def get_decoder_by_device(device_id):
         return decode_water_sensor
     elif device_id in MAGNETIC_DEVICES:
         return decode_magnetic_sensor
-    elif device_id in TANK_LEVEL_DEVICES:
-        return decode_tank_level
     return None
 
 # ----------------------------
@@ -404,7 +372,7 @@ def get_temperature_charts():
 
     with get_db_connection() as conn:
         with conn.cursor() as cur:
-            cur.execute(query, (params))
+            cur.execute(query, params)
             rows = cur.fetchall()
 
             for device_id, day, avg_t, max_t, min_t in rows:
@@ -884,98 +852,7 @@ def get_door_history():
         "device_id": device_id,
         "history": history_data
     })
-@app.route('/api/user/tank-level')
-def get_tank_level_data():
-    """Get current tank level data"""
-    try:
-        tank_data = []
-        with get_db_connection() as conn:
-            with conn.cursor() as cur:
-                for device_id in TANK_LEVEL_DEVICES:
-                    cur.execute("""
-                        SELECT level_percentage, battery_volts, received_at
-                        FROM TANK_LEVEL
-                        WHERE device_id = %s
-                        ORDER BY received_at DESC
-                        LIMIT 1
-                    """, (device_id,))
-                    row = cur.fetchone()
-                    
-                    if row:
-                        level, battery, timestamp = row
-                        tank_data.append({
-                            'device_id': device_id,
-                            'level_percentage': level,
-                            'battery_volts': battery,
-                            'last_updated': timestamp.isoformat() if timestamp else None,
-                            'alert': level < 20
-                        })
-        return jsonify(tank_data)
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
 
-@app.route('/api/user/tank-level-history')
-def get_tank_level_history():
-    period = request.args.get('period', 'Weekly')
-    device_id = request.args.get('device_id', 'all')
-    
-    period_map = {
-        'Daily': "1 day",
-        'Weekly': "7 days",
-        'Monthly': "30 days",
-        'All': "365 days"
-    }
-    
-    interval = period_map.get(period, "7 days")
-    
-    if device_id != 'all':
-        query = """
-        SELECT 
-            device_id,
-            received_at,
-            level_percentage,
-            battery_volts
-        FROM TANK_LEVEL
-        WHERE received_at >= NOW() - INTERVAL %s
-            AND device_id = %s
-        ORDER BY received_at
-        """
-        params = (interval, device_id)
-    else:
-        query = """
-        SELECT 
-            device_id,
-            received_at,
-            level_percentage,
-            battery_volts
-        FROM TANK_LEVEL
-        WHERE received_at >= NOW() - INTERVAL %s
-        ORDER BY received_at
-        """
-        params = (interval,)
-    
-    history_data = []
-    
-    with get_db_connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute(query, params)
-            rows = cur.fetchall()
-            
-            for row in rows:
-                device_id_row, received_at, level, battery = row
-                history_data.append({
-                    'device_id': device_id_row,
-                    'date': received_at.strftime("%Y-%m-%d"),
-                    'time': received_at.strftime("%H:%M:%S"),
-                    'level': level,
-                    'battery': battery
-                })
-    
-    return jsonify({
-        'period': period,
-        'device_id': device_id,
-        'history': history_data
-    })
 
 @app.route('/api/user/data')
 def get_sensor_data():
@@ -985,8 +862,7 @@ def get_sensor_data():
             'temperature_sensors': [],
             'pulse_meters': [],
             'water_sensors': [],
-            'door_sensors': [],
-            'tank_levels': []
+            'door_sensors': []
         }
         
         # Get temperature data
@@ -1065,31 +941,12 @@ def get_sensor_data():
                             'status': row[0],
                             'timestamp': row[1].isoformat() if row[1] else None
                         })
-        
-        # Get tank level data
-        with get_db_connection() as conn:
-            with conn.cursor() as cur:
-                for device_id in TANK_LEVEL_DEVICES:
-                    cur.execute("""
-                        SELECT level_percentage, received_at 
-                        FROM TANK_LEVEL 
-                        WHERE device_id = %s 
-                        ORDER BY received_at DESC 
-                        LIMIT 1
-                    """, (device_id,))
-                    row = cur.fetchone()
-                    if row:
-                        data['tank_levels'].append({
-                            'device_id': device_id,
-                            'level_percentage': row[0],
-                            'timestamp': row[1].isoformat() if row[1] else None
-                        })
-        
+
         return jsonify(data)
-        
+    
     except Exception as e:
         print(f"Error fetching sensor data: {e}")
-        return jsonify({'error': str(e)}), 500
+        return jsonify ({'error': str(e)}), 500
 
 # ----------------------------
 # Entry Point
